@@ -1,0 +1,7326 @@
+function Simulation_FBD_Beam_GUI_test_Strain
+
+%% Principal Figure
+d = floor(rand*1000);
+h.f = figure(d);
+
+
+h.lp_fit = figure(d);
+Name_version = 'Dynamical_Diffraction_FBD_GUI_V.14_02_2017';
+set(h.lp_fit,'Name',Name_version,...
+    'NumberTitle', 'Off',...
+    'Units','normalized',...
+    'Position', [0.001 0.855 0.48 0.12],...
+    'Color',[0.5 0.5 0.5],...
+    'Menubar','none','KeyReleaseFcn',@Press);
+
+%% Fit Theory
+h.name_Dynamical_Theory = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0. 0.9 0.2 0.1],...
+    'String','Dynamical Theory',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8);
+
+h.Dynamical_Theory_Plots = uicontrol('Parent',h.lp_fit,...
+    'Style','push',...
+    'Units','normalized',...
+    'Position',[0.2 0.9 0.1 0.1],...
+    'String','Plots',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8,...
+    'Callback',@Dynamical_Reflectivity);
+
+h.Bragg_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','BD',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.31 0.9 0.06 0.1]);
+h.Bragg_FBD_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','FBD',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.37 0.9 0.06 0.1]);
+h.Laue_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','LD',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.43 0.9 0.06 0.1]);
+h.Laue_FBD_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','FLD',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.49 0.9 0.06 0.1]);
+
+
+
+
+%% Definition of the Symmetries, Element and cell parameters
+h.name_Element = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0. 0.8 0.07 0.1],...
+    'String','Elemet',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.Element = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.07 0.8 0.03 0.1],...
+    'String','6',...
+    'FontSize',8);
+h.name_a_Parameter = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.1 0.8 0.04 0.1],...
+    'String','a (A)',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.a_parameter = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.14 0.8 0.04 0.1],...
+    'String','3.568',...
+    'FontSize',8);
+h.name_b_Parameter = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.18 0.8 0.04 0.1],...
+    'String','b (A)',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.b_parameter = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.22 0.8 0.04 0.1],...
+    'String','3.568',...
+    'FontSize',8);
+h.name_c_Parameter = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.26 0.8 0.04 0.1],...
+    'String','c (A)',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.c_parameter = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.3 0.8 0.04 0.1],...
+    'String','3.568',...
+    'FontSize',8);
+
+h.CParameter_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','Auto',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.34 0.8 0.06 0.1]);
+
+
+
+h.name_Thickness = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.39 0.8 0.04 0.1],...
+    'String','T(um)',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.Thickness = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.43 0.8 0.04 0.1],...
+    'String','500',...
+    'FontSize',8);
+
+h.name_DWF = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.47 0.8 0.04 0.1],...
+    'String','D-W',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.DWF = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.51 0.8 0.04 0.1],...
+    'String','1',...
+    'FontSize',8);
+
+
+%% Calculation of Theta Bragg
+
+h.name_Energy = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.0 0.7 0.07 0.1],...
+    'String','Energy eV',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Energy_input = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.07 0.7 0.07 0.1],...
+    'String','9830',...
+    'FontSize',8);
+
+h.name_h_miller = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.14 0.7 0.02 0.1],...
+    'String',' h ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.h_miller = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.16 0.7 0.02 0.1],...
+    'String','4',...
+    'FontSize',8);
+h.name_k_miller = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.18 0.7 0.02 0.1],...
+    'String',' k ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.k_miller = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.20 0.7 0.02 0.1],...
+    'String','0',...
+    'FontSize',8);
+h.name_l_miller = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.22 0.7 0.02 0.1],...
+    'String',' l ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.l_miller = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.24 0.7 0.02 0.1],...
+    'String','0',...
+    'FontSize',8);
+
+h.name_Asymmetry= uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.26 0.7 0.04 0.1],...
+    'String','Asymmetry (Deg)',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+
+h.Asymmetry =  uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.30 0.7 0.04 0.1],...
+    'String','0',...
+    'FontSize',8);
+
+
+h.Absorption =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Absor',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.34 0.7 0.05 0.1]);
+
+h.crystal_orientation = uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Normal +',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.39 0.7 0.06 0.1]);
+
+h.Polarization = uicontrol('Parent',h.lp_fit,...
+    'Style' , 'text',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Polar',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Units','Normalized',...
+    'Position', [0.45 0.7 0.04 0.1]);
+h.Polarization_s = uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','s',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.48 0.7 0.035 0.1]);
+h.Polarization_p = uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','p',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.515 0.7 0.035 0.1]);
+
+% Range definition
+h.name_Range_Left = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.0 0.6 0.05 0.1],...
+    'String','Range -',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Range_Left = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.05 0.6 0.05 0.1],...
+    'String','-10',...
+    'FontSize',8);
+h.name_Range_Right = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.1 0.6 0.05 0.1],...
+    'String','Range +',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Range_Right = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.15 0.6 0.05 0.1],...
+    'String','10',...
+    'FontSize',8);
+
+h.Range_Deg =uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','Deg',...
+    'FontSize',6,...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.2 0.6 0.05 0.1]);
+h.Range_meV =uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','eV',...
+    'FontSize',6,...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.25 0.6 0.05 0.1]);
+
+h.name_N_Steps = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.3 0.6 0.04 0.1],...
+    'String','N Steps',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.N_Steps = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.34 0.6 0.06 0.1],...
+    'String','1000',...
+    'FontSize',8);
+
+
+h.Dynamical_Reflectivity = uicontrol('Parent',h.lp_fit,...
+    'Style','push',...
+    'Units','normalized',...
+    'Position',[0.4 0.6 0.15 0.1],...
+    'String','Dynamical Reflectivity',...
+    'BackgroundColor',[0 0.95 0],...
+    'FontSize',8,...
+    'Callback',@Dynamical_Reflectivity);
+
+
+% Calculation of Chi_0 and Chi_h
+
+h.name_Theta_view = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.56 0.9 0.05 0.1],...
+    'String','Theta',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.Theta_view = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.61 0.9 0.08 0.1],...
+    'String',' [] ',...
+    'Enable', 'off',...
+    'FontSize',8);
+h.name_Theta_view = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.69 0.9 0.03 0.1],...
+    'String','Deg',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+
+
+h.f_check_values =uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','Change values',...
+    'FontSize',6,...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Bragg_Fit_Check,...
+    'Units','Normalized',...
+    'Position', [0.72 0.9 0.1 0.1],...
+    'FontSize',8);
+
+h.name_f0 = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.56 0.8 0.05 0.1],...
+    'String',' f0 ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.f0 = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.61 0.8 0.08 0.1],...
+    'String','1.6077',...
+    'FontSize',8);
+h.name_f1 = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.56 0.7 0.05 0.1],...
+    'String',' f ` ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.f1 = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.61 0.7 0.08 0.1],...
+    'String','0.013087',...
+    'FontSize',8);
+h.name_f2 = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.56 0.6 0.05 0.1],...
+    'String',' f " ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.f2 = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.61 0.6 0.08 0.1],...
+    'String','0.0061273',...
+    'FontSize',8);
+
+h.name_Chi_0 = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.69 0.8 0.03 0.1],...
+    'String','Chi0',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Chi_0 = uicontrol('Parent',h.lp_fit,...
+    'Enable','on',...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.72 0.8 0.1 0.1],...
+    'String',' [] ',...
+    'FontSize',8);
+
+h.name_Chi_h = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.69 0.7 0.03 0.1],...
+    'String','ChiH',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Chi_h = uicontrol('Parent',h.lp_fit,...
+    'Enable','on',...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.72 0.7 0.1 0.1],...
+    'String',' [] ',...
+    'FontSize',8);
+
+%% More crystal elements
+
+h.More_Crystal = uicontrol('Parent',h.lp_fit,...
+    'Style','push',...
+    'Units','normalized',...
+    'Position',[0.85 0.9 0.1 0.1],...
+    'String','More crystals',...
+    'BackgroundColor',[0 0.95 0.95],...
+    'FontSize',8,...
+    'Callback',@More_Crystal);
+
+
+h.More_Crystal_Chk = uicontrol('Parent',h.lp_fit,...
+    'Style','check',...
+    'Units','normalized',...
+    'Position',[0.95 0.9 0.05 0.1],...
+    'value',0,...
+    'String','off',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8,...
+    'Callback',@More_Crystal);
+
+h.name_info_number_crystal = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.85 0.8 0.1 0.1],...
+    'String','Number crystal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+
+h.info_number_crystal = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.95 0.8 0.05 0.1],...    
+    'enable','off',...
+    'String','-',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.name_crystal_show= uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.85 0.7 0.1 0.1],...
+    'String','Show crystal:',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.crystal_show = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.95 0.7 0.05 0.1],...    
+    'enable','on',...
+    'String','1',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+
+
+%% Beam properities
+h.name_Beam_simulation_Theory = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0. 0.45 0.04 0.1],...
+    'String','Beam',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8);
+h.name_Beam_Sigma = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.04 0.45 0.1 0.1],...
+    'String','Sigma',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8);
+h.name_Beam_Sigma = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.14 0.45 0.06 0.1],...
+    'String','N Steps',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8);
+
+h.Beam_simulation_Plots = uicontrol('Parent',h.lp_fit,...
+    'Style','push',...
+    'Units','normalized',...
+    'Position',[0.2 0.45 0.11 0.1],...
+    'String','Plots',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8,...
+    'Callback',@Beam_3D_plot);
+
+h.Gaussian_Beam_SASE_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','SASE',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0. 0.25 0.05 0.1]);
+
+
+h.Gaussian_Beam_1D_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','1D',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.0 0.35 0.04 0.1]);
+h.name_size_T_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.04 0.35 0.02 0.1],...
+    'BackgroundColor',[0.5 0.5 0.5],...
+    'String','t:',...
+    'FontSize',8);
+h.size_T_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.06 0.35 0.05 0.1],...
+    'String','[]',...
+    'FontSize',8);
+h.name_size_t_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.11 0.35 0.03 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','fs',...
+    'FontSize',8);
+h.Nstep_t_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.14 0.35 0.06 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','1000',...
+    'FontSize',8);
+
+h.name_initial_range_t =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.2 0.35 0.04 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','Range',...
+    'FontSize',8);
+h.initial_range_t =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.24 0.35 0.07 0.1],...
+    'String','500',...
+    'FontSize',8);
+
+h.name_rhoparameter = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.04 0.25 0.02 0.1],...
+    'String','Rho',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',6);
+
+h.rhoparameter =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.06 0.25 0.05 0.1],...
+    'String','5e-4',...
+    'FontSize',8);
+
+h.name_size_X_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.11 0.25 0.03 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','%',...
+    'FontSize',8);
+
+
+h.Gaussian_Beam_2D_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','2D',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.0 0.15 0.04 0.1]);
+h.name_size_X_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.04 0.15 0.02 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','x:',...
+    'FontSize',8);
+h.size_X_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable', 'off',...
+    'Position',[0.06 0.15 0.05 0.1],...
+    'String','[]',...
+    'FontSize',8);
+h.name_size_X_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.11 0.15 0.03 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','um',...
+    'FontSize',8);
+h.Nstep_x_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.14 0.15 0.06 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','100',...
+    'FontSize',8);
+
+h.name_initial_range_x =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.2 0.15 0.04 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','Range',...
+    'FontSize',8);
+h.initial_range_x =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.24 0.15 0.07 0.1],...
+    'String','200',...
+    'FontSize',8);
+
+h.Gaussian_Beam_3D_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','3D',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0. 0.05 0.04 0.1]);
+h.name_size_Y_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.04 0.05 0.02 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','y:',...
+    'FontSize',8);
+h.size_Y_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.06 0.05 0.05 0.1],...
+    'String','[]',...
+    'Enable', 'off',...
+    'FontSize',8);
+h.name_size_Y_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.11 0.05 0.03 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','um',...
+    'FontSize',8);
+
+h.Nstep_y_Beam =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.14 0.05 0.06 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','100',...
+    'FontSize',8);
+h.name_initial_range_y =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.2 0.05 0.04 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','Range',...
+    'FontSize',8);
+h.initial_range_y =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.24 0.05 0.07 0.1],...
+    'String','100',...
+    'FontSize',8);
+
+
+
+
+
+%% Mono
+h.name_Mono_simulation_Theory = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.3175 0.05 0.3 0.5],...
+    'String','',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8);
+h.name_Mono_simulation_Theory = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.3175 0.45 0.3 0.1],...
+    'String','Monochromator',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0.4 0.4 0.4],...
+    'FontSize',8);
+h.Mono_Beam_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','Mono',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.32 0.35 0.05 0.1]);
+
+h.crystal_orientation_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Normal +',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.37 0.35 0.06 0.1]);
+        
+        
+h.name_Element_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.42 0.35 0.06 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','Element',...
+    'FontSize',6);
+h.Element_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable', 'on',...
+    'Position',[0.48 0.35 0.035 0.1],...
+    'String','14',...
+    'FontSize',8);
+
+h.name_H_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.32 0.25 0.03 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','h',...
+    'FontSize',8);
+h.H_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable', 'on',...
+    'Position',[0.35 0.25 0.035 0.1],...
+    'String','3',...
+    'FontSize',8);
+h.name_K_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.385 0.25 0.03 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','k',...
+    'FontSize',8);
+h.K_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable', 'on',...
+    'Position',[0.415 0.25 0.035 0.1],...
+    'String','1',...
+    'FontSize',8);
+h.name_L_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.45 0.25 0.03 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','l',...
+    'FontSize',8);
+h.L_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable', 'on',...
+    'Position',[0.48 0.25 0.035 0.1],...
+    'String','1',...
+    'FontSize',8);
+
+h.name_Explain_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.32 0.15 0.195 0.1],...
+    'BackgroundColor',[0 0 0.9],...
+    'String','Element by atomic number, only C or Si.',...
+    'FontSize',6);
+
+h.name_Polarization_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.32 0.05 0.105 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','Polarization',...
+    'FontSize',6);
+
+h.Polarization_s_Mono=  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','s',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.425 0.05 0.05 0.1]);
+
+h.Polarization_p_Mono =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','p',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.475 0.05 0.05 0.1]);
+
+
+h.name_Asymmetry_Mono =uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.525 0.05 0.05 0.1],...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'String','Asymmetry',...
+    'FontSize',6);
+h.Asymmetry_Mono=uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable', 'on',...
+    'Position',[0.575 0.05 0.04 0.1],...
+    'String','0',...
+    'FontSize',8);
+
+
+h.name_f0 = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.52 0.35 0.025 0.1],...
+    'String',' f0 ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.f0_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.545 0.35 0.07 0.1],...
+    'String','1.6077',...
+    'FontSize',8);
+h.name_f1 = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.52 0.25 0.025 0.1],...
+    'String',' f ` ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.f1_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.545 0.25 0.07 0.1],...
+    'String','0.013087',...
+    'FontSize',8);
+h.name_f2 = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.52 0.15 0.025 0.1],...
+    'String',' f " ',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',8);
+h.f2_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Enable','off',...
+    'Position',[0.545 0.15 0.07 0.1],...
+    'String','0.0061273',...
+    'FontSize',8);
+
+%% Energy Scan
+h.Mono_Scan_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','Scan Energy',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.62 0.45 0.15 0.1]);
+
+h.name_Range_pos_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.62 0.35 0.04 0.1],...
+    'String','Range +',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Range_pos_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.66 0.35 0.035 0.1],...
+    'String','0',...
+    'FontSize',8);
+h.name_Range_neg_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.695 0.35 0.04 0.1],...
+    'String','Range -',...
+    'BackgroundColor',[0.55 0.45 0.45],...
+    'FontSize',6);
+h.Range_neg_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.735 0.35 0.035 0.1],...
+    'String','-5',...
+    'FontSize',8);
+
+h.name_Steps_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.62 0.25 0.04 0.1],...
+    'String','Steps',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Steps_Mono = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.66 0.25 0.035 0.1],...
+    'String','5',...
+    'FontSize',8);
+
+
+h.name_Repetition_ave = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.62 0.15 0.04 0.1],...
+    'String','Average',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Repetition_ave = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.66 0.15 0.035 0.1],...
+    'String','1',...
+    'FontSize',8);
+
+h.name_Repetition_channel = uicontrol('Parent',h.lp_fit,...
+    'Style','text',...
+    'Units','normalized',...
+    'Position',[0.62 0.05 0.04 0.1],...
+    'String','Channel',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'FontSize',6);
+h.Repetition_channel = uicontrol('Parent',h.lp_fit,...
+    'Style','Edit',...
+    'Units','normalized',...
+    'Position',[0.66 0.05 0.035 0.1],...
+    'String','1',...
+    'FontSize',8);
+
+h.Channel_Save_average_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','Save average steps',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.695 0.25 0.075 0.1]);
+
+h.Channel_Save_All_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','All',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.695 0.15 0.0375 0.1]);
+
+h.Channel_Save_XY_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','XY',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.695 0.05 0.0375 0.1]);
+h.Channel_Save_XT_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','XT',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.7325 0.15 0.0375 0.1]);
+h.Channel_Save_YT_Check =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','YT',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.7325 0.05 0.0375 0.1]);
+
+%% Shift FFT
+h.name_Shift_Time =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'text',...
+    'Enable', 'on',...
+    'FontName','Helvetica',...
+    'String','Shift Range',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Units','Normalized',...
+    'Position', [0.625+0.15 0.45 0.05 0.1]);
+
+h.Shift_t =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Shift t',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.625+0.15 0.35 0.05 0.1]);
+
+h.Shift_x =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Shift x',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.625+0.15 0.25 0.05 0.1]);
+
+h.Shift_y =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Shift y',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.625+0.15 0.15 0.05 0.1]);
+h.Shift_t2 =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Shift E',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.625+0.15 0.05 0.05 0.1]);
+
+%% Shape XY
+h.Lorenztian_Distribution =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 0,...
+    'FontName','Helvetica',...
+    'String','Cauchy',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.85 0.35 0.075 0.1]);
+
+h.Gaussian_Distribution =  uicontrol('Parent',h.lp_fit,...
+    'Style' , 'Check',...
+    'Enable', 'on',...
+    'Value', 1,...
+    'FontName','Helvetica',...
+    'String','Gaussian',...
+    'FontSize',6,...
+    'FontWeight','normal',...
+    'BackgroundColor',[0.45 0.45 0.45],...
+    'HorizontalAlignment','center',...
+    'Callback',@Beam_3D_plot,...
+    'Units','Normalized',...
+    'Position', [0.925 0.35 0.075 0.1]);
+
+h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
+    'Style','push',...
+    'Units','normalized',...
+    'Position',[0.85 0.05 0.15 0.3],...
+    'String','Beam Simulation',...
+    'FontWeight','bold',...
+    'BackgroundColor',[0 0.95 0],...
+    'FontSize',8,...
+    'Callback',@Beam_3D_Reflectivity);
+
+%% functions
+    function Dynamical_Reflectivity(source,evendata)
+        if source == h.Dynamical_Theory_Plots
+            
+            h.I_Fig_Reflectivity_Dynamical = figure(d+191);
+            
+            set(h.I_Fig_Reflectivity_Dynamical,'Name','Dynamical reflectivity',...
+                'NumberTitle', 'Off',...
+                'Toolbar','figure',...
+                'visible','on',...
+                'Units','normalized',...
+                'Position', [0.001 0.49 0.48 0.3],...
+                'Color',[0.8 0.8 0.8],...
+                'Menubar','figure',...
+                'KeyReleaseFcn',@Press);
+            
+            h.I_Fig_Reflectivity_In = axes('Parent',h.I_Fig_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.05 0.1 0.43 0.72],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('K Space')
+            xlabel('Energy (eV)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.I_Fig_Reflectivity_time_In = axes('Parent',h.I_Fig_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.55 0.1 0.43 0.72],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('Real Space')
+            xlabel('Time (s)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.Time_center_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Center T (s)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.8 0.95 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);            
+            h.Time_center =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','-',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.8 0.9 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+          
+            h.name_lim_Time_center =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Value', 0,...
+                'Enable','on',...                
+                'FontName','Helvetica',...
+                'String','Limit around 0',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.9 0.95 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'Callback',@Dynamical_Reflectivity,...
+                'FontSize',8);
+            h.lim_Time_center =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','-',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.9 0.9 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.K_Space_center_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Center K (eV)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.3 0.95 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            h.K_Space_center =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','on',...                
+                'FontName','Helvetica',...
+                'String','-',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.3 0.9 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            h.name_lim_K_Space_center =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Value', 0,...
+                'Enable','on',...                
+                'FontName','Helvetica',...
+                'String','Limit around 0',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.4 0.95 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'Callback',@Dynamical_Reflectivity,...
+                'FontSize',8);
+            h.lim_K_Space_center =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','-',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.4 0.9 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            
+            
+            h.Time_um_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 1,...
+                'FontName','Helvetica',...
+                'String','Time (s)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.5 0.95 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.Transverse_um_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','X (m)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.5 0.9 0.1 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            
+            h.Dynamical_Reflectivity_plot = uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style','push',...
+                'Units','normalized',...
+                'Position',[0. 0.95 0.2 0.05],...
+                'String','Dynamical Reflectivity',...
+                'BackgroundColor',[0 0.95 0],...
+                'FontSize',8,...
+                'Callback',@Dynamical_Reflectivity);
+            h.BD_plot_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 1,...
+                'FontName','Helvetica',...
+                'String','BD',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.0 0.9 0.05 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.FBD_plot_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','FBD',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.05 0.9 0.05 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            h.LD_plot_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','LD',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.1 0.9 0.05 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.FLD_plot_Check =  uicontrol('Parent',h.I_Fig_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','FLD',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Dynamical_Reflectivity,...
+                'Position',[0.15 0.9 0.05 0.05],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            
+            if get(h.Bragg_Check,'Value')== 1
+                set(h.BD_plot_Check,'Value',1)
+                set(h.FBD_plot_Check,'Value',0)
+                set(h.FLD_plot_Check,'Value',0)
+                set(h.LD_plot_Check,'Value',0)
+            elseif get(h.Bragg_FBD_Check,'Value')== 1
+                set(h.BD_plot_Check,'Value',0)
+                set(h.FBD_plot_Check,'Value',1)
+                set(h.FLD_plot_Check,'Value',0)
+                set(h.LD_plot_Check,'Value',0)
+            elseif get(h.Laue_Check,'Value')== 1
+                set(h.BD_plot_Check,'Value',0)
+                set(h.FBD_plot_Check,'Value',0)
+                set(h.FLD_plot_Check,'Value',0)
+                set(h.LD_plot_Check,'Value',1)
+            elseif get(h.Laue_FBD_Check,'Value')== 1
+                set(h.BD_plot_Check,'Value',0)
+                set(h.FBD_plot_Check,'Value',0)
+                set(h.LD_plot_Check,'Value',0)
+                set(h.FLD_plot_Check,'Value',1)                
+            end
+        elseif source == h.Time_um_Check
+            set(h.Time_um_Check,'Value',1)
+            set(h.Transverse_um_Check,'Value',0)
+        elseif source == h.Transverse_um_Check
+            set(h.Time_um_Check,'Value',0)
+            set(h.Transverse_um_Check,'Value',1)
+        elseif source == h.name_lim_K_Space_center
+            if get(h.name_lim_K_Space_center,'Value') == 1
+                set(h.name_lim_K_Space_center,'Value',1)
+            else
+                set(h.name_lim_K_Space_center,'Value',0)
+            end
+            
+        elseif source == h.name_lim_Time_center
+            if get(h.name_lim_Time_center,'Value') == 1
+                set(h.name_lim_Time_center,'Value',1)
+            else
+                set(h.name_lim_Time_center,'Value',0)
+            end
+            
+        elseif source == h.K_Space_center_Check
+            if get(h.K_Space_center_Check,'Value') == 1
+                set(h.K_Space_center_Check,'Value',1)
+            else
+                set(h.K_Space_center_Check,'Value',0)
+            end
+        elseif source == h.Time_center_Check
+            if get(h.Time_center_Check,'Value') == 1
+                set(h.Time_center_Check,'Value',1)
+            else
+                set(h.Time_center_Check,'Value',0)
+            end
+            
+        elseif source == h.BD_plot_Check
+            set(h.BD_plot_Check,'Value',1)
+            set(h.FBD_plot_Check,'Value',0)
+            set(h.FLD_plot_Check,'Value',0)
+            set(h.LD_plot_Check,'Value',0)
+            set(h.Bragg_Check,'Value',1)
+            set(h.Bragg_FBD_Check,'Value',0)
+            set(h.Laue_Check,'Value',0)
+            set(h.Laue_FBD_Check,'Value',0)
+        elseif source == h.FBD_plot_Check
+            set(h.BD_plot_Check,'Value',0)
+            set(h.FBD_plot_Check,'Value',1)
+            set(h.FLD_plot_Check,'Value',0)
+            set(h.LD_plot_Check,'Value',0)
+            set(h.Bragg_Check,'Value',0)
+            set(h.Bragg_FBD_Check,'Value',1)
+            set(h.Laue_Check,'Value',0)
+            set(h.Laue_FBD_Check,'Value',0)
+        elseif source == h.LD_plot_Check
+            set(h.BD_plot_Check,'Value',0)
+            set(h.FBD_plot_Check,'Value',0)
+            set(h.FLD_plot_Check,'Value',0)
+            set(h.LD_plot_Check,'Value',1)
+            set(h.Bragg_Check,'Value',0)
+            set(h.Bragg_FBD_Check,'Value',0)
+            set(h.Laue_Check,'Value',1)
+            set(h.Laue_FBD_Check,'Value',0)
+        elseif source == h.FLD_plot_Check
+            set(h.BD_plot_Check,'Value',0)
+            set(h.FBD_plot_Check,'Value',0)
+            set(h.FLD_plot_Check,'Value',1)
+            set(h.LD_plot_Check,'Value',0)
+            set(h.Bragg_Check,'Value',0)
+            set(h.Bragg_FBD_Check,'Value',0)
+            set(h.Laue_Check,'Value',0)
+            set(h.Laue_FBD_Check,'Value',1)
+            
+        elseif source == h.Dynamical_Reflectivity
+            
+            child = get(h.I_Fig_Reflectivity_In,'Children');
+            for i=1:length(child)
+                delete(child(i));
+            end
+            
+            child = get(h.I_Fig_Reflectivity_time_In,'Children');
+            for i=1:length(child)
+                delete(child(i));
+            end
+            Thickness = eval(get(h.Thickness,'String'));
+            Z = eval(get(h.Element,'String'));
+            crystal_orientation = get(h.crystal_orientation,'value');            
+            
+            Energy_center = eval(get(h.Energy_input,'String'));
+            
+            Energy_Bragg =  Energy_center;
+            h_Miller = eval(get(h.h_miller,'String'));
+            k_Miller = eval(get(h.k_miller,'String'));
+            l_Miller = eval(get(h.l_miller,'String'));
+            vector_Miller = [h_Miller,k_Miller,l_Miller];
+            
+            
+            DWF = eval(get(h.DWF,'String'));
+            
+            Range_E_neg = (-1)*eval(get(h.Range_Left,'String'));
+            Range_E_pos = eval(get(h.Range_Right,'String'));
+            
+            Absorption = get(h.Absorption,'Value');
+            
+            Ang_asy_Deg = eval(get(h.Asymmetry,'String'));
+            
+            N_Steps = eval(get(h.N_Steps,'String'));
+            set(h.Nstep_t_Beam,'String',N_Steps)
+            
+            if get(h.Polarization_s,'Value') == 1
+                Polarization = 's';
+            else
+                Polarization = 'p';
+            end
+            
+            [f_0,f_1,f_2,a_Par,b_Par,c_Par] = Element_Bragg_temp_Gui_08022017(Z,vector_Miller,Energy_Bragg);
+            
+            set(h.f0,'String',f_0)
+            set(h.f1,'String',f_1)
+            set(h.f2,'String',f_2)
+            
+            if get(h.CParameter_Check,'Value') == 1
+                a_Par = eval(get(h.a_parameter,'String'));
+                b_Par = eval(get(h.b_parameter,'String'));
+                c_Par = eval(get(h.c_parameter,'String'));      
+            end
+
+            set(h.a_parameter,'String',a_Par)
+            set(h.b_parameter,'String',b_Par)
+            set(h.c_parameter,'String',c_Par)
+            
+            if get(h.f_check_values,'Value') == 1
+                f_0 = eval(get(h.f0,'String'));
+                f_1 = eval(get(h.f1,'String'));
+                f_2 = eval(get(h.f2,'String'));
+            end
+            
+            if get(h.Bragg_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Bragg_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Bragg_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                
+                axes(h.I_Fig_Reflectivity_In)
+                hold on
+                plot(E_Scan,abs(R_0H_S).^2,'Parent',h.I_Fig_Reflectivity_In)
+                title('Reflectivity Bragg vs Energy')
+                xlabel('Energy (eV)')
+                axis auto
+                
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                
+                if get(h.Shift_t,'Value') == 1
+                    G_0H = fftshift(G_0H);
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                    
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    axis auto
+                    title('Time depdendence')
+                    xlabel('Transverse displacement (m)')
+                    axis auto
+                end
+
+                set(h.BD_plot_Check,'Value',1)
+                set(h.FBD_plot_Check,'Value',0)
+                set(h.LD_plot_Check,'Value',0)
+                set(h.FLD_plot_Check,'Value',0)
+                
+            elseif get(h.Bragg_FBD_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Bragg_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Bragg_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                axes(h.I_Fig_Reflectivity_In)  
+                
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                
+                hold on
+                plot(E_Scan,abs(R_00_S).^2, 'Parent',h.I_Fig_Reflectivity_In,'color','r')
+                title('Reflectivity Bragg vs Energy')
+                xlabel('Energy (eV)')
+                axis auto
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                if get(h.Shift_t,'value') == 1
+                    G_00 = fftshift(G_00);
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    axis auto
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    axis auto
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    title('Time depdendence')
+                    xlabel('Transverse displacement (m)')
+                    axis auto
+                end
+                
+                set(h.BD_plot_Check,'Value',0)
+                set(h.FBD_plot_Check,'Value',1)
+                set(h.LD_plot_Check,'Value',0)
+                set(h.FLD_plot_Check,'Value',0)
+            elseif get(h.Laue_FBD_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Laue_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Laue_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                
+                axes(h.I_Fig_Reflectivity_In)
+                hold on
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                
+                plot(E_Scan,abs(R_00_S).^2, 'Parent',h.I_Fig_Reflectivity_In,'color','r')
+                axis auto
+                title('Reflectivity Laue vs Energy')
+                xlabel('Energy (eV)')
+                
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                if get(h.Shift_t,'value') == 1
+                    G_00 = fftshift(G_00);
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    axis auto
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    axis auto
+                    title('Time depdendence')
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    xlabel('Transverse displacement (m)')
+                end
+                set(h.BD_plot_Check,'Value',0)
+                set(h.FBD_plot_Check,'Value',0)
+                set(h.LD_plot_Check,'Value',0)
+                set(h.FLD_plot_Check,'Value',1)
+            elseif get(h.Laue_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Laue_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Laue_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                
+                axes(h.I_Fig_Reflectivity_In)
+                hold on
+                plot(E_Scan,abs(R_0H_S).^2,'Parent',h.I_Fig_Reflectivity_In)
+                title('Reflectivity Laue vs Energy')
+                xlabel('Energy (eV)')
+                axis auto
+                
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                if get(h.Shift_t,'value') == 1
+                    G_0H = fftshift(G_0H);
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    axis auto
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    axis auto
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    title('Time depdendence')
+                    xlabel('Transverse displacement (m)')
+                end
+                set(h.BD_plot_Check,'Value',0)
+                set(h.FBD_plot_Check,'Value',0)
+                set(h.LD_plot_Check,'Value',1)
+                set(h.FLD_plot_Check,'Value',0)
+            end
+            h.R_0H_S = R_0H_S;
+            h.R_00_S = R_00_S;
+            h.E_Scan = E_Scan;
+            h.G_00 =G_00;
+            h.G_0H= G_0H;
+            h.t_array = t_array;
+            h.t_max0 = t_max0;
+            h.x_transvers_array =x_transvers_array;
+            h.X_max0= X_max0;
+            h.h_Miller =h_Miller;
+            h.k_Miller =k_Miller;
+            h.l_Miller =l_Miller;
+            
+        elseif source == h.Dynamical_Reflectivity_plot
+            
+            child = get(h.I_Fig_Reflectivity_In,'Children');
+            for i=1:length(child)
+                delete(child(i));
+            end
+            
+            child = get(h.I_Fig_Reflectivity_time_In,'Children');
+            for i=1:length(child)
+                delete(child(i));
+            end
+            Thickness = eval(get(h.Thickness,'String'));
+            Z = eval(get(h.Element,'String'));
+            crystal_orientation = get(h.crystal_orientation,'Value');
+            
+            
+            Energy_center = eval(get(h.Energy_input,'String'));
+            
+            Energy_Bragg =  Energy_center;
+            
+            h_Miller = eval(get(h.h_miller,'String'));
+            k_Miller = eval(get(h.k_miller,'String'));
+            l_Miller = eval(get(h.l_miller,'String'));
+            vector_Miller = [h_Miller,k_Miller,l_Miller];
+            
+            DWF = eval(get(h.DWF,'String'));
+            
+            Chi_0 = eval(get(h.Chi_0,'String'));
+            Chi_h = eval(get(h.Chi_h,'String'));
+            
+            Range_E_neg = (-1)*eval(get(h.Range_Left,'String'));
+            Range_E_pos = eval(get(h.Range_Right,'String'));
+            
+            Absorption = get(h.Absorption,'Value');
+            
+            Ang_asy_Deg = eval(get(h.Asymmetry,'String'));
+            
+            N_Steps = eval(get(h.N_Steps,'String'));
+            set(h.Nstep_t_Beam,'String',N_Steps)
+            
+            if get(h.Polarization_s,'Value') == 1
+                Polarization = 's';
+            else
+                Polarization = 'p';
+            end
+            
+            [f_0,f_1,f_2,a_Par,b_Par,c_Par] = Element_Bragg_temp_Gui_08022017(Z,vector_Miller,Energy_Bragg);
+            set(h.f0,'String',f_0)
+            set(h.f1,'String',f_1)
+            set(h.f2,'String',f_2)
+            set(h.a_parameter,'String',a_Par)
+            set(h.b_parameter,'String',b_Par)
+            set(h.c_parameter,'String',c_Par)
+            
+            if get(h.f_check_values,'Value') == 1
+                f_0 = eval(get(h.f0,'String'));
+                f_1 = eval(get(h.f1,'String'));
+                f_2 = eval(get(h.f2,'String'));
+            end
+            
+            if get(h.Bragg_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Bragg_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Bragg_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                
+                axes(h.I_Fig_Reflectivity_In)
+                hold on
+                plot(E_Scan,abs(R_0H_S).^2,'Parent',h.I_Fig_Reflectivity_In)
+                title('Reflectivity Bragg vs Energy')
+                xlabel('Energy (eV)')
+                axis auto
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                
+                if get(h.Shift_t,'value') == 1
+                    G_0H = fftshift(G_0H);
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    axis auto
+                    title('Time depdendence')
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    xlabel('Transverse displacement (m)')
+                end
+                axis auto
+                
+            elseif get(h.Bragg_FBD_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Bragg_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Bragg_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                axes(h.I_Fig_Reflectivity_In)
+                hold on
+                plot(E_Scan,abs(R_00_S).^2, 'Parent',h.I_Fig_Reflectivity_In,'color','r')
+                title('Reflectivity Bragg vs Energy')
+                xlabel('Energy (eV)')
+                axis auto
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                
+                if get(h.Shift_t,'value') == 1
+                    G_00 = fftshift(G_00);
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    axis auto
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    axis auto
+                    title('Time depdendence')
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    xlabel('Transverse displacement (m)')
+                end
+                axis auto
+                
+            elseif get(h.Laue_FBD_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Laue_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Laue_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                
+                if get(h.Shift_t,'value') == 1
+                    G_00 = fftshift(G_00);
+                end
+                
+                axes(h.I_Fig_Reflectivity_In)
+                hold on
+                plot(E_Scan,abs(R_00_S).^2, 'Parent',h.I_Fig_Reflectivity_In,'color','r')
+                axis auto
+                title('Reflectivity Laue vs Energy')
+                xlabel('Energy (eV)')
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    axis auto
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_00).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    axis auto
+                    title('Time depdendence')
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    xlabel('Transverse displacement (m)')
+                end
+                
+            elseif get(h.Laue_Check,'Value')
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_0H_S,R_00_S,E_Scan,G_00,G_0H,t_array,t_max0,x_transvers_array,X_max0] = Laue_temp_Gui_1D_test(Z,a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,Absorption,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Steps,get(h.Laue_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                if get(h. K_Space_center_Check, 'Value') == 1
+                    E_Scan =  eval(get(h.K_Space_center,'String'))-E_Scan;                    
+                end
+                if get(h. Time_center_Check, 'Value') == 1
+                    t_array = eval(get(h.Time_center,'String'))-t_array;
+                end
+                axes(h.I_Fig_Reflectivity_In)
+                hold on
+                plot(E_Scan,abs(R_0H_S).^2,'Parent',h.I_Fig_Reflectivity_In)
+                title('Reflectivity Laue vs Energy')
+                xlabel('Energy (eV)')
+                axis auto
+                if get(h.name_lim_K_Space_center,'value') == 1
+                    lim_k = eval(get(h.lim_K_Space_center,'String'));
+                    set(h.I_Fig_Reflectivity_In,'Xlim',[-lim_k lim_k])                    
+                end
+                
+                if get(h.Shift_t,'value') == 1
+                    G_0H = fftshift(G_0H);
+                end
+                
+                axes(h.I_Fig_Reflectivity_time_In)
+                hold on
+                if get(h.Time_um_Check,'Value') == 1
+                    plot(t_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','log');
+                    axis auto
+                    title('Time depdendence')
+                    xlabel('Time (s)')
+                    if get(h.name_lim_Time_center,'value') == 1
+                        lim_time = eval(get(h.lim_Time_center,'String'));
+                        set(h.I_Fig_Reflectivity_time_In,'Xlim',[-lim_time lim_time])
+                    end
+                elseif get(h.Time_um_Check,'Value') == 0
+                    plot(x_transvers_array,abs(G_0H).^2,'Parent',h.I_Fig_Reflectivity_time_In)
+                    axis auto
+                    title('Time depdendence')
+                    set(h.I_Fig_Reflectivity_time_In,'yscale','linear');
+                    xlabel('Transverse displacement (m)')
+                end
+            end
+            h.R_0H_S = R_0H_S;
+            h.R_00_S = R_00_S;
+            h.E_Scan = E_Scan;
+            h.G_00 =G_00;
+            h.G_0H= G_0H;
+            h.t_array = t_array;
+            h.t_max0 = t_max0;
+            h.x_transvers_array =x_transvers_array;
+            h.X_max0= X_max0;
+            h.h_Miller =h_Miller;
+            h.k_Miller =k_Miller;
+            h.l_Miller =l_Miller;
+        end
+    end
+
+    function Bragg_Fit_Check(source,eventdata)
+        if source == h.Bragg_Check
+            set(h.Bragg_Check,'Value',1)
+            set(h.Bragg_FBD_Check,'Value',0)
+            set(h.Laue_Check,'Value',0)
+            set(h.Laue_FBD_Check,'Value',0)
+        elseif source == h.Bragg_FBD_Check
+            set(h.Bragg_Check,'Value',0)
+            set(h.Bragg_FBD_Check,'Value',1)
+            set(h.Laue_Check,'Value',0)
+            set(h.Laue_FBD_Check,'Value',0)
+        elseif source == h.Laue_Check
+            set(h.Bragg_Check,'Value',0)
+            set(h.Bragg_FBD_Check,'Value',0)
+            set(h.Laue_Check,'Value',1)
+            set(h.Laue_FBD_Check,'Value',0)
+        elseif source == h.Laue_FBD_Check
+            set(h.Bragg_Check,'Value',0)
+            set(h.Bragg_FBD_Check,'Value',0)
+            set(h.Laue_Check,'Value',0)
+            set(h.Laue_FBD_Check,'Value',1)
+        elseif source == h.Absorption
+            
+        elseif source == h.Range_Deg
+            set(h.Range_Deg,'Value',1)
+            set(h.Range_meV,'Value',0)
+        elseif source == h.Range_meV
+            set(h.Range_Deg,'Value',0)
+            set(h.Range_meV,'Value',1)
+            
+        elseif source ==  h.f_check_values
+            if get(h.f_check_values ,'Value') == 1
+                set(h.f_check_values,'Value',1)
+                set(h.f0,'Enable','on')
+                set(h.f1,'Enable','on')
+                set(h.f2,'Enable','on')
+            else
+                set(h.f_check_values,'Value',0)
+                set(h.f0,'Enable','off')
+                set(h.f1,'Enable','off')
+                set(h.f2,'Enable','off')
+            end
+        elseif source == h.CParameter_Check
+            if get(h.CParameter_Check,'Value') == 1
+                set(h.CParameter_Check,'Value',1,'String','Manual')
+            else
+                set(h.CParameter_Check,'Value',0,'String','Auto')                
+            end
+        elseif source == h.Polarization_s
+            if get(h.Polarization_s,'Value') == 1
+                set(h.Polarization_s,'Value',1)
+                set(h.Polarization_p,'Value',0)
+            else
+                set(h.Polarization_s,'Value',0)
+                set(h.Polarization_p,'Value',1)
+            end
+        elseif source == h.Polarization_p
+            if get(h.Polarization_p,'Value') == 1
+                set(h.Polarization_s,'Value',0)
+                set(h.Polarization_p,'Value',1)
+            else
+                set(h.Polarization_s,'Value',1)
+                set(h.Polarization_p,'Value',0)
+            end
+        elseif source == h.crystal_orientation
+            if get(h.crystal_orientation,'Value') == 1
+                set(h.crystal_orientation,'Value',1,'String','Normal +')
+            else
+                set(h.crystal_orientation,'Value',0,'String','Normal -')
+            end
+            
+        end
+        
+    end
+
+    function More_Crystal(source,eventdata)
+        if source == h.More_Crystal
+            
+            h.I_Fig_More_Crystal= figure(d+198);            
+            
+            set(h.I_Fig_More_Crystal,'Name','More than one crystal',...
+                'NumberTitle', 'Off',...
+                'Toolbar','figure',...
+                'visible','on',...
+                'Units','normalized',...
+                'Position', [0.001 0.24 0.48 0.2],...
+                'Color',[0.8 0.8 0.8],...
+                'Menubar','figure',...
+                'KeyReleaseFcn',@Press);
+            
+            h.name_crystal_line = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','text',...
+                'Units','normalized',...
+                'Position',[0.0 0.9 0.8 0.1],...
+                'HorizontalAlignment','left',...
+                'String','Position, Element, [h,k,l], Thickness(um), Geometry(L=2 or B=1), Transm(R=0, T=1), Assym(deg), Diff nor(+=1, -=0), Polar(s=1 or p=0), Energy, Beam',...
+                'BackgroundColor',[0.4 0.4 0.4],...
+                'FontSize',8);
+            h.crystal_line_1 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.8 0.8 0.1],...
+                'String','1,  14, [3, 1, 1], 1000, 1, 0, 0, 1, 1, 0 ,1',...
+                'FontSize',8);
+            h.crystal_line_2 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.7 0.8 0.1],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_line_3 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.6 0.8 0.1],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_line_4 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.5 0.8 0.1],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_line_5 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.4 0.8 0.1],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_line_6 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.3 0.8 0.1],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_line_7 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.2 0.8 0.1],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_line_8 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','Edit',...
+                'Units','normalized',...
+                'Position',[0.0 0.1 0.8 0.1],...
+                'String','-',...
+                'FontSize',8);
+            
+            h.name_crystal_line_chk = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','text',...
+                'Units','normalized',...
+                'Position',[0.8 0.9 0.05 0.1],...
+                'BackgroundColor',[0.45 0.45 0.45],...
+                'String','Scan motor',...
+                'FontSize',8);
+           h.name_crystal_range_p = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','text',...
+                'Units','normalized',...
+                'Position',[0.85 0.9 0.05 0.1],...
+                'BackgroundColor',[0.45 0.45 0.45],...
+                'String','ranage +',...
+                'FontSize',8);
+            h.name_crystal_range_n = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','text',...
+                'Units','normalized',...
+                'Position',[0.9 0.9 0.05 0.1],...
+                'BackgroundColor',[0.45 0.45 0.45],...
+                'String','ranage -',...
+                'FontSize',8);
+            h.name_crystal_range_steps = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','text',...
+                'Units','normalized',...
+                'Position',[0.95 0.9 0.05 0.1],...
+                'BackgroundColor',[0.45 0.45 0.45],...
+                'String','Steps',...
+                'FontSize',8); 
+                      
+            h.crystal_line_chk_1 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.8 0.05 0.1],...
+                'value',0,...
+                'String','on',...
+                'callback',@More_Crystal,...
+                'FontSize',8);
+            h.crystal_range_p_1 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.8 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_range_n_1 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.8 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);            
+            h.crystal_range_steps_1 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.8 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            
+            
+            
+            h.crystal_line_chk_2 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.7 0.05 0.1],...
+                'value',0,...
+                'String','off',...
+                'callback',@More_Crystal,...                
+                'FontSize',8);
+            h.crystal_range_p_2 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.7 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_range_n_2 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.7 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);            
+            h.crystal_range_steps_2 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.7 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            
+            
+            h.crystal_line_chk_3 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.6 0.05 0.1],...
+                'value',0,...
+                'String','off',...
+                'callback',@More_Crystal,...
+                'FontSize',8);
+            h.crystal_range_p_3 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.6 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_range_n_3 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.6 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);            
+            h.crystal_range_steps_3 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.6 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            
+            
+            h.crystal_line_chk_4 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.5 0.05 0.1],...
+                'value',0,...
+                'String','off',...
+                'callback',@More_Crystal,...
+                'FontSize',8);
+            h.crystal_range_p_4 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.5 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_range_n_4 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.5 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);            
+            h.crystal_range_steps_4 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.5 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            
+            
+            h.crystal_line_chk_5 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.4 0.05 0.1],...
+                'value',0,...
+                'String','off',...
+                'callback',@More_Crystal,...
+                'FontSize',8);
+            h.crystal_range_p_5 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.4 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+           h.crystal_range_n_5 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.4 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);            
+            h.crystal_range_steps_5 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.4 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            
+            
+            h.crystal_line_chk_6 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.3 0.05 0.1],...
+                'value',0,...
+                'String','off',...
+                'callback',@More_Crystal,...
+                'FontSize',8);
+            h.crystal_range_p_6 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.3 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_range_n_6 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.3 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);            
+            h.crystal_range_steps_6 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.3 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            
+            
+            h.crystal_line_chk_7 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.2 0.05 0.1],...
+                'value',0,...
+                'String','off',...
+                'callback',@More_Crystal,...
+                'FontSize',8);
+            h.crystal_range_p_7 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.2 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+             h.crystal_range_n_7 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.2 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);            
+            h.crystal_range_steps_7 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.2 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            
+            
+            h.crystal_line_chk_8 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','check',...
+                'Units','normalized',...
+                'Position',[0.8 0.1 0.05 0.1],...
+                'value',0,...
+                'String','off',...
+                'callback',@More_Crystal,...
+                'FontSize',8);
+            h.crystal_range_p_8 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.85 0.1 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+            h.crystal_range_n_8 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.9 0.1 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8); 
+            h.crystal_range_steps_8 = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','edit',...
+                'Units','normalized',...
+                'Position',[0.95 0.1 0.05 0.1],...
+                'BackgroundColor',[0.8 0.8 0.8],...
+                'String','-',...
+                'FontSize',8);
+            
+            
+            
+            
+            
+            
+            
+            h.Calculate_Save_crystal_line = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','push',...
+                'Units','normalized',...
+                'Position',[0.5  0. 0.5 0.1],...
+                'String','Crystal Scan',...
+                'BackgroundColor',[0.4 0.4 0],...
+                'FontSize',8,...
+                'Callback',@More_Crystal_Scan);
+            
+            h.Save_crystal_line = uicontrol('Parent',h.I_Fig_More_Crystal,...
+                'Style','push',...
+                'Units','normalized',...
+                'Position',[0. 0. 0.5 0.1],...
+                'String','Save Crystals',...
+                'FontSize',8,...
+                'Callback',@More_Crystal);
+            
+            
+            
+        elseif source == h.More_Crystal_Chk
+            if get(h.More_Crystal_Chk,'value') == 1
+               set( h.More_Crystal_Chk,'value',1,'string','on')
+            else
+                set( h.More_Crystal_Chk,'value',0,'string','off')
+            end           
+        
+        elseif source == h.crystal_line_chk_1
+            if get(h.crystal_line_chk_1,'value') == 1
+                set(h.crystal_line_chk_1,'value',1,'string','on')
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+            end
+        elseif source == h.crystal_line_chk_2
+            if get(h.crystal_line_chk_2,'value') == 1
+                set(h.crystal_line_chk_2,'value',1,'string','on')
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+            end
+            elseif source == h.crystal_line_chk_3
+            if get(h.crystal_line_chk_3,'value') == 1
+                set(h.crystal_line_chk_3,'value',1,'string','on')
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+            end
+            elseif source == h.crystal_line_chk_4
+            if get(h.crystal_line_chk_4,'value') == 1
+                set(h.crystal_line_chk_4,'value',1,'string','on')
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+            end
+            elseif source == h.crystal_line_chk_5
+            if get(h.crystal_line_chk_5,'value') == 1
+                set(h.crystal_line_chk_5,'value',1,'string','on')
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+            end
+            elseif source == h.crystal_line_chk_6
+            if get(h.crystal_line_chk_6,'value') == 1
+                set(h.crystal_line_chk_6,'value',1,'string','on')
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+            end
+            elseif source == h.crystal_line_chk_7
+            if get(h.crystal_line_chk_7,'value') == 1
+                set(h.crystal_line_chk_7,'value',1,'string','on')
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+            end
+            elseif source == h.crystal_line_chk_8
+            if get(h.crystal_line_chk_8,'value') == 1
+                set(h.crystal_line_chk_8,'value',1,'string','on')
+                set(h.crystal_line_chk_2,'value',0,'string','off')
+                set(h.crystal_line_chk_3,'value',0,'string','off')
+                set(h.crystal_line_chk_4,'value',0,'string','off')
+                set(h.crystal_line_chk_5,'value',0,'string','off')
+                set(h.crystal_line_chk_6,'value',0,'string','off')
+                set(h.crystal_line_chk_7,'value',0,'string','off')
+                set(h.crystal_line_chk_1,'value',0,'string','off')
+            else
+                set(h.crystal_line_chk_8,'value',0,'string','off')
+            end
+        elseif source == h.Save_crystal_line
+            crystal_line_1 = get(h.crystal_line_1,'String');
+            crystal_line_2 = get(h.crystal_line_2,'String');
+            crystal_line_3 = get(h.crystal_line_3,'String');
+            crystal_line_4 = get(h.crystal_line_4,'String');
+            crystal_line_5 = get(h.crystal_line_5,'String');
+            crystal_line_6 = get(h.crystal_line_6,'String');
+            crystal_line_7 = get(h.crystal_line_7,'String');
+            crystal_line_8 = get(h.crystal_line_8,'String'); 
+            
+            crystal_number = 0;            
+            for i_line = 1:8                                
+                name_line_crystal = 'crystal_line_';
+                name = sprintf('%s%0.1d',name_line_crystal,i_line);
+                name_crystal = eval(name);
+                
+                if name_crystal == '-'
+                    
+                else    
+                    pos =1;
+                    name_variable_pos_1 = '';
+                    name_variable_pos_2 = '';
+                    name_variable_pos_3 = '';
+                    name_variable_pos_4 = '';
+                    name_variable_pos_5 = '';
+                    name_variable_pos_6 = '';
+                    name_variable_pos_7 = '';
+                    name_variable_pos_8 = '';
+                    name_variable_pos_9 = '';
+                    name_variable_pos_10 = '';
+                    name_variable_pos_11 = '';
+                    name_variable_pos_12 = '';
+                    name_variable_pos_13 = '';
+                    for i_variable = 1:size(name_crystal,2)
+                        if name_crystal (1,i_variable) == ','
+                           pos = pos +1;
+                        else
+                           if pos == 1
+                               name_variable_pos_1 = strcat(name_variable_pos_1,name_crystal (1,i_variable));
+                           elseif pos == 2
+                               name_variable_pos_2 = strcat(name_variable_pos_2,name_crystal (1,i_variable));
+                           elseif pos == 3
+                               if name_crystal (1,i_variable) == '['                                   
+                               else
+                                   name_variable_pos_3 = strcat(name_variable_pos_3,name_crystal (1,i_variable));
+                               end
+                           elseif pos == 4
+                               name_variable_pos_4 = strcat(name_variable_pos_4,name_crystal (1,i_variable));
+                           elseif pos == 5
+                               if name_crystal (1,i_variable) == ']'                                   
+                               else
+                                   name_variable_pos_5 = strcat(name_variable_pos_5,name_crystal (1,i_variable));
+                               end
+                           elseif pos == 6
+                               name_variable_pos_6 = strcat(name_variable_pos_6,name_crystal (1,i_variable));
+                           elseif pos == 7   
+                               name_variable_pos_7 = strcat(name_variable_pos_7,name_crystal (1,i_variable));
+                           elseif pos == 8
+                               name_variable_pos_8 = strcat(name_variable_pos_8,name_crystal (1,i_variable));
+                           elseif pos ==9
+                               name_variable_pos_9 = strcat(name_variable_pos_9,name_crystal (1,i_variable));
+                           elseif pos ==10
+                               name_variable_pos_10 = strcat(name_variable_pos_10,name_crystal (1,i_variable));
+                           elseif pos ==11
+                               name_variable_pos_11 = strcat(name_variable_pos_11,name_crystal (1,i_variable))  ;
+                           elseif pos ==12
+                               name_variable_pos_12 = strcat(name_variable_pos_12,name_crystal (1,i_variable))  ;
+                           elseif pos ==13
+                               name_variable_pos_13 = strcat(name_variable_pos_13,name_crystal (1,i_variable))  ;
+                           end                       
+                           
+                        end
+                        
+                    end
+                    
+                    if eval(name_variable_pos_1) == 0 
+                        
+                    else
+                        crystal_number = crystal_number + 1;
+                        
+                        name_pos(1,crystal_number) = eval(name_variable_pos_1);
+                        
+                        name_Element(1,crystal_number) = eval(name_variable_pos_2);
+                        
+                        name_h(1,crystal_number) = eval(name_variable_pos_3);
+                        
+                        name_k(1,crystal_number) = eval(name_variable_pos_4);
+                        
+                        name_l(1,crystal_number) = eval(name_variable_pos_5);
+                        
+                        name_Thickness(1,crystal_number) = eval (name_variable_pos_6);
+                        
+                        name_geometry(1,crystal_number) = eval(name_variable_pos_7);
+                        
+                        name_Transmission(1,crystal_number) = eval(name_variable_pos_8);
+                        
+                        name_Asymmetry(1,crystal_number) = eval(name_variable_pos_9);
+                        
+                        name_Normal(1,crystal_number) = eval(name_variable_pos_10);
+                        
+                        name_polarization(1,crystal_number) = eval(name_variable_pos_11);
+                        
+                        name_Energy(1,crystal_number) = eval(name_variable_pos_12);
+                        
+                        name_Beam(1,crystal_number) = eval(name_variable_pos_13);
+                    end
+                end
+                
+            end
+            set(h.info_number_crystal,'String',crystal_number)
+            
+            
+            h.pos_MCC = name_pos;
+            h.Element_MCC = name_Element;
+            h.h_MCC = name_h;
+            h.k_MCC = name_k;
+            h.l_MCC = name_l;
+            h.Thickness_MCC = name_Thickness;
+            h.Geometry_MCC = name_geometry;
+            h.Transmission_MCC = name_Transmission;
+            h.Asymmetry_MCC = name_Asymmetry;
+            h.Normal_MCC = name_Normal;
+            h.polarization_MCC = name_polarization;
+            h.name_Energy = name_Energy;
+            h.name_Beam = name_Beam;
+        end
+        
+    end
+
+    function Beam_3D_plot (source,eventata)
+        
+        if source == h.Beam_simulation_Plots
+            
+            
+            h.I_Fig_3D_Reflectivity_Dynamical = figure(d+192);
+            
+            
+            set(h.I_Fig_3D_Reflectivity_Dynamical,'Name','Dynamical reflectivity Beam',...
+                'NumberTitle', 'Off',...
+                'Toolbar','figure',...
+                'visible','on',...
+                'Units','normalized',...
+                'Position', [0.501 0.03 0.5 0.9],...
+                'Color',[0.8 0.8 0.8],...
+                'Menubar','figure',...
+                'KeyReleaseFcn',@Press);
+            
+            h.I_Fig_Beam_3D_F1 = axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.57 0.73 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('F2: Real Space')
+            xlabel('Energy (eV)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.I_Fig_Beam_3D_F1_GK = axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.57 0.5 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('F1_T: Real Space')
+            xlabel('Energy (eV)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.I_Fig_Beam_3D_F3 = axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.57 0.27 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('F4: Real Space')
+            xlabel('Energy (eV)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.I_Fig_Beam_3D_F2 = axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.07 0.73 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('F1: Reciprocal Space')
+            xlabel('time (s)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.I_Fig_Beam_3D_F1_T= axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.07 0.5 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('F1_R: Reciprocal Space')
+            xlabel('time (s)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.I_Fig_Beam_3D_F4= axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.07 0.27 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('F3: Reciprocal Space')
+            xlabel('time (s)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.I_Fig_Beam_3D_F5 = axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.07 0.03 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('Scan Reciprocal Space')
+            xlabel('Energy (eV)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            
+            h.I_Fig_Beam_3D_F6 = axes('Parent',h.I_Fig_3D_Reflectivity_Dynamical, 'Units','normalized',...
+                'Position',[0.57 0.03 0.4 0.18],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title('Scan Plot')
+            xlabel('Energy (eV)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            
+            h.Panel_name_Dynamical_3D =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'text',......
+                'FontName','Helvetica',...
+                'String','Dynamical Plot Panel',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.0 0.97 0.1 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.Time_um_3D_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Time (s)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.1 0.97 0.08 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.Transverse_um_3D_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 1,...
+                'FontName','Helvetica',...
+                'String','X (m)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.18 0.97 0.07 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.Transversey_um_3D_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 1,...
+                'FontName','Helvetica',...
+                'String','Y (m)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.25 0.97 0.07 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.name_Transversey_um_3D_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'text',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','Only two of these values should be check',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.32 0.97 0.08 0.03],...
+                'BackgroundColor',[0. 0. 0.9],...
+                'FontSize',6);
+            
+            h.name_Transversey_um_3D_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'text',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','F4 variable:',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.0 0.94 0.1 0.03],...
+                'BackgroundColor',[0.5 0.5 0.5],...
+                'FontSize',8);
+            
+            h.Time_um_F4_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Time (s)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.1 0.94 0.08 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.Transverse_um_F4_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 1,...
+                'FontName','Helvetica',...
+                'String','X (m)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.18 0.94 0.07 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.Transversey_um_F4_Check =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Y (m)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.25 0.94 0.07 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            
+            h.name_Energy_point = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'text',......
+                'FontName','Helvetica',...
+                'String','Energy Scan(eV)',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.4 0.97 0.05 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            h.Energy_point = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','off',...
+                'FontName','Helvetica',...
+                'String','0',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.45 0.97 0.1 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.name_Image_point = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'text',......
+                'FontName','Helvetica',...
+                'String','Scan Image',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.55 0.97 0.05 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            h.Image_point= uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','0',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.60 0.97 0.05 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            
+            
+            h.Load_Energy_point = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'push',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','Load Energy',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.65 0.97 0.1 0.03],...
+                'BackgroundColor',[0.5 0.5 0.],...
+                'Callback',@Beam_3D_plot_Fig,...
+                'FontSize',8);
+            
+            Str ={};
+            Str{end+1} = 'F1: Incident Beam propagating in K Space';
+            Str{end+1} = 'F2: Convolution Incidet Beam with Crystal Real Space';
+            Str{end+1} = 'F3: Convolution Incident Beam with Crystal K space';
+            Str{end+1} = 'F4: Intensity vs Energy & Transverse displement';
+            Str{end+1} = 'F5: Crystal and Incident Beam Reflectivity';
+            Str{end+1} = 'F6: Reflectivity convoluted Beam';
+            
+            h.Number_MultiGauss_3D_Beam = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style','popup',...
+                'Units','normalized',...
+                'String',Str,...
+                'Position',[0.75 0.97 0.1 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',10,...
+                'Callback',@Beam_3D_plot);
+            
+            
+            h.Save_Energy_point = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'push',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','Save Energy',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.85 0.97 0.1 0.03],...
+                'BackgroundColor',[0.5 0.5 0.],...
+                'Callback',@Beam_3D_plot_Save,...
+                'FontSize',8);
+            
+            h.Save_Energy_plus = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'push',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','+',...
+                'FontWeight','bold',...
+                'Value',0,...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.95 0.97 0.025 0.03],...
+                'BackgroundColor',[0.5 0.5 0.],...
+                'Callback',@Beam_3D_plot,...
+                'FontSize',8);
+            
+            h.Save_Energy_minus = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'push',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','-',...
+                'Value',0,...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.975 0.97 0.025 0.03],...
+                'BackgroundColor',[0.5 0.5 0.],...
+                'Callback',@Beam_3D_plot,...
+                'FontSize',8);
+
+            
+            h.Status_Dynamical_3D = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'text',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Status: Ready',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.35 0.94 0.1 0.03],...
+                'BackgroundColor',[0.8 0 0.8],...
+                'FontSize',8);
+            
+            h.Pause_Dynamical_3D = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Pause',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.45 0.94 0.1 0.03],...
+                'BackgroundColor',[0.5 0.5 0.],...
+                'FontSize',8);
+            h.name_Repetition_num = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'text',......
+                'FontName','Helvetica',...
+                'String','Average Image',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.55 0.94 0.05 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            h.Repetition_num = uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','0',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.60 0.94 0.05 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+            
+            h.name_directoryname_Images= uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Push',......
+                'Enable','on',...
+                'Value', 0,...
+                'FontName','Helvetica',...
+                'String','Folder:',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.65 0.94 0.1 0.03],...
+                'BackgroundColor',[0.5 0.5 0.5],...
+                'FontSize',8);
+            
+            h.directoryname_Images= uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'edit',......
+                'Enable','on',...
+                'FontName','Helvetica',...
+                'String','/das/work/p15/p15366/RN84/SwissFEL Simulations/',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Position',[0.75 0.94 0.2 0.03],...
+                'BackgroundColor',[0.45 0.45 0.45],...
+                'FontSize',8);
+            
+            h.Save_all =  uicontrol('Parent',h.I_Fig_3D_Reflectivity_Dynamical,...
+                'Style' , 'Check',......
+                'Enable','on',...
+                'Value', 1,...
+                'FontName','Helvetica',...
+                'String','All',...
+                'FontWeight','bold',...
+                'HorizontalAlignment','center',...
+                'Units','Normalized',...
+                'Callback',@Beam_3D_plot,...
+                'Position',[0.95 0.94 0.05 0.03],...
+                'BackgroundColor',[0.6 0.6 0.6],...
+                'FontSize',8);
+        elseif source == h.Channel_Save_All_Check     
+            if get(h.Channel_Save_All_Check,'value') == 1
+                set(h.Channel_Save_All_Check,'Value',1)
+            else
+                set(h.Channel_Save_All_Check,'Value',0)
+            end
+        elseif source == h.Channel_Save_average_Check
+            if get(h.Channel_Save_average_Check,'value') == 1
+                set(h.Channel_Save_average_Check,'Value',1)
+            else
+                set(h.Channel_Save_average_Check,'Value',0)
+            end
+            
+        elseif source == h.Channel_Save_XY_Check
+            if get(h.Channel_Save_XY_Check,'value') == 1
+                set(h.Channel_Save_XY_Check,'Value',1)
+            else
+                set(h.Channel_Save_XY_Check,'Value',0)
+            end
+            
+        elseif source == h.Channel_Save_XT_Check
+            if get(h.Channel_Save_XT_Check,'value') == 1
+                set(h.Channel_Save_XT_Check,'Value',1)
+            else
+                set(h.Channel_Save_XT_Check,'Value',0)
+            end
+            
+        elseif source == h.Channel_Save_YT_Check
+            if get(h.Channel_Save_YT_Check,'value') == 1
+                set(h.Channel_Save_YT_Check,'Value',1)
+            else
+                set(h.Channel_Save_YT_Check,'Value',0)
+            end
+
+        elseif source ==h.Gaussian_Distribution
+            set(h.Gaussian_Distribution,'Value',1)
+            set(h.Lorenztian_Distribution,'Value',0)
+            
+        elseif source ==h.Lorenztian_Distribution
+            set(h.Gaussian_Distribution,'Value',0)
+            set(h.Lorenztian_Distribution,'Value',1)
+            
+        elseif source ==h.Gaussian_Beam_SASE_Check
+            if get(h.Gaussian_Beam_SASE_Check,'Value')
+                set(h.Gaussian_Beam_SASE_Check,'Value',1)
+            else
+                set(h.Gaussian_Beam_SASE_Check,'Value',0)
+            end
+            
+        elseif source == h.name_directoryname_Images
+            folder_intical = get(h.directoryname_Images,'String');
+            name_dir = uigetdir(folder_intical);
+            for i_name = 1:size(name_dir,2)
+                if name_dir(1,i_name) == '\'
+                    name_dir_2(1,i_name) = '/';
+                else
+                    name_dir_2(1,i_name) = name_dir(1,i_name);
+                end
+            end
+            set(h.directoryname_Images,'String', name_dir_2)
+            
+        elseif source  == h.Save_all
+            if get(h.Save_all,'Value') == 1
+                set(h.Save_all,'Value',1)
+            else
+                set(h.Save_all,'Value',0)
+            end
+            
+            
+        elseif source == h.Save_Energy_plus
+            if get(h.Save_Energy_plus,'Value') == 1
+                Image_point = eval(get(h.Image_point,'String'))+1;
+                set(h.Image_point,'String',num2str(Image_point))
+                set(h.Save_Energy_plus,'Value',0)     
+            end
+            
+        elseif source == h.Save_Energy_minus
+            if get(h.Save_Energy_minus,'Value') == 1
+                Image_point = eval(get(h.Image_point,'String'))-1;
+                set(h.Image_point,'String',num2str(Image_point))
+                set(h.Save_Energy_minus,'Value',0)     
+            end
+        elseif source == h.crystal_orientation_Mono
+            if get(h.crystal_orientation_Mono,'Value') == 1
+                set(h.crystal_orientation_Mono,'Value',1,'String','Normal +')
+            else
+                set(h.crystal_orientation_Mono,'Value',0,'String','Normal -')
+            end
+        elseif source ==  h.Polarization_s_Mono
+            set(h.Polarization_s_Mono,'Value',1)
+            set(h.Polarization_p_Mono,'Value',0)
+        elseif source ==  h.Polarization_p_Mono
+            set(h.Polarization_s_Mono,'Value',0)
+            set(h.Polarization_p_Mono,'Value',1)
+            
+        elseif source == h.Time_um_F4_Check            
+            set(h.Time_um_F4_Check,'Value',1)
+            set(h.Transverse_um_F4_Check,'Value',0)
+            set(h.Transversey_um_F4_Check,'Value',0)
+        
+        elseif source == h.Transverse_um_F4_Check            
+            set(h.Time_um_F4_Check,'Value',0)
+            set(h.Transverse_um_F4_Check,'Value',1)
+            set(h.Transversey_um_F4_Check,'Value',0)
+            
+        elseif source == h.Transversey_um_F4_Check            
+            set(h.Time_um_F4_Check,'Value',0)
+            set(h.Transverse_um_F4_Check,'Value',0)
+            set(h.Transversey_um_F4_Check,'Value',1)
+            
+        elseif source == h.Shift_t
+            if get(h.Shift_t,'value') == 1
+                set(h.Shift_t,'value', 1);
+            else
+                set(h.Shift_t,'value', 0);
+            end
+        elseif source == h.Shift_t2
+            if get(h.Shift_t2,'value') == 1
+                set(h.Shift_t2,'value', 1);
+            else
+                set(h.Shift_t2,'value', 0);
+            end
+        elseif source == h.Shift_x
+            if get(h.Shift_x,'value') == 1
+                set(h.Shift_x,'value', 1);
+            else
+                set(h.Shift_x,'value', 0);
+            end
+        elseif source == h.Shift_y
+            if get(h.Shift_y,'value') == 1
+                set(h.Shift_y,'value', 1);
+            else
+                set(h.Shift_y,'value', 0);
+            end
+        elseif source == h.Number_MultiGauss_3D_Beam
+            if get(h.Number_MultiGauss_3D_Beam,'Value') == 1
+                h.BX =1;
+            elseif get(h.Number_MultiGauss_3D_Beam,'Value') == 2
+                h.BX =2;
+            elseif get(h.Number_MultiGauss_3D_Beam,'Value') == 3
+                h.BX =3;
+            elseif get(h.Number_MultiGauss_3D_Beam,'Value') == 4
+                h.BX =4;
+            elseif get(h.Number_MultiGauss_3D_Beam,'Value') == 5
+                h.BX =5;
+            elseif get(h.Number_MultiGauss_3D_Beam,'Value') == 6
+                h.BX =6;
+            end
+            
+        elseif source == h.Time_um_3D_Check
+            if get(h.Time_um_3D_Check,'Value') ==1
+                set(h.Time_um_3D_Check,'Value',1)
+            else
+                set(h.Time_um_3D_Check,'Value',0)
+            end
+            
+        elseif source == h.Transverse_um_3D_Check
+            if get(h.Transverse_um_3D_Check,'Value') ==1
+                set(h.Transverse_um_3D_Check,'Value',1)
+            else
+                set(h.Transverse_um_3D_Check,'Value',0)
+            end
+            
+        elseif source == h.Transversey_um_3D_Check
+            if get(h.Transversey_um_3D_Check,'Value') ==1
+                set(h.Transversey_um_3D_Check,'Value',1)
+            else
+                set(h.Transversey_um_3D_Check,'Value',0)
+            end
+            
+        elseif source == h.Gaussian_Beam_1D_Check
+            set(h.Gaussian_Beam_1D_Check,'Value',1)
+            set(h.Gaussian_Beam_2D_Check,'Value',0)
+            set(h.Gaussian_Beam_3D_Check,'Value',0)
+            set(h.Nstep_x_Beam,'Enable','off')
+            set(h.Nstep_y_Beam,'Enable','off')
+            set(h.size_X_Beam,'Enable','off')
+            set(h.size_Y_Beam,'Enable','off')
+            
+            
+        elseif source == h.Gaussian_Beam_2D_Check
+            set(h.Gaussian_Beam_1D_Check,'Value',0)
+            set(h.Gaussian_Beam_2D_Check,'Value',1)
+            set(h.Gaussian_Beam_3D_Check,'Value',0)
+            set(h.size_X_Beam,'Enable','on')
+            set(h.size_Y_Beam,'Enable','off')
+            set(h.Nstep_x_Beam,'Enable','on')
+            set(h.Nstep_y_Beam,'Enable','off')
+            
+        elseif source == h.Gaussian_Beam_3D_Check
+            set(h.Gaussian_Beam_1D_Check,'Value',0)
+            set(h.Gaussian_Beam_2D_Check,'Value',0)
+            set(h.Gaussian_Beam_3D_Check,'Value',1)
+            set(h.size_X_Beam,'Enable','on')
+            set(h.size_Y_Beam,'Enable','on')
+            set(h.Nstep_x_Beam,'Enable','on')
+            set(h.Nstep_y_Beam,'Enable','on')
+            
+            
+        elseif source  == h.Mono_Beam_Check
+            if get(h.Mono_Beam_Check,'Value') == 1
+                set(h.Mono_Beam_Check,'Value',1)
+            else
+                set(h.Mono_Beam_Check,'Value',0)
+            end
+        end
+    end
+
+    function Beam_3D_plot_Fig(source,eventdata)
+        
+        if source == h.Load_Energy_point
+            
+            h.I_Fig_3D_Reflectivity2_Dynamical = figure(d+193);
+            set(h.I_Fig_3D_Reflectivity2_Dynamical,'Name','Dynamical reflectivity Beam',...
+                'NumberTitle', 'Off',...
+                'Toolbar','figure',...
+                'visible','off',...
+                'Units','normalized',...
+                'Position', [0.1 0.25 0.40 0.30],...
+                'Color',[0.8 0.8 0.8],...
+                'Menubar','figure',...
+                'KeyReleaseFcn',@Press);
+            
+            h.I_Fig_Beam_3D_Print = axes('Parent',h.I_Fig_3D_Reflectivity2_Dynamical, 'Units','normalized',...
+                'Position',[0.15 0.15 0.8 0.7],...
+                'box','on',...
+                'LineWidth',0.5,...
+                'fontsize',8,...
+                'box','on',...
+                'Color',[1 1 1],...
+                'FontName','Helvetica',...
+                'FontWeight','bold',...
+                'Xlim',[-1 1]);
+            title(' Real Space')
+            xlabel('Energy (eV)')
+            ylabel('Intensity (arb. units)')
+            grid('on');
+            set(h.Image_point,'Enable','on')
+            
+            Energy_array = h.Energy_array;
+            Image_point = eval(get(h.Image_point,'String'));
+            Energy_point =Energy_array(1,Image_point);
+            
+            set(h.Image_point,'String',Image_point)
+            set(h.Energy_point,'string',Energy_point);
+            
+            if get(h.Gaussian_Beam_1D_Check,'value') == 1
+                t_plot =get(h.Time_um_3D_Check,'Value');
+                x_plot =get(h.Transverse_um_3D_Check,'Value');
+                
+                
+            elseif get(h.Gaussian_Beam_2D_Check,'value') == 1
+                
+                x_array = h.x_array;
+                t_array = h.t_array;
+                
+                Gaussian_R_all = h.Gaussian_R_all;
+                Intensityx_array = h.Intensityx_array;
+                E_Scan_plot = h.E_Scan_plot;
+                kx_transvers_array = h.kx_transvers_array;
+                R_S_G_all = h.R_S_G_all;
+                R_S_all = h.R_S_all;
+                
+                R_S_2D = R_S_all(:,:,Image_point);
+                
+                R_S_G = R_S_G_all(:,:,Image_point);
+                Gaussian_R = Gaussian_R_all(:,:,Image_point);
+                
+                set(h.I_Fig_3D_Reflectivity2_Dynamical,'Visible','on')
+                axes(h.I_Fig_Beam_3D_Print)
+                
+                
+                if h.BX == 1
+                    surf(E_Scan_plot,kx_transvers_array,abs(R_S_G).^2,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                    view([20 20]);
+                    xlabel('Energy(eV)')
+                    ylabel('kx (1/m)')
+                    zlabel('Intensity (arb.units)')
+                    
+                elseif h.BX == 2
+                    surf(t_array,x_array,abs(Gaussian_R).^2,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                    xlabel('Time(s)')
+                    ylabel('Reflectivity (arb. units)')
+                    
+                    
+                elseif h.BX == 3
+                    surf(E_Scan_plot,kx_transvers_array,abs(R_S_2D).^2,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                    view([90 0]);
+                    xlabel('Energy(eV)')
+                    ylabel('kx (1/m)')
+                    zlabel('Intensity (arb.units)')
+                    
+                    
+                elseif h.BX ==4
+                    surf(x_array,Energy_array,Intensityx_array,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                    view([90 0]);
+                    zlabel('Intensity (arb units)')
+                    xlabel('Transverse displecement (m)')
+                    ylabel('Energy (eV)')
+                    
+                elseif h.BX ==5
+                    R_0H_S = h.R_0H_S;
+                    R_00_S = h.R_00_S;
+                    R_0H_S_Mono_all = h.R_0H_S_Mono_all;
+                    if h.FBD ==1
+                        plot(E_Scan_plot,abs(R_00_S).^2,'Parent',h.I_Fig_Beam_3D_Print,'Color','r')
+                    else
+                        plot(E_Scan_plot,abs(R_0H_S).^2,'Parent',h.I_Fig_Beam_3D_Print,'Color','r')
+                    end
+                    hold on
+                    size(R_0H_S_Mono_all,2)
+                    for i_mono = 1 :size(R_0H_S_Mono_all,1)
+                        plot(E_Scan_plot,abs(R_0H_S_Mono_all(i_mono,:)).^2,'Parent',h.I_Fig_Beam_3D_Print)
+                    end
+                    
+                    xlabel('Energy(eV)')
+                    ylabel('Intensity (arb.units)')
+                    hold off
+                    
+                elseif h.BX ==6
+                    plot(Energy_array,sum(Intensityx_array,2),'Parent',h.I_Fig_Beam_3D_Print,'LineStyle','-','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                    xlabel('Energy(eV)')
+                    ylabel('Intensity (arb.units)')
+                end
+                
+            elseif get(h.Gaussian_Beam_3D_Check,'value') == 1
+                x_array = h.x_array;
+                y_array = h.y_array;
+                t_array = h.t_array;
+                Energy_array = h.Energy_array;
+                Gaussian_R_all = h.Gaussian_R_all;
+                Intensityx_array = h.Intensityx_array;
+                E_Scan_plot = h.E_Scan_plot;
+                kx_transvers_array = h.kx_transvers_array;
+                ky_transvers_array = h.ky_transvers_array;
+                R_S_G_all = h.R_S_G_all;
+                FBD = h.FBD;
+                LaueD = h.LaueD;
+                R_S_all = h.R_S_all;
+                
+                Intensity_array = sum(Intensityx_array,2);
+                
+%                R_S_2D = R_S_all(:,:,:);
+%                R_S_G = R_S_G_all(:,:,:,Image_point);
+%                Gaussian_R = Gaussian_R_all(:,:,:,Image_point);
+                
+                y_plot = get(h.Transversey_um_3D_Check,'Value');
+                t_plot =get(h.Time_um_3D_Check,'Value');
+                x_plot =get(h.Transverse_um_3D_Check,'Value');
+                
+                if h.BX == 1
+                    axes(h.I_Fig_Beam_3D_Print)
+                    if t_plot == 1 && x_plot == 1
+                        R_S_G_sum(:,:) = sum(abs(R_S_G).^2,2);
+                        surf(E_Scan_plot,kx_transvers_array,R_S_G_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('Energy(eV)')
+                        ylabel('kx (1/m)')
+                    elseif t_plot == 1 && y_plot == 1
+                        R_S_G_sum(:,:) = sum(abs(R_S_G).^2,1);
+                        surf(E_Scan_plot,ky_transvers_array,R_S_G_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('Energy(eV)')
+                        ylabel('ky (1/m)')
+                    elseif (y_plot) == 1 && (x_plot == 1)
+                        R_S_G_sum(:,:) = sum(abs(R_S_G).^2,3);
+                        surf(kx_transvers_array,ky_transvers_array,R_S_G_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('kx (1/m)')
+                        ylabel('ky (1/m)')
+                    end
+                    view([20 20]);
+                    zlabel('Intensity (arb.units)')
+                    
+                elseif h.BX == 2
+                    axes(h.I_Fig_Beam_3D_Print)
+                    if t_plot == 1 && x_plot == 1
+                        Gaussian_R_sum(:,:) = sum(abs(Gaussian_R).^2,1);
+                        surf(t_array,x_array,Gaussian_R_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('Time(s)')
+                        ylabel('x (m)')
+                    elseif t_plot == 1 && y_plot == 1
+                        Gaussian_R_sum(:,:) = sum(abs(Gaussian_R).^2,2);
+                        surf(t_array,y_array,Gaussian_R_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('Time(s)')
+                        ylabel('y (m)')
+                    elseif x_plot == 1 && y_plot == 1
+                        Gaussian_R_sum(:,:) = sum(abs(Gaussian_R).^2,3);
+                        surf(x_array,y_array,Gaussian_R_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('x (m)')
+                        ylabel('y (m)')
+                    end
+                    zlabel('Intensity (arb. units)')
+                    
+                elseif h.BX == 3
+                    axes(h.I_Fig_Beam_3D_Print)
+                    if t_plot == 1 && x_plot == 1
+                        R_S_2D_sum(:,:) = sum(abs(R_S_2D).^2,1);
+                        surf(E_Scan_plot,kx_transvers_array,R_S_2D_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('Energy(eV)')
+                        ylabel('kx (1/m)')
+                    elseif t_plot == 1 && x_plot == 1
+                        R_S_2D_sum(:,:) = sum(abs(R_S_2D).^2,2);
+                        surf(E_Scan_plot,ky_transvers_array,R_S_2D_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('Energy(eV)')
+                        ylabel('ky (1/m)')
+                    elseif t_plot == 1 && x_plot == 1
+                        R_S_2D_sum(:,:) = sum(abs(R_S_2D).^2,3);
+                        surf(kx_transvers_array,ky_transvers_array,R_S_2D_sum,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                        xlabel('kx (1/m)')
+                        ylabel('ky (1/m)')
+                    end
+                    view([90 0]);
+                    zlabel('Intensity (arb.units)')
+                    
+                elseif h.BX ==4
+                    surf(x_array,Energy_array,Intensityx_array,'Parent',h.I_Fig_Beam_3D_Print,'edgecolor','none')
+                    view([90 0]);
+                    zlabel('Intensity (arb units)')
+                    xlabel('Transverse displecement (m)')
+                    ylabel('Energy (eV)')
+                    
+                    set(h.I_Fig_3D_Reflectivity2_Dynamical,'Visible','on')
+                    axes(h.I_Fig_Beam_3D_Print)
+                    
+                elseif h.BX ==5
+                    R_0H_S = h.R_0H_S;
+                    R_00_S = h.R_00_S;
+                    R_0H_S_Mono_all = h.R_0H_S_Mono_all;
+                    FBD = h.FBD;
+                    axes(h.I_Fig_Beam_3D_Print)
+                    if h.FBD ==1
+                        plot(E_Scan_plot,abs(R_00_S).^2,'Parent',h.I_Fig_Beam_3D_Print,'Color','r')
+                    else
+                        plot(E_Scan_plot,abs(R_0H_S).^2,'Parent',h.I_Fig_Beam_3D_Print,'Color','r')
+                    end
+                    hold on
+                    for i_mono = 1 :size(R_0H_S_Mono_all,1)
+                        plot(E_Scan_plot,abs(R_0H_S_Mono_all(i_mono,:)).^2,'Parent',h.I_Fig_Beam_3D_Print)
+                    end
+                    xlabel('Energy(eV)')
+                    ylabel('Intensity (arb.units)')
+                    hold off
+                    set(h.I_Fig_Beam_3D_Print,'Visible','on')
+                    
+                elseif h.BX ==6
+                    axes(h.I_Fig_Beam_3D_Print)
+                    plot(Energy_array,sum(Intensity_array,2),'Parent',h.I_Fig_Beam_3D_Print,'LineStyle','-','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                    ylabel('Intensity (arb units)')
+                    xlabel('Energy (eV)')
+                    
+                end
+                
+                
+            end
+        end
+    end
+
+    function Beam_3D_plot_Save(source,eventdata)
+        
+        if source == h.Save_Energy_point
+            
+            
+            Energy_array = h.Energy_array;
+            if get(h.Save_all,'Value') == 0
+                Image_point_array = eval(get(h.Image_point,'String'));
+            else
+                Image_point_array = linspace(1,eval(get(h.Image_point,'String')),eval(get(h.Image_point,'String')));
+                
+            end
+            
+            
+            directoryname_Images = get(h.directoryname_Images,'String');
+            if get(h.Mono_Beam_Check,'Value') == 1
+                h_Miller_Mono = eval(get(h.H_Mono ,'String'));
+                k_Miller_Mono = eval(get(h.K_Mono ,'String'));
+                l_Miller_Mono = eval(get(h.L_Mono ,'String'));
+                Mono = sprintf('Si%0.1d%0.1d%0.1d',h_Miller_Mono,k_Miller_Mono,l_Miller_Mono);
+            else
+                tsize = eval(get(h.size_T_Beam,'String'));
+                rho= eval(get(h.rhoparameter,'String'));
+                if get(h.Gaussian_Beam_SASE_Check,'value') == 1
+                    Mono = sprintf('SASE_rho%0.1d_T%0.1dfs',rho,tsize);
+                else
+                    Mono = sprintf('_rho%0.1d_T%0.1dfs',rho,tsize);
+                end
+                
+            end
+            
+            if h.FBD == 1
+                FBD = 'F';
+            else
+                FBD = '';
+            end
+            
+            if h.LaueD == 1
+                Bragg = 'LD';
+            else
+                Bragg ='BD';
+            end
+            
+            Thickness = eval(get(h.Thickness,'String'));
+            
+            if eval(get(h.Element,'String')) == 6
+                Element = 'C';
+            else
+                Element = 'Si';
+            end
+            
+            
+            
+            Energy_center =   sprintf('%0.1d',eval(get(h.Energy_input,'String')));
+            
+            h_Miller = eval(get(h.h_miller,'String'));
+            k_Miller = eval(get(h.k_miller,'String'));
+            l_Miller = eval(get(h.l_miller,'String'));
+            Miller = sprintf('%0.1d%0.1d%0.1d',h_Miller,k_Miller,l_Miller);
+            
+            if get(h.More_Crystal_Chk,'value') == 1
+                
+                pos_MCC = h.pos_MCC;
+                Element_MCC = h.Element_MCC;
+                h_MCC = h.h_MCC;
+                k_MCC = h.k_MCC;
+                l_MCC = h.l_MCC;
+                Thickness_MCC = h.Thickness_MCC;
+                Geometry_MCC = h.Geometry_MCC;
+                Transmission_MCC = h.Transmission_MCC;
+                Asy_MCC = h.Asymmetry_MCC;
+                Normal_MCC = h.Normal_MCC;
+                Polarization_MCC = h.polarization_MCC;
+                
+                if eval(get(h.info_number_crystal,'string'))== 1
+                    
+                    if Transmission_MCC(1,1) == 1
+                        FBD1 = 'F';
+                    else
+                        FBD1 = '';
+                    end
+                    
+                    if Geometry_MCC(1,1) == 0
+                        Bragg1 = 'LD';
+                    else
+                        Bragg1 ='BD';
+                    end
+                    
+                    if Normal_MCC(1,1)== 1
+                    Normal1 = '+';
+                    else
+                    Normal1 = '-';
+                    end
+                    
+                    if Polarization_MCC(1,1) ==1 
+                        Pola1 = 's';
+                    else
+                        Pola1= 'p';
+                    end
+                        
+                    
+                    anp1 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,1),Normal1,Pola1);
+                    
+                    Thickness1 = sprintf('%0.1d',Thickness_MCC(1,1));
+                    
+                    if Element_MCC(1,1) == 6
+                        Element1 = 'C';
+                    else
+                        Element1 = 'Si';
+                    end
+                    Miller1 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,1),k_MCC(1,1),l_MCC(1,1));
+                    
+                    Name_common = sprintf('Xtal%0.1d_%s%s_%s%s_%sum_%s_%seV_%s',pos_MCC(1,1),Element1,Miller1,FBD1,Bragg1,Thickness1,anp1,Energy_center,Mono);
+                    
+                elseif eval(get(h.info_number_crystal,'string'))== 2
+                    if Transmission_MCC(1,1) == 1
+                        FBD1 = 'F';                        
+                    else
+                        FBD1 = '';
+                    end
+                    
+                    if Transmission_MCC(1,2) == 1
+                        FBD2 = 'F';                        
+                    else
+                        FBD2 = '';
+                    end
+                    
+                    if Geometry_MCC(1,1) == 0
+                        Bragg1 = 'LD';
+                    else
+                        Bragg1 ='BD';
+                    end
+                    
+                    if Geometry_MCC(1,2) == 0
+                        Bragg2 = 'LD';
+                    else
+                        Bragg2 ='BD';
+                    end
+                    
+                    if Normal_MCC(1,1)== 1
+                    Normal1 = '+';
+                    else
+                    Normal1 = '-';
+                    end
+                    
+                    if Normal_MCC(1,2)== 1
+                    Normal2 = '+';
+                    else
+                    Normal2 = '-';
+                    end
+                    
+                    if Polarization_MCC(1,1) ==1 
+                        Pola1 = 's';
+                    else
+                        Pola1= 'p';
+                    end
+                        
+                    if Polarization_MCC(1,2) ==1 
+                        Pola2 = 's';
+                    else
+                        Pola2= 'p';
+                    end
+                    
+                    anp1 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,1),Normal1,Pola1);
+                    anp2 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,2),Normal2,Pola2);
+                    
+                    Thickness1 = sprintf('%0.1d',Thickness_MCC(1,1));
+                    Thickness2 = sprintf('%0.1d',Thickness_MCC(1,2));
+                    
+                    if Element_MCC(1,1) == 6
+                        Element1 = 'C';
+                    else
+                        Element1 = 'Si';
+                    end
+                    
+                    if Element_MCC(1,2) == 6
+                        Element2 = 'C';
+                    else
+                        Element2 = 'Si';
+                    end
+                    Miller1 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,1),k_MCC(1,1),l_MCC(1,1));
+                    Miller2 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,2),k_MCC(1,2),l_MCC(1,2));
+                    
+                    Name_common = sprintf('Xtal%0.1d_%s%s_%s%s_%sum_%s_Xtal%0.1d_%s%s_%s%s_%sum_%s_%seV_%s',pos_MCC(1,1),Element1,Miller1,FBD1,Bragg1,Thickness1,anp1,pos_MCC(1,2),Element2,Miller2,FBD2,Bragg2,Thickness2,anp2,Energy_center,Mono);
+                    
+                elseif eval(get(h.info_number_crystal,'string'))== 3
+                    if Transmission_MCC(1,1) == 1
+                        FBD1 = 'F';                        
+                    else
+                        FBD1 = '';
+                    end
+                    
+                    if Transmission_MCC(1,2) == 1
+                        FBD2 = 'F';                        
+                    else
+                        FBD2 = '';
+                    end
+                    
+                    if Transmission_MCC(1,3) == 1
+                        FBD3 = 'F';                        
+                    else
+                        FBD3 = '';
+                    end
+                    
+                    if Geometry_MCC(1,1) == 0
+                        Bragg1 = 'LD';
+                    else
+                        Bragg1 ='BD';
+                    end
+                    
+                    if Geometry_MCC(1,2) == 0
+                        Bragg2 = 'LD';
+                    else
+                        Bragg2 ='BD';
+                    end
+                    
+                    if Geometry_MCC(1,3) == 0
+                        Bragg3 = 'LD';
+                    else
+                        Bragg3 ='BD';
+                    end
+                    
+                    if Normal_MCC(1,1)== 1
+                    Normal1 = '+';
+                    else
+                    Normal1 = '-';
+                    end
+                    
+                    if Normal_MCC(1,2)== 1
+                    Normal2 = '+';
+                    else
+                    Normal2 = '-';
+                    end
+                    
+                    if Normal_MCC(1,3)== 1
+                    Normal3 = '+';
+                    else
+                    Normal3 = '-';
+                    end
+                    
+                    if Polarization_MCC(1,1) ==1 
+                        Pola1 = 's';
+                    else
+                        Pola1= 'p';
+                    end
+                        
+                    if Polarization_MCC(1,2) ==1 
+                        Pola2 = 's';
+                    else
+                        Pola2= 'p';
+                    end
+                    
+                    if Polarization_MCC(1,3) ==1 
+                        Pola3 = 's';
+                    else
+                        Pola3 = 'p';
+                    end
+                    
+                    anp1 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,1),Normal1,Pola1);
+                    anp2 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,2),Normal2,Pola2);
+                    anp3 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,3),Normal3,Pola3);
+                    
+                    Thickness1 = sprintf('%0.1d',Thickness_MCC(1,1));
+                    Thickness2 = sprintf('%0.1d',Thickness_MCC(1,2));                    
+                    Thickness3 = sprintf('%0.1d',Thickness_MCC(1,3));
+                    
+                    if Element_MCC(1,1) == 6
+                        Element1 = 'C';
+                    else
+                        Element1 = 'Si';
+                    end
+                    
+                    if Element_MCC(1,2) == 6
+                        Element2 = 'C';
+                    else
+                        Element2 = 'Si';
+                    end
+                    if Element_MCC(1,3) == 6
+                        Element3 = 'C';
+                    else
+                        Element3 = 'Si';
+                    end
+                    
+                    Miller1 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,1),k_MCC(1,1),l_MCC(1,1));
+                    Miller2 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,2),k_MCC(1,2),l_MCC(1,2));
+                    Miller3 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,3),k_MCC(1,3),l_MCC(1,3));
+                    
+                    Name_common = sprintf('Xtal%0.1d_%s%s_%s%s_%sum_%s_Xtal%0.1d_%s%s_%s%s_%sum_%s_Xtal%0.1d_%s%s_%s%s_%sum_%s_%seV_%s',pos_MCC(1,1),Element1,Miller1,FBD1,Bragg1,Thickness1,anp1,pos_MCC(1,2),Element2,Miller2,FBD2,Bragg2,Thickness2,anp2,pos_MCC(1,3),Element3,Miller3,FBD3,Bragg3,Thickness3,anp3,Energy_center,Mono);
+                    
+                elseif eval(get(h.info_number_crystal,'string'))== 4
+                    
+                    if Transmission_MCC(1,1) == 1
+                        FBD1 = 'F';                        
+                    else
+                        FBD1 = '';
+                    end
+                    
+                    if Transmission_MCC(1,2) == 1
+                        FBD2 = 'F';                        
+                    else
+                        FBD2 = '';
+                    end
+                    
+                    if Transmission_MCC(1,3) == 1
+                        FBD3 = 'F';                        
+                    else
+                        FBD3 = '';
+                    end
+                    
+                    if Transmission_MCC(1,4) == 1
+                        FBD4 = 'F';                        
+                    else
+                        FBD4 = '';
+                    end
+                    
+                    if Geometry_MCC(1,1) == 0
+                        Bragg1 = 'LD';
+                    else
+                        Bragg1 ='BD';
+                    end
+                    
+                    if Geometry_MCC(1,2) == 0
+                        Bragg2 = 'LD';
+                    else
+                        Bragg2 ='BD';
+                    end
+                    
+                    if Geometry_MCC(1,3) == 0
+                        Bragg3 = 'LD';
+                    else
+                        Bragg3 ='BD';
+                    end
+                    
+                    if Geometry_MCC(1,4) == 0
+                        Bragg4 = 'LD';
+                    else
+                        Bragg4 ='BD';
+                    end
+                    
+                    if Normal_MCC(1,1)== 1
+                    Normal1 = '+';
+                    else
+                    Normal1 = '-';
+                    end
+                    
+                    if Normal_MCC(1,2)== 1
+                    Normal2 = '+';
+                    else
+                    Normal2 = '-';
+                    end
+                    
+                    if Normal_MCC(1,3)== 1
+                    Normal3 = '+';
+                    else
+                    Normal3 = '-';
+                    end
+                    
+                    if Normal_MCC(1,4)== 1
+                    Normal4 = '+';
+                    else
+                    Normal4 = '-';
+                    end
+                    
+                    if Polarization_MCC(1,1) ==1 
+                        Pola1 = 's';
+                    else
+                        Pola1= 'p';
+                    end
+                        
+                    if Polarization_MCC(1,2) ==1 
+                        Pola2 = 's';
+                    else
+                        Pola2= 'p';
+                    end
+                    
+                    if Polarization_MCC(1,3) ==1 
+                        Pola3 = 's';
+                    else
+                        Pola3 = 'p';
+                    end
+                    
+                    if Polarization_MCC(1,4) ==1 
+                        Pola4 = 's';
+                    else
+                        Pola4 = 'p';
+                    end
+                    
+                    anp1 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,1),Normal1,Pola1);
+                    anp2 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,2),Normal2,Pola2);
+                    anp3 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,3),Normal3,Pola3);
+                    anp4 = sprintf('asy_%0.1ddeg_nor%s_pol_%s',Asy_MCC(1,4),Normal4,Pola4);
+                    
+                    
+                    Thickness1 = sprintf('%0.1d',Thickness_MCC(1,1));
+                    Thickness2 = sprintf('%0.1d',Thickness_MCC(1,2));                    
+                    Thickness3 = sprintf('%0.1d',Thickness_MCC(1,3));
+                    Thickness4 = sprintf('%0.1d',Thickness_MCC(1,4));
+                    
+                    if Element_MCC(1,1) == 6
+                        Element1 = 'C';
+                    else
+                        Element1 = 'Si';
+                    end
+                    
+                    if Element_MCC(1,2) == 6
+                        Element2 = 'C';
+                    else
+                        Element2 = 'Si';
+                    end
+                    
+                    if Element_MCC(1,3) == 6
+                        Element3 = 'C';
+                    else
+                        Element3 = 'Si';
+                    end
+                    
+                    if Element_MCC(1,4) == 6
+                        Element4 = 'C';
+                    else
+                        Element4 = 'Si';
+                    end
+                    
+                    Miller1 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,1),k_MCC(1,1),l_MCC(1,1));
+                    Miller2 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,2),k_MCC(1,2),l_MCC(1,2));
+                    Miller3 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,3),k_MCC(1,3),l_MCC(1,3));
+                    Miller4 = sprintf('%0.1d%0.1d%0.1d',h_MCC(1,4),k_MCC(1,4),l_MCC(1,4));
+                    
+                    Name_common = sprintf('Xtal%0.1d_%s%s_%s%s_%sum_%s_Xtal%0.1d_%s%s_%s%s_%sum_%s_Xtal%0.1d_%s%s_%s%s_%sum_%s_Xtal%0.1d_%s%s_%s%s_%sum_%s_%seV_%s',pos_MCC(1,1),Element1,Miller1,FBD1,Bragg1,Thickness1,anp1,pos_MCC(1,2),Element2,Miller2,FBD2,Bragg2,Thickness2,anp2,pos_MCC(1,3),Element3,Miller3,FBD3,Bragg3,Thickness3,anp3,pos_MCC(1,4),Element4,Miller4,FBD4,Bragg4,Thickness4,anp4,Energy_center,Mono);
+                    
+                elseif eval(get(h.info_number_crystal,'string'))== 5
+                    Name_common = sprintf('To write');
+                    
+                elseif eval(get(h.info_number_crystal,'string'))== 6
+                    Name_common = sprintf('To write');
+                    
+                elseif eval(get(h.info_number_crystal,'string'))== 7
+                    Name_common = sprintf('To write');
+                    
+                elseif eval(get(h.info_number_crystal,'string'))== 8
+                    Name_common = sprintf('To write');
+                    
+                end                                   
+                
+                
+            else
+                Name_common = sprintf('%s%s%s%s_%seV_%0.1dum_%s',Element,Miller,FBD,Bragg,Energy_center,Thickness,Mono);
+            end
+            
+            
+            if get(h.Gaussian_Beam_1D_Check,'value') == 1
+                t_plot =get(h.Time_um_3D_Check,'Value');
+                x_plot =get(h.Transverse_um_3D_Check,'Value');
+                
+                
+            elseif get(h.Gaussian_Beam_2D_Check,'value') == 1
+                
+                xsize_I = eval(get(h.size_X_Beam,'String'));
+                if xsize_I - floor(xsize_I) == 0
+                    Name_File = sprintf('%s_%0.1dum',Name_common,xsize_I);
+                else
+                    xsize = xsize_I;
+                    xsize1 = num2str (xsize_I);
+                    for i_xsize = 1:size(xsize1,2)
+                        if xsize1(1,i_xsize) == '.'
+                            xsize1(1,i_xsize) = 'd';
+                        else
+                            xsize1(1,i_xsize) = xsize1(1,i_xsize);
+                        end
+                    end
+                    
+                    Name_File = sprintf('%s_%sum',Name_common,xsize1);
+                end
+                
+                x_array = h.x_array;
+                t_array = h.t_array;
+                
+                Gaussian_R_all = h.Gaussian_R_all;
+                Intensityx_array = h.Intensityx_array;
+                E_Scan_plot = h.E_Scan_plot;
+                kx_transvers_array = h.kx_transvers_array;
+                R_S_G_all = h.R_S_G_all;
+                R_S_all = h.R_S_all;
+                
+                if h.BX == 1 ||h.BX == 2 ||h.BX == 3
+                
+                    for i_Image_point = 1:size(Image_point_array,2)
+                        Image_point = Image_point_array(1,i_Image_point);
+                        
+                        Energy_point =Energy_array(1,Image_point);
+                        
+                        set(h.Image_point,'String',Image_point)
+                        set(h.Energy_point,'string',Energy_point);
+                        R_S_2D = R_S_all(:,:,Image_point);
+                        
+                        R_S_G = R_S_G_all(:,:,Image_point);
+                        Gaussian_R = Gaussian_R_all(:,:,Image_point);
+                        
+                        if h.BX == 1
+                            Name_Filep = sprintf('%s_f1_xt_I%0.4d.mat',Name_File,Image_point);
+                            filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+                            
+                            save(filename_Output,'E_Scan_plot','kx_transvers_array','R_S_G');
+                            
+                        elseif h.BX == 2
+                            
+                            Name_Filep = sprintf('%s_f2_xt_I%0.4d.mat',Name_File,Image_point);
+                            filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+                            
+                            save(filename_Output,'t_array','x_array','Gaussian_R');
+                            
+                        elseif h.BX == 3
+                            Name_Filep = sprintf('%s_f3_xt_I%0.4d.mat',Name_File,Image_point);
+                            filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+                            
+                            save(filename_Output,'E_Scan_plot','kx_transvers_array','R_S_2D');
+                        end
+                    end
+                else
+                    if h.BX ==4
+                        Name_File = sprintf('%s_f4.mat',Name_File);
+                        filename_Output = sprintf('%s/%s',directoryname_Images,Name_File);
+                        
+                        save(filename_Output,'x_array','Energy_array','Intensityx_array');
+                        
+                        
+                    elseif h.BX ==5
+                        Name_File = sprintf('%s_f5.mat',Name_File);
+                        filename_Output = sprintf('%s/%s',directoryname_Images,Name_File);
+                        R_0H_S = h.R_0H_S;
+                        R_00_S = h.R_00_S;
+                        R_0H_S_Mono_all = h.R_0H_S_Mono_all;
+                        save(filename_Output,'E_Scan_plot','R_00_S','R_0H_S','R_0H_S_Mono_all');
+       
+                        
+                    elseif h.BX ==6
+                        Name_File = sprintf('%s_f6.mat',Name_File);
+                        filename_Output = sprintf('%s/%s',directoryname_Images,Name_File);
+                        Intensityx_sum_array = sum(Intensityx_array,2);
+                        save(filename_Output,'Energy_array','Intensityx_sum_array');
+                        
+                    end
+            end
+                
+            elseif get(h.Gaussian_Beam_3D_Check,'value') == 1
+                xsize_I = eval(get(h.size_X_Beam,'String'));
+                if xsize_I - floor(xsize_I) == 0
+                    Name_Filex = sprintf('%s_%0.1d',Name_common,xsize_I);
+                else
+                    xsize1 = num2str (xsize_I);
+                    for i_xsize = 1:size(xsize1,2)
+                        if xsize1(1,i_xsize) == '.'
+                            xsize1(1,i_xsize) = 'd';
+                        else
+                            xsize1(1,i_xsize) = xsize1(1,i_xsize);
+                        end
+                    end
+                    
+                    Name_Filex = sprintf('%s_%s',Name_common,xsize1);
+                end
+                
+                ysize = eval(get(h.size_Y_Beam,'String'));
+                if ysize - floor(ysize) == 0
+                    Name_File = sprintf('%sx%0.1dum',Name_Filex,ysize);
+                else
+                    ysize1 = num2str (ysize);
+                    for i_xsize = 1:size(ysize1,2)
+                        if ysize1(1,i_xsize) == '.'
+                            ysize1(1,i_xsize) = 'd';
+                        else
+                            ysize1(1,i_xsize) = ysize1(1,i_xsize);
+                        end
+                    end
+                    
+                    Name_File = sprintf('%sx%sum',Name_commonx,ysize1);
+                end
+                
+
+                plot_array =h.plot_array;
+                x_array = h.x_array;
+                y_array = h.y_array;
+                t_array = h.t_array;
+                Energy_array = h.Energy_array;                
+                Intensityx_array = h.Intensityx_array;
+                E_Scan_plot = h.E_Scan_plot;
+                kx_transvers_array = h.kx_transvers_array;
+                ky_transvers_array = h.ky_transvers_array;                
+                FBD = h.FBD;
+                LaueD = h.LaueD;
+                
+                
+                Intensity_array = sum(Intensityx_array,2);
+                save_folder_intermediate = h.save_folder_intermediate;
+
+                y_plot = get(h.Transversey_um_3D_Check,'Value');
+                t_plot =get(h.Time_um_3D_Check,'Value');
+                x_plot =get(h.Transverse_um_3D_Check,'Value');
+                
+                if h.BX == 1 || h.BX ==2 || h.BX ==3 || h.BX == 5
+                    
+                for i_Image_point = 1:size(Image_point_array,2)
+                    if get(h.More_Crystal_Chk,'value')== 0
+                        Image_point = Image_point_array(1,i_Image_point);
+                        
+                        
+                        Energy_point = Energy_array(1,Image_point);
+                    else
+                        Image_point = 1;% Image_point_array(1,i_Image_point);
+                        
+                        Energy_point = 9830;%Energy_array(1,Image_point);
+                    end
+                    set(h.Image_point,'String',Image_point)
+                    set(h.Energy_point,'string',Energy_point);
+
+                    
+                    if h.BX == 1
+                        if t_plot == 1 && x_plot == 1
+                            if get(h.Channel_Save_XT_Check,'value')      
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep); 
+                                Save_file = load(filename_input);
+                                R_S_G_sum = Save_file.R_S_G_XT_ave;
+                                
+                                Name_Filep = sprintf('%s_f1_xt_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                                
+                                save(filename_Output,'E_Scan_plot','kx_transvers_array','R_S_G_sum');
+                                
+                                
+                            end
+                            
+                        elseif t_plot == 1 && y_plot == 1  
+                            if get(h.Channel_Save_YT_Check,'value')      
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep); 
+                                Save_file = load(filename_input);
+                                
+                                R_S_G_sum = Save_file.R_S_G_YT_ave;
+                                Name_Filep = sprintf('%s_f1_yt_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+                                
+                                
+                                save(filename_Output,'E_Scan_plot','ky_transvers_array','R_S_G_sum');
+                            end
+                            
+                        elseif (y_plot) == 1 && (x_plot == 1)
+                            if get(h.Channel_Save_XY_Check,'value') 
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                Save_file = load(filename_input);
+                                
+                                R_S_G_sum = Save_file.R_S_G_XY_ave;
+                                Name_Filep = sprintf('%s_f1_xy_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+                                
+                                
+                                save(filename_Output,'kx_transvers_array','ky_transvers_array','R_S_G_sum');
+                            end
+                        end
+                        
+                    elseif h.BX == 2
+                        if t_plot == 1 && x_plot == 1
+                            if get(h.Channel_Save_XT_Check,'value') 
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                
+                                Save_file = load(filename_input);
+                                Gaussian_R_sum = Save_file.Gaussian_R_XT_ave;
+                                Name_Filep = sprintf('%s_f2_xt_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+                                save(filename_Output,'t_array','x_array','Gaussian_R_sum');
+                                
+                                if get(h.Channel_Save_average_Check,'value') == 1                                    
+                                    for i_repetition =1:eval(get(h.Repetition_ave,'String'))
+                                        Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_Image_point,Channel_rep,i_repetition);
+                                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                        Save_file = load(filename_input);
+                                        %G_monoR_S_G_XTGaussian_R_XT
+                                        Gaussian_R_sum = Save_file.Gaussian_R_XT;
+                                        Name_Filep = sprintf('%s_f2_xt_Apoint_%0.1d_I%0.4d.mat',Name_File,i_repetition,Image_point);
+                                        filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                                
+                                        save(filename_Output,'t_array','x_array','Gaussian_R_sum'); 
+                                    end
+                                end
+                            end
+                        elseif t_plot == 1 && y_plot == 1
+                            if get(h.Channel_Save_YT_Check,'value') 
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                Save_file = load(filename_input);
+                                
+                                Gaussian_R_sum = Save_file.Gaussian_R_YT_ave;
+                                Name_Filep = sprintf('%s_f2_yt_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                                
+                                
+                                save(filename_Output,'t_array','y_array','Gaussian_R_sum');
+                                if get(h.Channel_Save_average_Check,'value') == 1                                    
+                                    for i_repetition =1:eval(get(h.Repetition_ave,'String'))
+                                        Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_Image_point,Channel_rep,i_repetition);
+                                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                        Save_file = load(filename_input);
+                                        %G_monoR_S_G_XTGaussian_R_XT
+                                        Gaussian_R_sum = Save_file.Gaussian_R_YT;
+                                        Name_Filep = sprintf('%s_f2_yt_Apoint_%0.1d_I%0.4d.mat',Name_File,i_repetition,Image_point);
+                                        filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                                
+                                        save(filename_Output,'t_array','x_array','Gaussian_R_sum'); 
+                                    end
+                                end
+                            end
+                            
+                        elseif x_plot == 1 && y_plot == 1
+                            if get(h.Channel_Save_XY_Check,'value')
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                Save_file = load(filename_input);
+                                
+                                Gaussian_R_sum = Save_file.Gaussian_R_XY_ave;
+                                Name_Filep = sprintf('%s_f2_xy_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                               
+                                
+                                save(filename_Output,'x_array','y_array','Gaussian_R_sum');
+                                if get(h.Channel_Save_average_Check,'value') == 1                                    
+                                    for i_repetition =1:eval(get(h.Repetition_ave,'String'))
+                                        Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_Image_point,Channel_rep,i_repetition);
+                                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                        Save_file = load(filename_input);
+                                        %G_monoR_S_G_XTGaussian_R_XT
+                                        Gaussian_R_sum = Save_file.Gaussian_R_XY;
+                                        Name_Filep = sprintf('%s_f2_xy_Apoint_%0.1d_I%0.4d.mat',Name_File,i_repetition,Image_point);
+                                        filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                                
+                                        save(filename_Output,'t_array','x_array','Gaussian_R_sum'); 
+                                    end
+                                end
+                            end
+                            
+                        end
+                        
+                    elseif h.BX == 3
+                        if t_plot == 1 && x_plot == 1
+                            if get(h.Channel_Save_XT_Check,'value')                                
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                Save_file = load(filename_input);
+                                
+                                R_S_2D_sum(:,:) = Save_file.G_mono_ave;
+                                
+                                Name_Filep = sprintf('%s_f3_xt_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+                                
+                                save(filename_Output,'E_Scan_plot','kx_transvers_array','R_S_2D_sum');
+                            end
+                            
+                        elseif t_plot == 1 && x_plot == 1
+                            if get(h.Channel_Save_YT_Check,'value')                                
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                Save_file = load(filename_input);
+                                
+                                R_S_2D_sum(:,:) = Save_file.G_mono_ave;
+                                Name_Filep = sprintf('%s_f3_yt_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                               
+                                
+                                save(filename_Output,'E_Scan_plot','ky_transvers_array','R_S_2D_sum');
+                            end
+                            
+                        elseif t_plot == 1 && x_plot == 1
+                            if get(h.Channel_Save_XY_Check,'value')                                
+                                Channel_rep = eval(get(h.Repetition_channel,'String'));
+                                Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                Save_file = load(filename_input);
+                                
+                                R_S_2D_sum(:,:) = Save_file.G_mono_ave;
+                                Name_Filep = sprintf('%s_f3_xy_I%0.4d.mat',Name_File,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);
+
+                                save(filename_Output,'kx_transvers_array','ky_transvers_array','R_S_2D_sum');
+                            end
+                        end
+                    elseif h.BX == 5
+                        
+                        Channel_rep = eval(get(h.Repetition_channel,'String'));
+                        Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_average.mat',i_Image_point,Channel_rep);
+                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep); 
+                        Save_file = load(filename_input);
+                        G_mono = Save_file.G_mono_ave;
+                        
+                       % figure                           
+                       % hold on
+                        
+                        if get(h.Channel_Save_average_Check,'value') == 1     
+                         
+                            for i_repetition =1:eval(get(h.Repetition_ave,'String'))
+                                Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_Image_point,Channel_rep,i_repetition);
+                                filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                                Save_file = load(filename_input);
+                                %G_monoR_S_G_XTGaussian_R_XT
+                                G_mono = Save_file.G_mono;
+                                
+                              %  plot(E_Scan_plot,abs(G_mono).^2)
+                                
+                                Name_Filep = sprintf('%s_f5_RE_Apoint_%0.1d_I%0.4d.mat',Name_File,i_repetition,Image_point);
+                                filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                                
+                                save(filename_Output,'E_Scan_plot','G_mono'); 
+                            end
+                        end
+                        
+                        %plot(E_Scan_plot,abs(G_mono).^2,'color','k')
+                        
+                        Name_Filep = sprintf('%s_f5_RE_I%0.4d.mat',Name_File,Image_point);
+                        filename_Output = sprintf('%s/%s',directoryname_Images,Name_Filep);                                
+                        save(filename_Output,'E_Scan_plot','G_mono');                              
+                        
+                    end
+                end
+                else
+                
+                if h.BX ==4
+                    Name_File = sprintf('%s_f4.mat',Name_File);
+                    filename_Output = sprintf('%s/%s',directoryname_Images,Name_File);
+                    
+                    save(filename_Output,'plot_array','Energy_array','Intensityx_array');
+                    
+                elseif h.BX ==5
+                    R_0H_S = h.R_0H_S;
+                    R_00_S = h.R_00_S;
+                    R_0H_S_Mono_all = h.R_0H_S_Mono_all;
+                    
+                    Name_File = sprintf('%s_f5.mat',Name_File);
+                    filename_Output = sprintf('%s/%s',directoryname_Images,Name_File);
+                    
+                    save(filename_Output,'E_Scan_plot','R_00_S','R_0H_S','R_0H_S_Mono_all');
+                    
+                    
+                    
+                    
+                    
+                elseif h.BX ==6
+                    Name_File = sprintf('%s_f6.mat',Name_File);
+                    filename_Output = sprintf('%s/%s',directoryname_Images,Name_File);
+                    Intensity_array_save = sum(Intensity_array,2);
+                    save(filename_Output,'Energy_array','Intensity_array_save');
+                    
+                end
+                end
+            end
+            
+        end
+    end
+
+    function Beam_3D_Reflectivity(source,eventdata)
+        
+        h.x_array  = [];
+        x_array = [];
+        h.y_array  = [];
+        y_array = [];
+        h.t_array  = [];
+        t_array = [];
+        
+        h.Energy_array  = [];
+        Energy_array = [];
+        h.Gaussian_R_all  = [];
+        Gaussian_R_all = [];
+        h.Intensityx_array  = [];
+        Intensityx_array = [];
+        h.E_Scan_plot  = [];
+        E_Scan_plot = [];
+        h.kx_transvers_array  = [];
+        kx_transvers_array = [];
+        h.ky_transvers_array  = [];
+        ky_transvers_array = [];
+        h.R_S_G_all  = [];
+        R_S_G_all = [];
+        h.FBD  = [];
+        
+        h.LaueD  = [];
+        LaueD = [];
+        h.R_S_all  = [];
+        R_S_all = [];
+        
+        R_0H_S_Mono_all  = [];
+        h.R_0H_S_Mono_all = [];
+        
+        child = get(h.I_Fig_Beam_3D_F1,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        
+        child = get(h.I_Fig_Beam_3D_F5,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F6,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        
+        child = get(h.I_Fig_Beam_3D_F2,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F4,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F3,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F1_GK,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F1_T,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+
+        
+        
+        c_light= 299792458; %Light Speed m/s
+        h_planck = 4.13566733*10^(-15);% eV
+        
+        Thickness = eval(get(h.Thickness,'String'));
+        Z = eval(get(h.Element,'String'));
+        crystal_orientation = get(h.crystal_orientation,'value');
+        
+        
+        
+        
+        Energy_center = eval(get(h.Energy_input,'String'));
+        
+        h_Miller = eval(get(h.h_miller,'String'));
+        k_Miller = eval(get(h.k_miller,'String'));
+        l_Miller = eval(get(h.l_miller,'String'));
+        vector_Miller = [h_Miller k_Miller l_Miller];
+        
+        DWF = eval(get(h.DWF,'String'));
+        
+        Range_E_neg = (-1)*eval(get(h.Range_Left,'String'));
+        Range_E_pos = eval(get(h.Range_Right,'String'));
+        
+        Ang_asy_Deg = eval(get(h.Asymmetry,'String'));
+        
+        N_Step = eval(get(h.Nstep_t_Beam,'String'));
+        
+        if get(h.Polarization_s ,'value') == 1
+            Polarization = 's';
+        else
+            Polarization = 'p';
+        end
+        absor = get(h.Absorption,'Value');
+        
+        if get(h.More_Crystal_Chk,'value') == 1
+            pos_MCC = h.pos_MCC;            
+            Element_MCC = h.Element_MCC;
+            h_MCC = h.h_MCC;
+            k_MCC = h.k_MCC;
+            l_MCC = h.l_MCC;
+            Thickness_MCC = h.Thickness_MCC;
+            Geometry_MCC = h.Geometry_MCC;
+            Transmission_MCC = h.Transmission_MCC;
+            Asymmetry_MCC =h.Asymmetry_MCC;
+            Normal_MCC = h.Normal_MCC;
+            polarization_MCC = h.polarization_MCC ;           
+            Energy_MCC = h.name_Energy;
+            Beam_MCC = h.name_Beam;   
+            
+            i_cryst_show = eval(get(h.crystal_show,'string'));
+            
+            
+            for i_cryst = 1:size(pos_MCC,2)
+                Z = Element_MCC(1,i_cryst);
+                vector_Miller = [h_MCC(1,i_cryst), k_MCC(1,i_cryst),l_MCC(1,i_cryst)];
+                [f_0_i,f_1_i,f_2_i,a_Par_i,b_Par_i,c_Par_i] = Element_Bragg_temp_Gui_08022017(Z,vector_Miller,Energy_center);
+                f_0(1,i_cryst) = f_0_i;
+                f_1(1,i_cryst) = f_1_i;
+                f_2(1,i_cryst) = f_2_i;
+                a_Par(1,i_cryst) = a_Par_i;
+                b_Par(1,i_cryst) = b_Par_i;
+                c_Par(1,i_cryst) = c_Par_i;
+            end
+            
+        else
+          [f_0,f_1,f_2,a_Par,b_Par,c_Par] = Element_Bragg_temp_Gui_08022017(Z,vector_Miller,Energy_center); 
+          i_cryst = 1;
+        end
+        
+        
+        set(h.f0,'String',f_0(1,i_cryst))
+        set(h.f1,'String',f_1(1,i_cryst))
+        set(h.f2,'String',f_2(1,i_cryst))
+
+        if get(h.CParameter_Check,'Value') == 1
+            a_Par = eval(get(h.a_parameter,'String'));
+            b_Par = eval(get(h.b_parameter,'String'));
+            c_Par = eval(get(h.c_parameter,'String'));      
+        end
+        set(h.a_parameter,'String',a_Par(1,i_cryst))
+        set(h.b_parameter,'String',b_Par(1,i_cryst))
+        set(h.c_parameter,'String',c_Par(1,i_cryst))
+        
+        if get(h.More_Crystal_Chk,'value') == 1
+            if Geometry_MCC(1,i_cryst_show) ==1 
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_S,E_Scan,t_array,k_array] = Bragg_temp_Gui_test(Z(1,i_cryst_show),a_Par(1,i_cryst_show),b_Par(1,i_cryst_show),c_Par(1,i_cryst_show),Energy_center,Energy_center,h_MCC(1,i_cryst_show),k_MCC(1,i_cryst_show),l_MCC(1,i_cryst_show),DWF,f_0(1,i_cryst_show),f_1(1,i_cryst_show),f_2(1,i_cryst_show),absor,Range_E_neg,Range_E_pos,polarization_MCC(1,i_cryst_show),Asymmetry_MCC(1,i_cryst_show),Thickness_MCC(1,i_cryst_show),N_Step,Transmission_MCC(1,i_cryst_show),Normal_MCC(1,i_cryst_show));
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                FBD = get(h.Bragg_FBD_Check,'Value');
+                
+            else
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_S,E_Scan,t_array,k_array] = Laue_temp_Gui_test(Z(1,i_cryst_show),a_Par(1,i_cryst_show),b_Par(1,i_cryst_show),c_Par(1,i_cryst_show),Energy_center,Energy_center,h_MCC(1,i_cryst_show),k_MCC(1,i_cryst_show),l_MCC(1,i_cryst_show),DWF,f_0(1,i_cryst_show),f_1(1,i_cryst_show),f_2(1,i_cryst_show),absor,Range_E_neg,Range_E_pos,polarization_MCC(1,i_cryst_show),Asymmetry_MCC(1,i_cryst_show),Thickness_MCC(1,i_cryst_show),N_Step,Transmission_MCC(1,i_cryst_show),Normal_MCC(1,i_cryst_show));
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                FBD = get(h.Laue_FBD_Check,'Value');
+            end
+        else
+            
+            if get(h.Bragg_Check,'Value') ==1 ||  get(h.Bragg_FBD_Check,'Value') == 1
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_S,E_Scan,t_array,k_array] = Bragg_temp_Gui_test(Z(1,1),a_Par(1,1),b_Par(1,1),c_Par(1,1),Energy_center,Energy_center,h_Miller(1,1),k_Miller(1,1),l_Miller(1,1),DWF,f_0(1,1),f_1(1,1),f_2(1,1),absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,get(h.Bragg_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                FBD = get(h.Bragg_FBD_Check,'Value');
+                
+            elseif get(h.Laue_FBD_Check,'Value')  == 1 || get(h.Laue_Check,'Value') == 1
+                [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_S,E_Scan,t_array,k_array] = Laue_temp_Gui_test(Z(1,1),a_Par(1,1),b_Par(1,1),c_Par(1,1),Energy_center,Energy_center,h_Miller(1,1),k_Miller(1,1),l_Miller(1,1),DWF,f_0(1,1),f_1(1,1),f_2(1,1),absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,get(h.Laue_FBD_Check,'Value'),crystal_orientation);
+                set(h.Chi_0,'String',Chi_0_Cx)
+                set(h.Chi_h,'String',Chi_h_Cx)
+                set(h.Theta_view,'String',Theta_Bragg*180/pi)
+                FBD = get(h.Laue_FBD_Check,'Value');
+                
+            end
+        end
+        E_Scan_plot = E_Scan-Energy_center;
+        
+        h.R_S = R_S;
+        
+        if  source == h.Beam_simulation
+            set (h.Status_Dynamical_3D,'String','Status: working','BackgroundColor',[0.5 0.5 0.5])
+            
+            if get(h.Mono_Scan_Check,'value') == 0
+                number_Steps = 0;
+                Step_Range = 0;
+                Range_Mono_neg = 0;
+            else
+                number_Steps = eval(get(h.Steps_Mono,'String'));
+                
+                Range_Mono_pos = eval(get(h.Range_pos_Mono,'String'));
+                Range_Mono_neg = -eval(get(h.Range_neg_Mono,'String'));                
+                Step_Range = (Range_Mono_pos+Range_Mono_neg)/number_Steps;
+                if number_Steps == 1
+                    number_Steps = 0;                
+                end
+
+            end
+            
+            Energy_array= zeros(1,number_Steps);
+            Intensity_array = zeros(1,number_Steps);
+            
+            
+            
+            if  get(h.Gaussian_Beam_1D_Check,'Value') == 1
+                axes(h.I_Fig_Beam_3D_F5)
+                plot(E_Scan_plot,abs(R_S).^2,'Parent',h.I_Fig_Beam_3D_F5,'Color','r')
+                
+                hold on
+                
+            elseif get(h.Gaussian_Beam_2D_Check,'Value') == 1
+                %Definition of x
+                N_Step_x = eval(get(h.Nstep_x_Beam,'String'));
+                initial_range_x = eval(get(h.initial_range_x,'String'));
+                sigma_x = eval(get(h.size_X_Beam,'String'))*1e-6; %um
+                x_array = linspace(-initial_range_x/2,initial_range_x/2,N_Step_x)*1e-6;
+                
+                if get(h.Lorenztian_Distribution,'Value') == 1
+                    sigma_x = sigma_x/2;
+                    Gaussian_x = 1e-3/(pi*sigma_x)./(1+((x_array)/sigma_x).^2)./100;
+                else
+                    sigma_x = sigma_x/2.355;
+                    Gaussian_x = 1*exp(-((x_array)/sigma_x).^2./2);
+                end
+                % axes(h.I_Fig_Beam_3D_F6)
+                %                 figure
+                %                 plot(x_array,Gaussian_x)
+                
+                
+                % What is the realtion kx x?
+                dx = x_array(1,1)-x_array(1,2);
+                dkx = 2*pi/(N_Step_x*dx);
+                kx_transvers_array = dkx *linspace(1,N_Step_x,N_Step_x) ;
+                
+                
+                Gaussian_kx = fftshift(fft(Gaussian_x));
+                
+                %                 pause(0.1)
+                %                 figure
+                %                 plot(kx_transvers_array,Gaussian_kx)
+                %Calculate the Green function using Kx and K
+                if get(h.Bragg_Check,'Value') ==1 || get(h.Bragg_FBD_Check,'Value') == 1
+                    [R_S_2D] = Bragg_temp_Gui_2D_test(Z,a_Par,b_Par,c_Par,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,FBD,kx_transvers_array,crystal_orientation);
+                    LaueD = 0;
+                    
+                elseif get(h.Laue_Check,'Value') ==1 || get(h.Laue_FBD_Check,'Value') == 1
+                    [R_S_2D] = Laue_temp_Gui_2D_test(Z,a_Par,b_Par,c_Par,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,FBD,kx_transvers_array,crystal_orientation);
+                    LaueD = 1;
+                    
+                end
+                
+                axes(h.I_Fig_Beam_3D_F5)
+                hold on
+                R_S_3D_plot(1,:) = sum(abs(R_S_2D),1);
+                
+                plot(E_Scan_plot,R_S_3D_plot,'Parent',h.I_Fig_Beam_3D_F5)
+                hold on
+                R_S_3D_plot = [];
+                
+            elseif get(h.Gaussian_Beam_3D_Check,'Value') == 1
+                N_Step_x = eval(get(h.Nstep_x_Beam,'String'));
+                N_Step_y = eval(get(h.Nstep_y_Beam,'String'));
+                
+                initial_range_x = eval(get(h.initial_range_x,'String'));
+                initial_range_y = eval(get(h.initial_range_y,'String'));
+                
+                %Definition of x
+                sigma_x = eval(get(h.size_X_Beam,'String'))*1e-6; %um
+                x_array = linspace(-initial_range_x/2,initial_range_x/2,N_Step_x)*1e-6;
+                
+                if get(h.Lorenztian_Distribution,'Value') == 1
+                    sigma_x = sigma_x/2;
+                    Gaussian_x = 1e-3/(pi*sigma_x)./(1+((x_array)/sigma_x).^2)/100;
+                else
+                    sigma_x = sigma_x/2.355;
+                    Gaussian_x = 1*exp(-((x_array)/sigma_x).^2./2);
+                end
+                
+%                                  figure
+%                                  plot(x_array,Gaussian_x)
+%                                  pause(1)
+                %
+                %Definition of y
+                sigma_y = eval(get(h.size_Y_Beam,'String'))*1e-6; %um
+                y_array = linspace(-initial_range_y/2,initial_range_y/2,N_Step_y)*1e-6;
+                if get(h.Lorenztian_Distribution,'Value') == 1
+                    Gaussian_y = 1e-3/(pi*sigma_y)./(1+((y_array)/sigma_y).^2)/100;
+                else
+                    Gaussian_y = 1*exp(-((y_array)/sigma_y).^2./2);
+                end
+                
+%                                  hold on
+%                                  plot(y_array,Gaussian_y)
+%                                  pause(1)
+                                 
+                
+                % What is the realtion kx x?
+                dx = x_array(1,1)-x_array(1,2);
+                dkx = 2*pi/(N_Step_x*dx);
+                kx_transvers_array = dkx *linspace(1,N_Step_x,N_Step_x);
+                
+                Gaussian_kx = fftshift(fft(Gaussian_x));
+                
+                
+                % What is the realtion ky y?
+                dy = y_array(1,1)-y_array(1,2);
+                dky = 2*pi/(N_Step_y*dy);
+                ky_transvers_array = dky *linspace(1,N_Step_y,N_Step_y) ;
+                
+                Gaussian_ky = fftshift(fft(Gaussian_y));
+                for i_y = 1:size(ky_transvers_array,2)
+                    Gaussian_XY (:,i_y)= Gaussian_kx'.*Gaussian_ky(1,i_y);
+                end
+                
+                axes(h.I_Fig_Beam_3D_F2)
+                surf(ky_transvers_array,kx_transvers_array,abs(Gaussian_XY).^2,'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                
+%                 pause(0.1)
+%                 figure
+%                 hold on
+%                 plot(kx_transvers_array,Gaussian_kx)
+%                 plot(ky_transvers_array,Gaussian_ky)
+%                 pause(0.1)
+                
+                  Gaussian_ky =[];
+                  Gaussian_kx =[];
+                  Gaussian_y =[];
+                  Gaussian_x =[];
+
+                if get(h.More_Crystal_Chk,'value') == 1
+                    axes(h.I_Fig_Beam_3D_F5)
+                    hold on 
+                    
+                    for i_cryst = 1:size(pos_MCC,2)
+                        if polarization_MCC(1,i_cryst) == 1
+                            polarization = 's';
+                        else
+                            polarization = 'p';
+                        end
+                        
+                        Z = Element_MCC(1,i_cryst);
+                        
+                        if pos_MCC(1,i_cryst) == 1 
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D1] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                LaueD = 0;
+                            else
+                                [R_S_3D1] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                LaueD = 1;
+                            end
+                            R_S_3D_plot(1,:) = R_S_3D1(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                                                        
+                        elseif pos_MCC(1,i_cryst) == 2                             
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D2] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            else
+                                [R_S_3D2] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            end
+                            R_S_3D_plot(1,:) = R_S_3D2(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                        elseif pos_MCC(1,i_cryst) == 3                            
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D3] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            else
+                                [R_S_3D3] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            end  
+                            R_S_3D_plot(1,:) = R_S_3D3(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                         elseif pos_MCC(1,i_cryst) == 4
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D4] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                               
+                            else
+                                [R_S_3D4] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            end    
+                            R_S_3D_plot(1,:) = R_S_3D4(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                           elseif pos_MCC(1,i_cryst) == 5
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D5] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            else
+                                [R_S_3D5] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            end
+                            R_S_3D_plot(1,:) = R_S_3D5(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                        elseif pos_MCC(1,i_cryst) == 6
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D6] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            else
+                                [R_S_3D6] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            end
+                            R_S_3D_plot(1,:) = R_S_3D6(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                        elseif pos_MCC(1,i_cryst) == 7
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D7] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            else
+                                [R_S_3D7] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            end
+                            R_S_3D_plot(1,:) = R_S_3D7(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                        elseif pos_MCC(1,i_cryst) == 8
+                            if Geometry_MCC(1,i_cryst) ==1 
+                                [R_S_3D8] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            else
+                                [R_S_3D8] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                                
+                            end
+                            
+                            R_S_3D_plot(1,:) = R_S_3D8(N_Step_y/2,N_Step_x/2,:);
+                            plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                        end
+                    end
+                    
+                    
+                else
+                    %Calculate the Green function using Kx and K
+                    if get(h.Bragg_Check,'Value') ==1 || get(h.Bragg_FBD_Check,'Value') == 1
+                        [R_S_3D1] = Bragg_temp_Gui_3D_test(Z,a_Par,b_Par,c_Par,Energy_center,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,FBD,kx_transvers_array,ky_transvers_array,crystal_orientation);
+                        LaueD = 0;
+                        
+                    elseif get(h.Laue_Check,'Value') ==1 || get(h.Laue_FBD_Check,'Value') == 1
+                        [R_S_3D1] = Laue_temp_Gui_3D_test(Z,a_Par,b_Par,c_Par,Energy_center,Energy_center,h_Miller,k_Miller,l_Miller,DWF,f_0,f_1,f_2,absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,FBD,kx_transvers_array,ky_transvers_array,crystal_orientation);
+                        LaueD = 1;
+                        
+                    end
+                    axes(h.I_Fig_Beam_3D_F5)
+                    hold on 
+                    R_S_3D_plot(1,:) = R_S_3D1(N_Step_y/2,N_Step_x/2,:);                
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+                axis auto
+                
+                
+                R_S_3D_plot = [];
+            end
+           
+                
+            for i_steps = 1: number_Steps + 1
+                
+                for i_average = 1: eval(get(h.Repetition_ave,'String'))
+                set(h.Repetition_num ,'string',i_average)
+                
+                if get(h.Pause_Dynamical_3D,'Value') == 1
+                    pause(1)
+                    for i_pause =1:1000
+                        if get(h.Pause_Dynamical_3D,'Value') == 1
+                            set (h.Status_Dynamical_3D,'String','Status: Paused','BackgroundColor',[0 0.8 0.8])
+                            pause(0.1)
+                        else
+                            set (h.Status_Dynamical_3D,'String','Status: working','BackgroundColor',[0.5 0.5 0.5])
+                        end
+                    end
+                else
+                    pause(0.1)
+                end
+                                
+                Energy_Bragg = Energy_center - Range_Mono_neg + Step_Range*(i_steps-1);
+                set(h.Energy_point,'String',Energy_Bragg)
+                Energy_array(1,i_steps) = Energy_Bragg;
+                set(h.Image_point,'String',i_steps)
+                
+                if get(h.Mono_Beam_Check,'Value') == 1
+                    
+                    Thickness_Mono = 1e3;
+                    Z_Mono = eval(get(h.Element_Mono,'String'));
+                    crystal_orientation_Mono = get(h.crystal_orientation_Mono,'value');
+                                        
+                    % Perfect crystal                    
+                    Ang_asy_Deg_Mono = eval(get(h.Asymmetry_Mono,'String'));     
+                    
+                    %Polarization Mono
+                    if get(h.Polarization_s_Mono,'Value') == 1
+                        Polarization_Mono = 's';
+                    elseif get(h.Polarization_p_Mono,'Value') == 1
+                        Polarization_Mono = 'p';
+                    end
+                        
+                    
+                    h_Miller_Mono = eval(get(h.H_Mono,'String'));
+                    k_Miller_Mono = eval(get(h.K_Mono,'String'));
+                    l_Miller_Mono = eval(get(h.L_Mono,'String'));
+                    
+                    vector_Miller_Mono = [h_Miller_Mono k_Miller_Mono l_Miller_Mono];
+                    
+                    [f_0_Mono,f_1_Mono,f_2_Mono,a_Par_Mono,b_Par_Mono,c_Par_Mono]=Element_Bragg_temp_Gui_08022017(Z_Mono,vector_Miller_Mono,Energy_Bragg);
+                    
+                    set(h.f0_Mono,'String',f_0_Mono)
+                    set(h.f1_Mono,'String',f_1_Mono)
+                    set(h.f2_Mono,'String',f_2_Mono)
+                    
+                    if get(h.f_check_values,'Value') == 1
+                        f_0 = eval(get(h.f0_Mono,'String'));
+                        f_1 = eval(get(h.f1_Mono,'String'));
+                        f_2 = eval(get(h.f2_Mono,'String'));
+                    end
+                    
+                    
+                    [Theta_Bragg_Mono,Chi_0_Cx_Mono,Chi_h_Cx_Mono,R_0H_S_Mono,E_Scan,t_array,k_array] = Bragg_temp_Gui_test(Z_Mono,a_Par_Mono,b_Par_Mono,c_Par_Mono,Energy_Bragg,Energy_center,h_Miller_Mono,k_Miller_Mono,l_Miller_Mono,DWF,f_0_Mono,f_1_Mono,f_2_Mono,absor,Range_E_neg,Range_E_pos,Polarization_Mono,Ang_asy_Deg_Mono,Thickness_Mono,N_Step,0,crystal_orientation_Mono);
+                    
+                    axes(h.I_Fig_Beam_3D_F5)
+                    plot(E_Scan_plot,abs(R_0H_S_Mono).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                    title_Mono = strcat('Monochromator:(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),')');
+                    title(title_Mono)
+                    ylabel('Intensity (arb units)')
+                    xlabel('Energy (eV)')
+                    axis auto
+                    hold on
+
+                    % To time space
+%                     Gaussian_T = ifft(fftshift(R_0H_S_Mono));                    
+%                     
+%                     axes(h.I_Fig_Beam_3D_F1_GK)
+%                     
+%                     plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%                     pause(1)
+%                     
+%                     %Definition time window
+%                     lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+%                     dt = t_array(1,2)- t_array(1,1);
+%                     Nsam=floor(lt/dt);
+%                     Gaussian_T(Nsam:end)=0;
+%                     
+%                     axes(h.I_Fig_Beam_3D_F1_GK)
+%                     plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%                     pause(1)
+%                     %Back to k space
+%                     Gaussian_K=fftshift(fft(Gaussian_T));
+%                     % Gaussian_K=(fft(Gaussian_T));
+                    
+                    Gaussian_K = R_0H_S_Mono;
+                    
+                    axes(h.I_Fig_Beam_3D_F5)
+                    hold on
+                    plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                    pause(1)
+                    
+                    Gaussian_K_all(i_steps,:) = Gaussian_K;
+                    
+                end
+                
+                if get(h.Gaussian_Beam_1D_Check,'Value') == 1
+                    
+                    if get(h.Mono_Beam_Check,'Value') == 0
+                        
+                        
+                        WaveL_Bragg = h_planck*c_light/Energy_Bragg    ; %m
+                        k0=2*pi/WaveL_Bragg;
+                        rho = eval(get(h.rhoparameter,'String'));
+                        %rho=5e-4; %related to number of periodes undulator 5e-4
+                        sigk=rho*k0;
+                        
+                        
+                        Gaussian_k=exp(-0.5*(k_array-k0).*(k_array-k0)/sigk/sigk);
+                        
+                        axes(h.I_Fig_Beam_3D_F5)
+                        % k space gaussian define by machine porperties                        
+                        plot(E_Scan_plot,abs(Gaussian_k).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        axis auto
+                        hold on    
+                        
+                        if get(h.Gaussian_Beam_SASE_Check,'Value') == 1
+                            phase = exp(1i*2*pi*random('unif',0,1,1,N_Step));
+                            Gaussian_k= Gaussian_k.*phase;
+                            % k space gaussian define by machine porperties
+                            plot(E_Scan_plot,abs(Gaussian_k).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                            % To time space
+                            Gaussian_T = ifft(fftshift(Gaussian_k));
+                            plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1)
+                            pause(1)
+                            
+                            %Definition time window
+                            lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+                            dt = t_array(1,2)- t_array(1,1);
+                            Nsam=floor(lt/dt);
+                            Gaussian_T(Nsam:end)=0;
+                            
+                            plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1)
+                            pause(1)
+                            
+                            %Back to k space
+                            Gaussian_K=fftshift(fft(Gaussian_T));
+                            
+                            plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            pause(1)
+                            
+                            Gaussian_K_all(i_steps,:) = Gaussian_K;
+                            R_S_G = R_S.*Gaussian_K; 
+                        else
+                            
+                            R_S_G = R_S.*Gaussian_k;
+                        end
+                        
+                    else
+                        R_S_G = R_S.*Gaussian_K;
+                        
+                    end
+                    
+                    axes(h.I_Fig_Beam_3D_F2)
+                    plot(E_Scan_plot,abs(R_S_G).^2,'Parent',h.I_Fig_Beam_3D_F2)
+                    
+                    set(h.I_Fig_Beam_3D_F2,'yscale','linear');
+                    title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',h_Miller,',',k_Miller,',',l_Miller,')');
+                    title(title_Convolution)
+                    axis auto
+                    ylabel('Intensity (arb units)')
+                    xlabel('Energy (eV)')
+                    pause(1)
+                    
+                    
+                    Gaussian_R = (ifft(R_S_G));
+                    
+                    Intensity_array(1,i_steps) = sum(abs(Gaussian_R).^2);
+                    
+                    axes(h.I_Fig_Beam_3D_F1)
+                    plot(t_array,abs(Gaussian_R).^2,'Parent',h.I_Fig_Beam_3D_F1)
+                    set(h.I_Fig_Beam_3D_F1,'yscale','log');
+                    xlabel('Time (s)')
+                    xlim_neg = (-1)*t_array(1,1)*1000;
+                    xlim_pos = t_array(1,size(t_array,2));
+                    pause (3)
+                    
+                    title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',h_Miller,',',k_Miller,',',l_Miller,')');
+                    title(title_Convolution)
+                    ylabel('Intensity (arb units)')
+                    
+                    
+                    axes(h.I_Fig_Beam_3D_F6)
+                    plot(Energy_array(1,i_steps),Intensity_array(1,i_steps),'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','none','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                    title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',h_Miller,',',k_Miller,',',l_Miller,')');
+                    title(title_Convolution)
+                    ylabel('Intensity (arb units)')
+                    xlabel('Energy (eV)')
+                    hold on
+                    axis auto
+                    
+                    
+                    
+                elseif get(h.Gaussian_Beam_2D_Check,'Value') == 1
+                    
+                    if get(h.Mono_Beam_Check,'Value') == 0
+                        
+                        WaveL_Bragg = h_planck*c_light/Energy_Bragg    ; %m
+                        k0=2*pi/WaveL_Bragg;
+                        rho = eval(get(h.rhoparameter,'String'));
+                        %rho=5e-4; %related to number of periodes undulator 5e-4
+                        sigk=rho*k0;
+                        
+                        
+                        Gaussian_k=exp(-0.5*(k_array-k0).*(k_array-k0)/sigk/sigk);
+                        axes(h.I_Fig_Beam_3D_F5)
+                        % k space gaussian define by machine porperties
+                        plot(E_Scan_plot,abs(Gaussian_k).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        axis auto
+                        hold on
+                        
+                        if get(h.Gaussian_Beam_SASE_Check,'Value') == 1
+                            phase = exp(1i*2*pi*random('unif',0,1,1,N_Step));
+                            Gaussian_k= Gaussian_k.*phase;
+                            % k space gaussian define by machine porperties
+                            plot(E_Scan_plot,abs(Gaussian_k).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            
+                            % To time space
+                            Gaussian_T = ifft(fftshift(Gaussian_k));
+                            plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1)
+                            pause(1)
+                            
+                            %Definition time window
+                            lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+                            dt = t_array(1,2)- t_array(1,1);
+                            Nsam=floor(lt/dt);
+                            Gaussian_T(Nsam:end)=0;
+                            
+                            plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1)
+                            pause(1)
+                            
+                            %Back to k space
+                            Gaussian_K=fftshift(fft(Gaussian_T));
+                            
+                            plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            pause(1)
+                            
+                            Gaussian_K_all(i_steps,:) = Gaussian_K;
+                            % G_mono = R_S.*Gaussian_K; 
+                            G_mono = Gaussian_K; 
+                        else
+                            
+                            %G_mono = R_S.*Gaussian_k;
+                            G_mono = Gaussian_k;
+                            
+                        end
+                        
+                    else
+                        G_mono =  Gaussian_K;
+                        
+                    end
+                    
+                    
+                    for i_t = 1 :size(E_Scan_plot,2)
+                        Gaussian_K (:,i_t)= Gaussian_kx'.*G_mono(1,i_t);
+                    end
+                    
+                    axes(h.I_Fig_Beam_3D_F2)
+                    surf(E_Scan_plot,kx_transvers_array,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                    view([20 20]);
+                    
+                    Gaussian_K_all(i_steps,:) = G_mono;
+                    G_mono = [];
+                    
+                    axes(h.I_Fig_Beam_3D_F4)
+                    if get(h.Bragg_Check,'Value') ==1 ||   get(h.Laue_Check,'Value') ==1
+                        surf(E_Scan_plot,kx_transvers_array,abs(R_S_2D).^2,'Parent',h.I_Fig_Beam_3D_F4,'edgecolor','none')
+                        view([20 20]);
+                    elseif get(h.Bragg_FBD_Check,'Value') == 1 || get(h.Laue_FBD_Check,'Value') == 1
+                        surf(E_Scan_plot,kx_transvers_array,abs(R_S_2D).^2,'Parent',h.I_Fig_Beam_3D_F4,'edgecolor','none')
+                        view([20 20]);
+                    end
+                    
+                    
+                    
+                    
+                    if get(h.Pause_Dynamical_3D,'Value') == 1
+                        pause(0)
+                        for i_pause =1:1000
+                            if get(h.Pause_Dynamical_3D,'Value') == 1
+                                set (h.Status_Dynamical_3D,'String','Status: Paused','BackgroundColor',[0 0.8 0.8])
+                                pause(0.1)
+                            else
+                                set (h.Status_Dynamical_3D,'String','Status: working','BackgroundColor',[0.5 0.5 0.5])
+                            end
+                        end
+                    else
+                        pause(1)
+                    end
+                    
+                    
+                    % Convolute both signals R MONO and R crystal in 2D
+                    
+                    R_S_G = R_S_2D.*Gaussian_K;
+                    
+                    Gaussian_K = [];
+                    
+                    axes(h.I_Fig_Beam_3D_F2)
+                    surf(E_Scan_plot,kx_transvers_array,abs(R_S_G).^2,'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                    view([20 20]);
+                    
+                    Gaussian_R = ifft2(fftshift(R_S_G),2);
+                    R_S_G_all(:,:,i_steps) = R_S_G;
+                    
+                    % Free Space
+                    R_S_G = [];
+                    
+                    axes(h.I_Fig_Beam_3D_F1)
+                    surf(t_array,x_array,abs(Gaussian_R).^2,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                    view([90 0]);
+                    
+                    axes(h.I_Fig_Beam_3D_F3)
+                    Intensityx_array(i_steps,:) = sum(abs(Gaussian_R).^2,2);
+                    plot(x_array',Intensityx_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                    hold on
+                    
+                    Intensity_array(1,i_steps) = sum(sum(abs(Gaussian_R).^2,1),2);
+                    axes(h.I_Fig_Beam_3D_F6)
+                    plot(Energy_array(1,i_steps),Intensity_array(1,i_steps),'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','none','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                    title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+                    title(title_Convolution)
+                    ylabel('Intensity (arb units)')
+                    xlabel('Energy (eV)')
+                    xlim auto
+                    hold on
+                    pause(0.1)
+                    
+                    
+                elseif get(h.Gaussian_Beam_3D_Check,'Value') == 1
+                    
+                    if get(h.Mono_Beam_Check,'Value') == 0
+                        
+                        WaveL_Bragg = h_planck*c_light/Energy_Bragg    ; %m
+                        k0=2*pi/WaveL_Bragg;
+                        rho = eval(get(h.rhoparameter,'String'));
+                        %rho=5e-4; %related to number of periodes undulator 5e-4
+                        sigk=rho*k0;
+                        
+                        
+                        Gaussian_k=exp(-0.5*(k_array-k0).*(k_array-k0)/sigk/sigk)*2;
+                        
+                        axes(h.I_Fig_Beam_3D_F1_T)
+                        % k space gaussian define by machine porperties
+                        plot(E_Scan_plot,Gaussian_k,'Parent',h.I_Fig_Beam_3D_F1_T)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        axis auto
+                        hold on
+                        pause(0.1)
+                       
+                        
+                        if get(h.Gaussian_Beam_SASE_Check,'Value') == 1
+                            phase = exp(1i*2*pi*random('unif',0,1,1,N_Step));
+                            Gaussian_k= Gaussian_k.*phase;
+                            % k space gaussian define by machine porperties
+                            plot(E_Scan_plot,abs(Gaussian_k).^2,'Parent',h.I_Fig_Beam_3D_F1_T)
+                            
+                            % To time space
+                            Gaussian_T = ifft(fftshift(Gaussian_k));
+                            axes(h.I_Fig_Beam_3D_F1_T)
+                            plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1_T)
+                            pause(1)
+                            
+                            %Definition time window
+                            lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+                            dt = t_array(1,2)- t_array(1,1);
+                            Nsam=floor(lt/dt);
+                            Gaussian_T(Nsam:end)=0;
+                            
+                            plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1_GK)
+                            pause(1)
+                            
+                            %Back to k space
+                            Gaussian_K=fftshift(fft(Gaussian_T))*3;
+                            
+                            axes(h.I_Fig_Beam_3D_F5)
+                            hold on
+                            plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                            pause(1)
+                            
+                            Gaussian_K_all(i_steps,:) = Gaussian_K;
+                            %G_mono = R_S.*Gaussian_K; 
+                            G_mono = Gaussian_K; 
+                            
+                        else
+%                             % To time space
+%                             Gaussian_T = ifft(fftshift(Gaussian_k));
+%                             %Gaussian_T = fftshift(ifft(Gaussian_k));
+%                             
+%                             axes(h.I_Fig_Beam_3D_F1_GK)
+% 
+%                             plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%                             pause(1)
+%                             
+%                             %Definition time window
+%                             lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+%                             dt = t_array(1,2)- t_array(1,1);
+%                             Nsam=floor(lt/dt);
+%                             Gaussian_T(Nsam:end)=0;
+%                             
+%                             axes(h.I_Fig_Beam_3D_F1_GK)
+%                             plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%                             pause(1)
+%                             %Back to k space
+%                             Gaussian_K=fftshift(fft(Gaussian_T));
+%                             % Gaussian_K=(fft(Gaussian_T));
+%                             
+%                             axes(h.I_Fig_Beam_3D_F5)
+%                             hold on
+%                             plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+%                             pause(1)
+                            
+                            Gaussian_K_all(i_steps,:) = Gaussian_k;
+                            %G_mono = R_S.*Gaussian_K;
+                            G_mono = Gaussian_k;
+                            
+                        end
+                    else
+                        G_mono =  Gaussian_K;
+                        
+                    end
+
+                    for i_x = 1 :size(E_Scan_plot,2)
+                        Gaussian_K_3D (:,:,i_x)= Gaussian_XY'.*G_mono(1,i_x);
+                    end
+                    
+                    axes(h.I_Fig_Beam_3D_F2)
+                    surf(kx_transvers_array,ky_transvers_array,sum(abs(Gaussian_K_3D).^2,3),'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                    view([20 20]);
+                    
+                   
+                    
+                    axes(h.I_Fig_Beam_3D_F4)
+                    if get(h.More_Crystal_Chk,'value') == 1
+                        
+                        for i_cryst = 1:size(pos_MCC,2)
+                            
+                            R_S_3D_plot(:,:) = sum(abs(R_S_3D1),1).^2;
+                            surf(E_Scan_plot,kx_transvers_array,R_S_3D_plot,'Parent',h.I_Fig_Beam_3D_F4,'edgecolor','none')
+                            
+                            view([20 20]);
+                            R_S_3D_plot = [];
+                            
+                            if get(h.Pause_Dynamical_3D,'Value') == 1
+                                pause(0)
+                                for i_pause =1:1000
+                                    if get(h.Pause_Dynamical_3D,'Value') == 1
+                                        pause(0.1)
+                                    else
+                                    end
+                                end
+                            else
+                                pause(1)
+                            end
+                        
+                            if i_cryst == 1                                
+                                R_S_3D = R_S_3D1;                                
+                            elseif i_cryst == 2
+                                R_S_3D = R_S_3D2;
+                            elseif i_cryst == 3
+                                R_S_3D = R_S_3D3;
+                            elseif i_cryst == 4
+                                R_S_3D = R_S_3D4;
+                            elseif i_cryst == 5
+                                R_S_3D = R_S_3D5;
+                            elseif i_cryst == 6
+                                R_S_3D = R_S_3D6;
+                            elseif i_cryst == 7
+                                R_S_3D = R_S_3D7;
+                            elseif i_cryst == 8
+                                R_S_3D = R_S_3D8;
+                            end
+                            % Convolute both signals R MONO and R crystal in 2D
+                            
+                        
+                            R_S_G = R_S_3D.*Gaussian_K_3D;                            
+                            
+                            Gaussian_K_3D = R_S_G;
+                           % Gaussian_K_3D = [];
+                            
+                            axes(h.I_Fig_Beam_3D_F2)
+                            surf(x_array,y_array,sum(abs(R_S_G).^2,3),'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                            view([20 20]);
+                        %end   
+                            
+                            if get(h.Shift_x,'Value') == 1
+                                R_S_G = fftshift(R_S_G,1);
+                            end
+                            if get(h.Shift_y,'Value') == 1
+                                R_S_G = fftshift(R_S_G,2);
+                            end
+                            if get(h.Shift_t2,'Value') == 1
+                                R_S_G = fftshift(R_S_G,3);
+                            end
+                            
+                            Gaussian_R = (ifftn(R_S_G));   
+                        
+                        
+                            axes(h.I_Fig_Beam_3D_F1)
+                            if get(h.Time_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1
+                                Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,1);
+                                surf(t_array,x_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                                
+                            elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Time_um_3D_Check,'Value') == 1
+                                Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,2);
+                                surf(t_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                                
+                            elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1
+                                Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,3);
+                                surf(x_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                            end
+                            view([90 -90])
+                            Gaussian_R_plot = [];
+                            pause(1)
+                            
+                            Gaussian_K_3D = fftshift(fftn(Gaussian_R));
+                            
+                        end
+                        Gaussian_K_3D = [];
+                        
+                        axes(h.I_Fig_Beam_3D_F3)
+                        if get(h.Time_um_F4_Check,'Value') == 1
+                            Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),2);
+                            plot_array = t_array;
+                            plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                            
+                        elseif get(h.Transverse_um_F4_Check,'Value') == 1
+                            Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),3);
+                            plot_array = x_array;
+                            plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                            
+                        elseif get(h.Transversey_um_F4_Check,'Value') == 1
+                            Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,2),3);
+                            plot_array = y_array;
+                            plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                        end
+                        hold on
+                            
+                        Intensity_array(1,i_steps) = sum(sum(sum(abs(Gaussian_R).^2,1),2),3);
+                        axes(h.I_Fig_Beam_3D_F6)
+                        plot(Energy_array(1,i_steps),Intensity_array(1,i_steps),'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','none','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                        title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+                        title(title_Convolution)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        xlim auto
+                        hold on
+                        pause(0.1)
+                            
+                    else
+                        R_S_3D_plot(:,:) = sum(abs(R_S_3D1),1).^2;
+                        surf(E_Scan_plot,kx_transvers_array,R_S_3D_plot,'Parent',h.I_Fig_Beam_3D_F4,'edgecolor','none')
+                        
+                        view([20 20]);
+                        R_S_3D_plot = [];
+                        
+                        if get(h.Pause_Dynamical_3D,'Value') == 1
+                            pause(0)
+                            for i_pause =1:1000
+                                if get(h.Pause_Dynamical_3D,'Value') == 1
+                                    pause(0.1)
+                                else
+                                end
+                            end
+                        else
+                            pause(1)
+                        end
+                        
+                        
+                        % Convolute both signals R MONO and R crystal in 2D
+                        R_S_G = R_S_3D1.*Gaussian_K_3D;
+                        
+                        
+                        Gaussian_K_3D = [];
+                        
+                        axes(h.I_Fig_Beam_3D_F2)                    
+                        surf(x_array,y_array,sum(abs(R_S_G).^2,3),'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                        view([20 20]);
+                        
+                        
+                        if get(h.Shift_x,'Value') == 1
+                            R_S_G = fftshift(R_S_G,1);
+                        end
+                        if get(h.Shift_y,'Value') == 1
+                            R_S_G = fftshift(R_S_G,2);
+                        end
+                        if get(h.Shift_t2,'Value') == 1
+                            R_S_G = fftshift(R_S_G,3);
+                        end
+                        
+                        Gaussian_R = (ifftn(R_S_G));
+                        
+                        
+                        
+                        axes(h.I_Fig_Beam_3D_F1)
+                        if get(h.Time_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1                        
+                            Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,1);                        
+                            surf(t_array,x_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                            
+                        elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Time_um_3D_Check,'Value') == 1
+                            Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,2);  
+                            surf(t_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none') 
+                            
+                        elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1
+                            Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,3);  
+                            surf(x_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                        end
+                        view([90 -90])
+                        Gaussian_R_plot = [];
+                        
+                        axes(h.I_Fig_Beam_3D_F3)
+                        if get(h.Time_um_F4_Check,'Value') == 1
+                            Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),2);
+                            plot_array = t_array;
+                            plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                        elseif get(h.Transverse_um_F4_Check,'Value') == 1
+                            Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),3);
+                            plot_array = x_array;
+                            plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                            
+                        elseif get(h.Transversey_um_F4_Check,'Value') == 1
+                            Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,2),3);
+                            plot_array = y_array;
+                            plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                        end
+                        hold on
+                        
+                        Intensity_array(1,i_steps) = sum(sum(sum(abs(Gaussian_R).^2,1),2),3);
+                        axes(h.I_Fig_Beam_3D_F6)
+                        plot(Energy_array(1,i_steps),Intensity_array(1,i_steps),'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','none','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                        title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+                        title(title_Convolution)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        xlim auto
+                        hold on
+                        pause(0.1)
+                    end
+                    
+                end
+                
+                %save_folder_intermediate = '/das/work/p15/p15366/RN84/SwissFEL Simulations/Calculation_Support';
+                save_folder_intermediate = '/Users/angrod/Desktop/FBD-sim-Analysis/gitlab/Temporal_Data';
+                h.save_folder_intermediate = save_folder_intermediate;
+                
+                if get(h.Channel_Save_XY_Check,'value')
+                    Gaussian_R_XY(:,:) = sum(abs(Gaussian_R).^2,3);  
+                    R_S_G_XY(:,:) = sum(abs(R_S_G).^2,3);  
+                    
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    save(filename_Output,'Gaussian_R_XY','R_S_G_XY','G_mono');
+                end
+                
+                if get(h.Channel_Save_XT_Check,'value')
+                    Gaussian_R_XT(:,:) = sum(abs(Gaussian_R).^2,1);  
+                    R_S_G_XT(:,:) = sum(abs(R_S_G).^2,2);
+                    
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    save(filename_Output,'Gaussian_R_XT','R_S_G_XT','G_mono');
+                end
+                
+                if get(h.Channel_Save_YT_Check,'value')
+                    Gaussian_R_YT(:,:) = sum(abs(Gaussian_R).^2,2);                        
+                    R_S_G_YT(:,:) = sum(abs(R_S_G).^2,1);
+                    
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    save(filename_Output,'Gaussian_R_YT','R_S_G_YT','G_mono');
+                end
+                
+                if get(h.Channel_Save_All_Check,'value') 
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep) ; 
+                    
+                    Gaussian_R_re = real(Gaussian_R);
+                    Gaussian_R_im = imag(Gaussian_R);
+                   
+                    R_S_G_re = real(R_S_G);
+                    R_S_G_im = imag(R_S_G); 
+                    
+                    save(filename_Output,'Gaussian_R_re','Gaussian_R_im','R_S_G_re','R_S_G_im','G_mono');
+
+                    R_S_G_im =[];
+                    R_S_G_re =[];
+                    Gaussian_R_re =[];
+                    Gaussian_R_im =[];
+                end
+
+                end
+                Gaussian_R_sum = Gaussian_R.*0;
+                R_S_G_sum = R_S_G.*0;
+                G_mono_sum = G_mono.*0;
+                Gaussian_R = [];
+                R_S_G = [];
+
+                
+                if get(h.Channel_Save_XY_Check,'value')
+                    Gaussian_R_XY_sum = Gaussian_R_XY.*0;
+                    R_S_G_XY_sum = R_S_G_XY.*0;
+                    G_mono_XY_sum = G_mono.*0;
+                    Gaussian_R_XY = [];
+                    R_S_G_XY = [];
+
+                end
+                
+                if get(h.Channel_Save_XT_Check,'value')
+                    Gaussian_R_XT_sum = Gaussian_R_XT.*0;
+                    R_S_G_XT_sum = R_S_G_XT.*0;
+                    G_mono_XT_sum = G_mono.*0;
+                    Gaussian_R_XT = [];
+                    R_S_G_XT = [];
+
+                end
+                
+                if get(h.Channel_Save_YT_Check,'value')
+                    Gaussian_R_YT_sum = Gaussian_R_YT.*0;
+                    R_S_G_YT_sum = R_S_G_YT.*0;
+                    G_mono_YT_sum = G_mono.*0;
+                    Gaussian_R_YT = [];
+                    R_S_G_YT = [];                    
+                end
+                
+
+                G_mono = [];
+                Gaussian_R = [];
+                R_S_G = [];
+                G_mono = [];  
+                Gaussian_R_XY_ave = [];
+                R_S_G_XY_ave = [];
+                Gaussian_R_XT_ave = [];
+                R_S_G_XT_ave = [];
+                Gaussian_R_YT_ave = [];
+                R_S_G_YT_ave = [];
+                Gaussian_R_ave = [];
+                R_S_G_ave = [];
+                
+                for i_average = 1: eval(get(h.Repetition_ave,'String')) 
+                    if get(h.Channel_Save_XY_Check,'value')
+                        Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep); 
+                        load(filename_input)
+                        Gaussian_R_XY_sum = Gaussian_R_XY_sum + Gaussian_R_XY;
+                        R_S_G_XY_sum = R_S_G_XY_sum + R_S_G_XY;
+                        G_mono_XY_sum = G_mono_XY_sum +G_mono;
+                        if get(h.Channel_Save_average_Check,'value') == 0
+                            delete(filename_input)
+                        end
+                    end
+                    
+                    if get(h.Channel_Save_XT_Check,'value')
+                        Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep); 
+                        load(filename_input)
+                        Gaussian_R_XT_sum = Gaussian_R_XT_sum + Gaussian_R_XT;
+                        R_S_G_XT_sum = R_S_G_XT_sum + R_S_G_XT;
+                        G_mono_XT_sum = G_mono_XT_sum +G_mono;
+                        if get(h.Channel_Save_average_Check,'value') == 0
+                            delete(filename_input)
+                        end
+                    end
+                    
+                    if get(h.Channel_Save_YT_Check,'value')
+                        Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep); 
+                        load(filename_input)
+                        Gaussian_R_YT_sum = Gaussian_R_YT_sum + Gaussian_R_YT;
+                        R_S_G_YT_sum = R_S_G_YT_sum + R_S_G_YT;
+                        G_mono_YT_sum = G_mono_YT_sum +G_mono;
+                        if get(h.Channel_Save_average_Check,'value') == 0
+                            delete(filename_input)
+                        end
+                    end
+                    
+                    if get(h.Channel_Save_All_Check,'value')
+                        Name_Filep = sprintf('Gaussian_R_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                        filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep); 
+                        load(filename_input)
+
+                        Gaussian_R = Gaussian_R_re +1i*Gaussian_R_im;
+                        R_S_G = R_S_G_re + 1i* R_S_G_im;                        
+
+                        Gaussian_R_sum = Gaussian_R_sum + Gaussian_R;
+                        R_S_G_sum = R_S_G_sum + Gaussian_R;                        
+                        
+                        G_mono_sum = G_mono_sum + G_mono;
+                        
+                        if get(h.Channel_Save_average_Check,'value') == 0
+                            delete(filename_input)
+                        end
+                    end
+
+                end
+                
+                if get(h.Channel_Save_XY_Check,'value')
+                    Gaussian_R_XY_ave = Gaussian_R_XY_sum./eval(get(h.Repetition_ave,'String'));
+                    R_S_G_XY_ave = R_S_G_XY_sum./eval(get(h.Repetition_ave,'String'));
+                    G_mono_ave = G_mono_XY_sum./eval(get(h.Repetition_ave,'String'));
+                    
+                    Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);                                    
+                    save(filename_Output,'Gaussian_R_XY_ave','R_S_G_XY_ave','G_mono_ave');
+                    
+                    Gaussian_R_XY=[];
+                    G_mono=[];                    
+                    R_S_G_XY=[];
+                    Gaussian_R_XY_sum = [];
+                    R_S_G_XY_sum=[];
+                    G_mono_XY_sum =[];
+                    G_mono_ave= [];
+                    Gaussian_R_XY_ave = [];
+                    R_S_G_XY_ave = [];
+                end
+                if get(h.Channel_Save_XT_Check,'value')
+                    Gaussian_R_XT_ave = Gaussian_R_XT_sum./eval(get(h.Repetition_ave,'String'));
+                    R_S_G_XT_ave = R_S_G_XT_sum./eval(get(h.Repetition_ave,'String'));
+                    G_mono_ave = G_mono_XT_sum./eval(get(h.Repetition_ave,'String'));
+                    
+                    Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);                
+                    save(filename_Output,'Gaussian_R_XT_ave','R_S_G_XT_ave','G_mono_ave');   
+                    if eval(get(h.Repetition_ave,'String')) == 1
+                    else
+                        if get(h.Time_um_F4_Check,'Value') == 1                    
+                            Intensityplot_array = sum(Gaussian_R_XT_ave,1);
+                            plot(plot_array,Intensityplot_array,'Parent',h.I_Fig_Beam_3D_F3,'Color','k','linewidth',2)
+                            
+                            
+                        elseif get(h.Transverse_um_F4_Check,'Value') == 1     
+                            Intensityplot_array = sum(Gaussian_R_XT_ave,2);                           
+                            plot(plot_array,Intensityplot_array,'Parent',h.I_Fig_Beam_3D_F3,'Color','k','linewidth',2)
+                        end
+                    end
+                    
+                    Gaussian_R_XT=[];
+                    G_mono=[];                    
+                    R_S_G_XT=[];
+                    Gaussian_R_XT_sum = [];
+                    R_S_G_XT_sum=[];
+                    G_mono_XT_sum =[];
+                    G_mono_ave= [];
+                    Gaussian_R_XT_ave = [];
+                    R_S_G_XT_ave = [];
+                end
+                if get(h.Channel_Save_YT_Check,'value')
+                    Gaussian_R_YT_ave = Gaussian_R_YT_sum./eval(get(h.Repetition_ave,'String'));
+                    R_S_G_YT_ave = R_S_G_YT_sum./eval(get(h.Repetition_ave,'String'));
+                    G_mono_ave = G_mono_YT_sum./eval(get(h.Repetition_ave,'String'));
+                    
+                    Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);                
+                    save(filename_Output,'Gaussian_R_YT_ave','R_S_G_YT_ave','G_mono_ave');    
+                    Gaussian_R_YT=[];
+                    G_mono=[];
+                    R_S_G_YT=[];
+                    Gaussian_R_YT_sum = [];
+                    R_S_G_YT_sum=[];
+                    G_mono_YT_sum =[];
+                    G_mono_ave= [];
+                    Gaussian_R_YT_ave = [];
+                    R_S_G_YT_ave = [];
+                end
+                if get(h.Channel_Save_All_Check,'value')
+                    Gaussian_R_ave = Gaussian_R_sum./eval(get(h.Repetition_ave,'String'));
+                    R_S_G_ave = R_S_G_sum./eval(get(h.Repetition_ave,'String'));
+                    G_mono_ave = G_mono_sum./eval(get(h.Repetition_ave,'String'));
+                    
+                    Name_Filep = sprintf('Gaussian_R_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);                
+                    save(filename_Output,'Gaussian_R_ave','R_S_G_ave','G_mono_ave');
+                    
+                    Guassian_R = Gaussian_R_re + 1i*Gaussian_R_im;
+                    
+                    axes(h.I_Fig_Beam_3D_F3)
+                    if get(h.Time_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R_ave).^2,1),2);
+                        plot_array = t_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3,'Color','k','Marker','x')
+                    elseif get(h.Transverse_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R_ave).^2,1),3);
+                        plot_array = x_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3,'Color','k','Marker','x')
+                        
+                    elseif get(h.Transversey_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R_ave).^2,2),3);
+                        plot_array = y_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3,'Color','k','Marker','x')
+                    end
+                    hold on
+                
+                    Gaussian_R=[];
+                    G_mono=[];
+                    R_S_G=[];
+                    Gaussian_R_sum = [];
+                    R_S_G_sum=[];
+                    G_mono_sum =[];
+                    G_mono_ave= [];
+                    Gaussian_R_ave = [];
+                    R_S_G_ave = [];
+                end
+                
+                
+
+            end
+            
+            
+            Gaussian_XY = [];
+            
+            
+            if number_Steps == 0
+            else
+                if get(h.Mono_Scan_Check,'value') == 1
+                    if get(h.Gaussian_Beam_1D_Check,'Value') == 1
+                        axes(h.I_Fig_Beam_3D_F6)
+                        plot(Energy_array,Intensity_array,'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','-','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                        title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+                        title(title_Convolution)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        hold on
+                        xlim([E_Scan(1,1),E_Scan(1,size(E_Scan,2))])
+                        
+                    elseif get(h.Gaussian_Beam_2D_Check,'Value') == 1
+                        axes(h.I_Fig_Beam_3D_F6)
+                        plot(Energy_array,Intensity_array,'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','-','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                        title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+                        title(title_Convolution)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        hold on
+                        xlim([E_Scan(1,1),E_Scan(1,size(E_Scan,2))])
+                        
+                        axes(h.I_Fig_Beam_3D_F3)
+                        hold off
+                        surf(x_array,Energy_array,Intensityx_array,'Parent',h.I_Fig_Beam_3D_F3,'edgecolor','none')
+                        zlabel('Intensity (arb units)')
+                        xlabel('Transverse displecement (m)')
+                        ylabel('Energy (eV)')
+                        axis auto
+                        
+                        h.x_array = x_array;
+                        h.t_array = t_array;
+                        h.Energy_array = Energy_array;
+                        %                     h.Gaussian_R_all = Gaussian_R_all;
+                        h.Intensityx_array = Intensityx_array;
+                        h.E_Scan_plot = E_Scan_plot;
+                        h.kx_transvers_array = kx_transvers_array;
+                        %                     h.R_S_G_all = R_S_G_all;
+                        h.FBD = FBD;
+                        h.LaueD = LaueD;
+                        h.R_S_all = R_S_2D;
+                        if get(h.Mono_Beam_Check,'Value') == 1
+                            h.R_0H_S_Mono_all = R_0H_S_Mono_all;
+                        else
+                            h.R_0H_S_Mono_all = Gaussian_K_all;
+                        end
+                        
+                    elseif get(h.Gaussian_Beam_3D_Check,'Value') == 1
+                        axes(h.I_Fig_Beam_3D_F6)
+                        plot(Energy_array,Intensity_array,'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','-','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                        title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+                        title(title_Convolution)
+                        ylabel('Intensity (arb units)')
+                        xlabel('Energy (eV)')
+                        hold on
+                        xlim([E_Scan(1,1),E_Scan(1,size(E_Scan,2))])
+                        
+                        
+                        axes(h.I_Fig_Beam_3D_F3)
+                        hold off
+                        surf(plot_array,Energy_array,Intensityplot_array,'Parent',h.I_Fig_Beam_3D_F3,'edgecolor','none')
+                        zlabel('Intensity (arb units)')
+                        xlabel('Transverse displecement (m)')
+                        ylabel('Energy (eV)')
+                        axis auto
+                        
+                        h.x_array = x_array;
+                        h.y_array = y_array;
+                        h.t_array = t_array;
+                        h.Energy_array = Energy_array;
+                        %                     h.Gaussian_R_all = Gaussian_R_all;
+                        h.plot_array = plot_array;
+                        h.Intensityx_array = Intensityplot_array;
+                        h.E_Scan_plot = E_Scan_plot;
+                        h.kx_transvers_array = kx_transvers_array;
+                        h.ky_transvers_array = ky_transvers_array;
+                        %                     h.R_S_G_all = R_S_G_all;
+                        h.FBD = FBD;
+                        h.LaueD = LaueD;
+                        h.R_S_all = R_S_3D1;
+                        if get(h.Mono_Beam_Check,'Value') == 1
+                            h.R_0H_S_Mono_all = R_0H_S_Mono_all;
+                        else
+                            h.R_0H_S_Mono_all = Gaussian_K_all;
+                        end
+                    end
+                    
+                end
+            end
+            if get(h.Gaussian_Beam_1D_Check,'Value') == 1
+                
+                
+            elseif get(h.Gaussian_Beam_2D_Check,'Value') == 1
+                h.x_array = x_array;
+                h.t_array = t_array;
+                h.Energy_array = Energy_array;
+                h.Intensityx_array = Intensityx_array;
+                h.E_Scan_plot = E_Scan_plot;
+                h.kx_transvers_array = kx_transvers_array;
+                h.FBD = FBD;
+                h.LaueD = LaueD;
+                h.R_S_all = R_S_2D;
+                if get(h.Mono_Beam_Check,'Value') == 1
+                    h.R_0H_S_Mono_all = R_0H_S_Mono_all;
+                else
+                    h.R_0H_S_Mono_all = Gaussian_K_all;
+                end
+                
+            elseif get(h.Gaussian_Beam_3D_Check,'Value') == 1
+                
+                h.x_array = x_array;
+                h.y_array = y_array;
+                h.t_array = t_array;
+                h.Energy_array = Energy_array;
+                h.plot_array = plot_array;
+                h.Intensityx_array = Intensityplot_array;
+                h.E_Scan_plot = E_Scan_plot;
+                h.kx_transvers_array = kx_transvers_array;
+                h.ky_transvers_array = ky_transvers_array;
+                h.FBD = FBD;
+                h.LaueD = LaueD;
+                h.R_S_all = R_S_3D1;
+                if get(h.Mono_Beam_Check,'Value') == 1
+                    h.R_0H_S_Mono_all = R_0H_S_Mono_all;
+                else
+                    h.R_0H_S_Mono_all = Gaussian_K_all;
+                end
+            end
+        end
+        set (h.Status_Dynamical_3D,'String','Status: Finnish','BackgroundColor',[0 0 0.9])
+        
+
+        
+    end
+
+    function More_Crystal_Scan(source, eventdata)
+        
+        h.x_array  = [];
+        x_array = [];
+        h.y_array  = [];
+        y_array = [];
+        h.t_array  = [];
+        t_array = [];
+        
+        h.Energy_array  = [];
+        Energy_array = [];
+        h.Gaussian_R_all  = [];
+        Gaussian_R_all = [];
+        h.Intensityx_array  = [];
+        Intensityx_array = [];
+        h.E_Scan_plot  = [];
+        E_Scan_plot = [];
+        h.kx_transvers_array  = [];
+        kx_transvers_array = [];
+        h.ky_transvers_array  = [];
+        ky_transvers_array = [];
+        h.R_S_G_all  = [];
+        R_S_G_all = [];
+        h.FBD  = [];
+        
+        h.LaueD  = [];
+        LaueD = [];
+        h.R_S_all  = [];
+        R_S_all = [];
+        
+        R_0H_S_Mono_all  = [];
+        h.R_0H_S_Mono_all = [];
+        
+        child = get(h.I_Fig_Beam_3D_F1,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        
+        child = get(h.I_Fig_Beam_3D_F5,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F6,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        
+        child = get(h.I_Fig_Beam_3D_F2,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F4,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F3,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F1_GK,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+        child = get(h.I_Fig_Beam_3D_F1_T,'Children');
+        for i=1:length(child)
+            delete(child(i));
+        end
+
+        i_Cryst_show = eval(get(h.crystal_show,'String'));
+        
+        c_light= 299792458; %Light Speed m/s
+        h_planck = 4.13566733*10^(-15);% eV
+              
+        Energy_center = eval(get(h.Energy_input,'String'));
+        
+        DWF = eval(get(h.DWF,'String'));
+        
+        Range_E_neg = (-1)*eval(get(h.Range_Left,'String'));
+        Range_E_pos = eval(get(h.Range_Right,'String'));        
+                
+        N_Step = eval(get(h.Nstep_t_Beam,'String'));
+
+        absor = get(h.Absorption,'Value');
+        
+        pos_MCC = h.pos_MCC;  
+        
+        Element_MCC = h.Element_MCC;
+        h_MCC = h.h_MCC;
+        k_MCC = h.k_MCC;
+        l_MCC = h.l_MCC;
+        Thickness_MCC = h.Thickness_MCC;
+        Geometry_MCC = h.Geometry_MCC;
+        Transmission_MCC = h.Transmission_MCC;
+        Asymmetry_MCC =h.Asymmetry_MCC;
+        Normal_MCC = h.Normal_MCC;
+        polarization_MCC = h.polarization_MCC ;
+        Energy_MCC = h.name_Energy;
+        Beam_MCC = h.name_Beam;
+        
+        i_cryst_show = eval(get(h.crystal_show,'string'));
+        
+        
+        for i_cryst = 1:size(pos_MCC,2)
+            Z = Element_MCC(1,i_cryst);
+            vector_Miller = [h_MCC(1,i_cryst), k_MCC(1,i_cryst),l_MCC(1,i_cryst)];
+            [f_0_i,f_1_i,f_2_i,a_Par_i,b_Par_i,c_Par_i] = Element_Bragg_temp_Gui_08022017(Z,vector_Miller,Energy_center);
+            f_0(1,i_cryst) = f_0_i;
+            f_1(1,i_cryst) = f_1_i;
+            f_2(1,i_cryst) = f_2_i;
+            a_Par(1,i_cryst) = a_Par_i;
+            b_Par(1,i_cryst) = b_Par_i;
+            c_Par(1,i_cryst) = c_Par_i;
+        end
+            
+        set(h.f0,'String',f_0(1,i_Cryst_show))
+        set(h.f1,'String',f_1(1,i_Cryst_show))
+        set(h.f2,'String',f_2(1,i_Cryst_show))
+
+        set(h.a_parameter,'String',a_Par(1,i_Cryst_show))
+        set(h.b_parameter,'String',b_Par(1,i_Cryst_show))
+        set(h.c_parameter,'String',c_Par(1,i_Cryst_show))
+        
+        
+        if Geometry_MCC(1,i_cryst_show) ==1 
+            [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_S,E_Scan,t_array,k_array] = Bragg_temp_Gui_test(Z(1,i_cryst_show),a_Par(1,i_cryst_show),b_Par(1,i_cryst_show),c_Par(1,i_cryst_show),Energy_center,Energy_center,h_MCC(1,i_cryst_show),k_MCC(1,i_cryst_show),l_MCC(1,i_cryst_show),DWF,f_0(1,i_cryst_show),f_1(1,i_cryst_show),f_2(1,i_cryst_show),absor,Range_E_neg,Range_E_pos,polarization_MCC(1,i_cryst_show),Asymmetry_MCC(1,i_cryst_show),Thickness_MCC(1,i_cryst_show),N_Step,Transmission_MCC(1,i_cryst_show),Normal_MCC(1,i_cryst_show));
+            set(h.Chi_0,'String',Chi_0_Cx)
+            set(h.Chi_h,'String',Chi_h_Cx)
+            set(h.Theta_view,'String',Theta_Bragg*180/pi)
+            FBD = get(h.Bragg_FBD_Check,'Value');
+            
+        else
+            [Theta_Bragg,Chi_0_Cx,Chi_h_Cx,R_S,E_Scan,t_array,k_array] = Laue_temp_Gui_test(Z(1,i_cryst_show),a_Par(1,i_cryst_show),b_Par(1,i_cryst_show),c_Par(1,i_cryst_show),Energy_center,Energy_center,h_MCC(1,i_cryst_show),k_MCC(1,i_cryst_show),l_MCC(1,i_cryst_show),DWF,f_0(1,i_cryst_show),f_1(1,i_cryst_show),f_2(1,i_cryst_show),absor,Range_E_neg,Range_E_pos,polarization_MCC(1,i_cryst_show),Asymmetry_MCC(1,i_cryst_show),Thickness_MCC(1,i_cryst_show),N_Step,Transmission_MCC(1,i_cryst_show),Normal_MCC(1,i_cryst_show));
+            set(h.Chi_0,'String',Chi_0_Cx)
+            set(h.Chi_h,'String',Chi_h_Cx)
+            set(h.Theta_view,'String',Theta_Bragg*180/pi)
+            FBD = get(h.Laue_FBD_Check,'Value');
+        end
+        
+        E_Scan_plot = E_Scan-Energy_center;
+        
+        h.R_S = R_S;
+        
+        
+        set (h.Status_Dynamical_3D,'String','Status: working','BackgroundColor',[0.5 0.5 0.5])
+        
+        
+        N_Step_x = eval(get(h.Nstep_x_Beam,'String'));
+        N_Step_y = eval(get(h.Nstep_y_Beam,'String'));
+        
+        initial_range_x = eval(get(h.initial_range_x,'String'));
+        initial_range_y = eval(get(h.initial_range_y,'String'));
+        
+        %Definition of x
+        sigma_x = eval(get(h.size_X_Beam,'String'))*1e-6; %um
+        x_array = linspace(-initial_range_x/2,initial_range_x/2,N_Step_x)*1e-6;
+        
+        if get(h.Lorenztian_Distribution,'Value') == 1
+            sigma_x = sigma_x/2;
+            Gaussian_x = 1e-3/(pi*sigma_x)./(1+((x_array)/sigma_x).^2)/100;
+        else
+            sigma_x = sigma_x/2.355;
+            Gaussian_x = 1*exp(-((x_array)/sigma_x).^2./2);
+        end
+        
+        
+        %Definition of y
+        sigma_y = eval(get(h.size_Y_Beam,'String'))*1e-6; %um
+        y_array = linspace(-initial_range_y/2,initial_range_y/2,N_Step_y)*1e-6;
+        if get(h.Lorenztian_Distribution,'Value') == 1
+            Gaussian_y = 1e-3/(pi*sigma_y)./(1+((y_array)/sigma_y).^2)/100;
+        else
+            Gaussian_y = 1*exp(-((y_array)/sigma_y).^2./2);
+        end
+        
+        
+        % What is the realtion kx x?
+        dx = x_array(1,1)-x_array(1,2);
+        dkx = 2*pi/(N_Step_x*dx);
+        kx_transvers_array = dkx *linspace(1,N_Step_x,N_Step_x);
+        
+        Gaussian_kx = fftshift(fft(Gaussian_x));
+        
+        
+        % What is the realtion ky y?
+        dy = y_array(1,1)-y_array(1,2);
+        dky = 2*pi/(N_Step_y*dy);
+        ky_transvers_array = dky *linspace(1,N_Step_y,N_Step_y) ;
+        
+        Gaussian_ky = fftshift(fft(Gaussian_y));
+        for i_y = 1:size(ky_transvers_array,2)
+            Gaussian_XY (:,i_y)= Gaussian_kx'.*Gaussian_ky(1,i_y);
+        end
+        
+        axes(h.I_Fig_Beam_3D_F2)
+        surf(ky_transvers_array,kx_transvers_array,abs(Gaussian_XY).^2,'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+        
+        
+        
+        Gaussian_ky =[];
+        Gaussian_kx =[];
+        Gaussian_y =[];
+        Gaussian_x =[];
+        
+        
+        axes(h.I_Fig_Beam_3D_F5)
+        hold on
+        
+        for i_cryst = 1:size(pos_MCC,2)
+            if polarization_MCC(1,i_cryst) == 1
+                polarization = 's';
+            else
+                polarization = 'p';
+            end
+            
+            Z = Element_MCC(1,i_cryst);
+            
+            if pos_MCC(1,i_cryst) == 1
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D1] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    LaueD = 0;
+                else
+                    [R_S_3D1] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    LaueD = 1;
+                end
+                if get(h.crystal_line_chk_1,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D1(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end   
+                
+            elseif pos_MCC(1,i_cryst) == 2
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D2] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                else
+                    [R_S_3D2] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                end
+                if get(h.crystal_line_chk_2,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D2(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+            elseif pos_MCC(1,i_cryst) == 3
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D3] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                else
+                    [R_S_3D3] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                end
+                if get(h.crystal_line_chk_3,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D3(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+                
+            elseif pos_MCC(1,i_cryst) == 4
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D4] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                else
+                    [R_S_3D4] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                end
+                if get(h.crystal_line_chk_4,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D4(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+                
+            elseif pos_MCC(1,i_cryst) == 5
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D5] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                else
+                    [R_S_3D5] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                end
+                if get(h.crystal_line_chk_5,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D5(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+                
+            elseif pos_MCC(1,i_cryst) == 6
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D6] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                else
+                    [R_S_3D6] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                end
+                if get(h.crystal_line_chk_6,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D6(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+                
+            elseif pos_MCC(1,i_cryst) == 7
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D7] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                else
+                    [R_S_3D7] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                end
+                if get(h.crystal_line_chk_7,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D7(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+            elseif pos_MCC(1,i_cryst) == 8
+                if Geometry_MCC(1,i_cryst) ==1
+                    [R_S_3D8] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                else
+                    [R_S_3D8] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_MCC(1,i_cryst),h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                    
+                end
+                if get(h.crystal_line_chk_8,'Value') == 1
+                else
+                    R_S_3D_plot(1,:) = R_S_3D8(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                end
+            end
+           
+            
+            axis auto
+                
+            
+            R_S_3D_plot = [];
+        end
+        
+        
+        
+        Energy_Bragg = Energy_center;
+        
+        
+        if get(h.Mono_Beam_Check,'Value') == 1
+            
+            Thickness_Mono = 1e3;
+            Z_Mono = eval(get(h.Element_Mono,'String'));
+            crystal_orientation_Mono = get(h.crystal_orientation_Mono,'value');
+            
+            % Perfect crystal
+            Ang_asy_Deg_Mono = eval(get(h.Asymmetry_Mono,'String'));
+            
+            %Polarization Mono
+            if get(h.Polarization_s_Mono,'Value') == 1
+                Polarization_Mono = 's';
+            elseif get(h.Polarization_p_Mono,'Value') == 1
+                Polarization_Mono = 'p';
+            end
+            
+            
+            h_Miller_Mono = eval(get(h.H_Mono,'String'));
+            k_Miller_Mono = eval(get(h.K_Mono,'String'));
+            l_Miller_Mono = eval(get(h.L_Mono,'String'));
+            
+            vector_Miller_Mono = [h_Miller_Mono k_Miller_Mono l_Miller_Mono];
+            
+            [f_0_Mono,f_1_Mono,f_2_Mono,a_Par_Mono,b_Par_Mono,c_Par_Mono]=Element_Bragg_temp_Gui_08022017(Z_Mono,vector_Miller_Mono,Energy_Bragg);
+            
+            set(h.f0_Mono,'String',f_0_Mono)
+            set(h.f1_Mono,'String',f_1_Mono)
+            set(h.f2_Mono,'String',f_2_Mono)
+            
+            if get(h.f_check_values,'Value') == 1
+                f_0 = eval(get(h.f0_Mono,'String'));
+                f_1 = eval(get(h.f1_Mono,'String'));
+                f_2 = eval(get(h.f2_Mono,'String'));
+            end
+            
+            
+            [Theta_Bragg_Mono,Chi_0_Cx_Mono,Chi_h_Cx_Mono,R_0H_S_Mono,E_Scan,t_array,k_array] = Bragg_temp_Gui_test(Z_Mono,a_Par_Mono,b_Par_Mono,c_Par_Mono,Energy_Bragg,Energy_center,h_Miller_Mono,k_Miller_Mono,l_Miller_Mono,DWF,f_0_Mono,f_1_Mono,f_2_Mono,absor,Range_E_neg,Range_E_pos,Polarization_Mono,Ang_asy_Deg_Mono,Thickness_Mono,N_Step,0,crystal_orientation_Mono);
+            
+            axes(h.I_Fig_Beam_3D_F5)
+            plot(E_Scan,abs(R_0H_S_Mono).^2,'Parent',h.I_Fig_Beam_3D_F5)
+            title_Mono = strcat('Monochromator:(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),')');
+            title(title_Mono)
+            ylabel('Intensity (arb units)')
+            xlabel('Energy (eV)')
+            axis auto
+            hold on
+            
+            % To time space
+%             Gaussian_T = ifft(fftshift(R_0H_S_Mono));
+%             
+%             axes(h.I_Fig_Beam_3D_F1_GK)
+%             
+%             plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%             pause(1)
+%             
+%             %Definition time window
+%             lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+%             dt = t_array(1,2)- t_array(1,1);
+%             Nsam=floor(lt/dt);
+%             Gaussian_T(Nsam:end)=0;
+%             
+%             axes(h.I_Fig_Beam_3D_F1_GK)
+%             plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%             pause(1)
+%             %Back to k space
+%             Gaussian_K=fftshift(fft(Gaussian_T));
+%             % Gaussian_K=(fft(Gaussian_T));
+
+             Gaussian_K = R_0H_S_Mono;
+             axes(h.I_Fig_Beam_3D_F5)
+             hold on
+             plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+
+            
+
+            Gaussian_K_all(1,:) = Gaussian_K;
+            
+        end
+        
+        if get(h.Mono_Beam_Check,'Value') == 0
+            
+            WaveL_Bragg = h_planck*c_light/Energy_Bragg    ; %m
+            k0=2*pi/WaveL_Bragg;
+            rho = eval(get(h.rhoparameter,'String'));
+            %rho=5e-4; %related to number of periodes undulator 5e-4
+            sigk=rho*k0;
+            
+            phase = exp(1i*2*pi*random('unif',0,1,1,N_Step));
+            Gaussian_k=exp(-0.5*(k_array-k0).*(k_array-k0)/sigk/sigk);
+            
+            axes(h.I_Fig_Beam_3D_F1_T)
+            % k space gaussian define by machine porperties
+            plot(E_Scan_plot,Gaussian_k,'Parent',h.I_Fig_Beam_3D_F1_T)
+            ylabel('Intensity (arb units)')
+            xlabel('Energy (eV)')
+            axis auto
+            hold on
+            pause(0.1)
+            
+            
+            if get(h.Gaussian_Beam_SASE_Check,'Value') == 1
+                Gaussian_k= Gaussian_k.*phase;
+                % k space gaussian define by machine porperties
+                plot(E_Scan_plot,abs(Gaussian_k).^2,'Parent',h.I_Fig_Beam_3D_F1_T)
+                
+                % To time space
+                Gaussian_T = ifft(fftshift(Gaussian_k));
+                axes(h.I_Fig_Beam_3D_F1_T)
+                plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1_T)
+                pause(1)
+                
+                %Definition time window
+                lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+                dt = t_array(1,2)- t_array(1,1);
+                Nsam=floor(lt/dt);
+                Gaussian_T(Nsam:end)=0;
+                
+                plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1_GK)
+                pause(1)
+                
+                %Back to k space
+                Gaussian_K=fftshift(fft(Gaussian_T))*3;
+                
+                axes(h.I_Fig_Beam_3D_F5)
+                hold on
+                plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+                pause(1)
+                
+                Gaussian_K_all(1,:) = Gaussian_K;
+                %G_mono = R_S.*Gaussian_K;
+                G_mono = Gaussian_K;
+                
+            else
+                % To time space
+%                 Gaussian_T = ifft(fftshift(Gaussian_k));
+%                 %Gaussian_T = fftshift(ifft(Gaussian_k));
+%                 
+%                 axes(h.I_Fig_Beam_3D_F1_GK)
+%                 
+%                 plot(t_array,Gaussian_T,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%                 pause(1)
+%                 
+%                 %Definition time window
+%                 lt = eval(get(h.size_T_Beam,'String'))*1e-15; %seg
+%                 dt = t_array(1,2)- t_array(1,1);
+%                 Nsam=floor(lt/dt);
+%                 Gaussian_T(Nsam:end)=0;
+%                 
+%                 axes(h.I_Fig_Beam_3D_F1_GK)
+%                 plot(t_array,abs(Gaussian_T).^2,'Parent',h.I_Fig_Beam_3D_F1_GK)
+%                 pause(1)
+%                 %Back to k space
+%                 Gaussian_K=fftshift(fft(Gaussian_T));
+%                 % Gaussian_K=(fft(Gaussian_T));
+%                 
+%                 axes(h.I_Fig_Beam_3D_F5)
+%                 hold on
+%                 plot(E_Scan_plot,abs(Gaussian_K).^2,'Parent',h.I_Fig_Beam_3D_F5)
+%                 pause(1)
+                
+                Gaussian_K_all(1,:) = Gaussian_k;
+                %G_mono = R_S.*Gaussian_K;
+                G_mono = Gaussian_k;
+                
+            end
+        else
+            G_mono =  Gaussian_K;
+            
+        end
+        
+        for i_x = 1 :size(E_Scan_plot,2)
+            Gaussian_K_3D (:,:,i_x)= Gaussian_XY'.*G_mono(1,i_x);
+        end
+        
+        axes(h.I_Fig_Beam_3D_F2)
+        surf(kx_transvers_array,ky_transvers_array,sum(abs(Gaussian_K_3D).^2,3),'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+        view([20 20]);
+        
+        Crystal_range_step = 1;
+        Crystal_range_n = 0;
+        Crystal_range_p = 0;
+        
+        if get(h.crystal_line_chk_1,'Value') == 1
+        Crystal_range_p = eval(get(h.crystal_range_p_1,'string'));
+        Crystal_range_n = eval(get(h.crystal_range_n_1,'string'));
+        Crystal_range_step =eval(get( h.crystal_range_steps_1,'string'));
+        i_cryst = 1;
+        
+        elseif get(h.crystal_line_chk_2,'Value') == 1
+        Crystal_range_p =eval(get( h.crystal_range_p_2,'string'));
+        Crystal_range_n =eval(get( h.crystal_range_n_2,'string'));
+        Crystal_range_step = eval(get(h.crystal_range_steps_2,'string'));
+        i_cryst = 2;
+        
+        elseif get(h.crystal_line_chk_3,'Value') == 1
+        Crystal_range_p = eval(get(h.crystal_range_p_3,'string'));
+        Crystal_range_n = eval(get(h.crystal_range_n_3,'string'));
+        Crystal_range_step = eval(get(h.crystal_range_steps_3,'string'));
+        i_cryst = 3;
+        
+        elseif get(h.crystal_line_chk_4,'Value') == 1
+        Crystal_range_p = eval(get(h.crystal_range_p_4,'string'));
+        Crystal_range_n = eval(get(h.crystal_range_n_4,'string'));
+        Crystal_range_step = eval(get(h.crystal_range_steps_4,'string'));
+        i_cryst = 4;
+         
+        elseif get(h.crystal_line_chk_5,'Value') == 1
+        Crystal_range_p = eval(get(h.crystal_range_p_5,'string'));
+        Crystal_range_n =eval(get( h.crystal_range_n_5,'string'));
+        Crystal_range_step = eval(get(h.crystal_range_steps_5,'string'));
+        i_cryst = 5;
+          
+        elseif get(h.crystal_line_chk_6,'Value') == 1
+        Crystal_range_p = eval(get(h.crystal_range_p_6,'string'));
+        Crystal_range_n = eval(get(h.crystal_range_n_6,'string'));
+        Crystal_range_step = eval(get(h.crystal_range_steps_6,'string'));
+        i_cryst = 6;
+                  
+        elseif get(h.crystal_line_chk_7,'Value') == 1
+        Crystal_range_p = eval(get(h.crystal_range_p_7,'string'));
+        Crystal_range_n = eval(get(h.crystal_range_n_7,'string'));
+        Crystal_range_step = eval(get(h.crystal_range_steps_7,'string'));
+        i_cryst = 7; 
+                  
+        elseif get(h.crystal_line_chk_8,'Value') == 1
+        Crystal_range_p = eval(get(h.crystal_range_p_8,'string'));
+        Crystal_range_n = eval(get(h.crystal_range_n_8,'string'));
+        Crystal_range_step = eval(get(h.crystal_range_steps_8,'string'));
+        i_cryst = 8;
+        end
+        
+        Crystal_range_step_size = (Crystal_range_n - Crystal_range_p)/(Crystal_range_step);
+        if Crystal_range_step == 1
+            Crystal_range_step = Crystal_range_step-1;            
+        end
+
+        Gaussian_K_3D_int = Gaussian_K_3D;
+        
+        for i_steps = 1 : (Crystal_range_step)+1
+            
+            for i_average = 1: eval(get(h.Repetition_ave,'String'))
+                set(h.Repetition_num ,'string',i_average)
+                
+                if get(h.Pause_Dynamical_3D,'Value') == 1
+                    pause(1)
+                    for i_pause =1:1000
+                        if get(h.Pause_Dynamical_3D,'Value') == 0
+                            set (h.Status_Dynamical_3D,'String','Status: Paused','BackgroundColor',[0 0.8 0.8])
+                            pause(0.1)
+                        else
+                            set (h.Status_Dynamical_3D,'String','Status: working','BackgroundColor',[0.5 0.5 0.5])
+                        end
+                    end
+                else
+                    pause(0.1)
+                end
+                                
+                Gaussian_K_3D = Gaussian_K_3D_int;
+                
+                Energy_Scan = Crystal_range_p +(i_steps-1)* Crystal_range_step_size;
+                
+                set(h.Energy_point,'String',Energy_Scan)
+                
+                Energy_array(1,i_steps) = Energy_Scan;
+                set(h.Image_point,'String',i_steps)
+                
+                if Crystal_range_step == 1
+                    
+                else
+                    
+                    
+                    if Geometry_MCC(1,i_cryst) == 1
+                        [R_S_3DScan] = Bragg_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_Scan,h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                        
+                    else
+                        [R_S_3DScan] = Laue_temp_Gui_3D_test(Z,a_Par(1,i_cryst),b_Par(1,i_cryst),c_Par(1,i_cryst),Energy_center,Energy_center+Energy_Scan,h_MCC(1,i_cryst),k_MCC(1,i_cryst),l_MCC(1,i_cryst),DWF,f_0(1,i_cryst),f_1(1,i_cryst),f_2(1,i_cryst),absor,Range_E_neg,Range_E_pos,polarization,Asymmetry_MCC(1,i_cryst),Thickness_MCC(1,i_cryst),N_Step,Transmission_MCC(1,i_cryst),kx_transvers_array,ky_transvers_array,Normal_MCC(1,i_cryst));
+                        
+                    end
+                    
+                    
+                    R_S_3D_plot(1,:) = R_S_3DScan(N_Step_y/2,N_Step_x/2,:);
+                    plot(E_Scan_plot,abs(R_S_3D_plot).^2,'Parent',h.I_Fig_Beam_3D_F5)
+
+                end
+                
+                axes(h.I_Fig_Beam_3D_F4)
+                if get(h.More_Crystal_Chk,'value') == 1
+                    
+                    for i_cryst_scan = 1:size(pos_MCC,2)
+                        
+%                         size(R_S_3DScan)
+%                         R_S_3D_plot(:,:) = sum(abs(R_S_3DScan),1).^2;
+%                         surf(E_Scan_plot,kx_transvers_array,R_S_3D_plot,'Parent',h.I_Fig_Beam_3D_F4,'edgecolor','none')
+%                         
+%                         view([20 20]);
+%                         R_S_3D_plot = [];
+                        
+                        if get(h.Pause_Dynamical_3D,'Value') == 1
+                            pause(0)
+                            for i_pause =1:1000
+                                if get(h.Pause_Dynamical_3D,'Value') == 1
+                                    pause(0.1)
+                                else
+                                end
+                            end
+                        else
+                            pause(1)
+                        end
+                        
+                        if i_cryst_scan == 1
+                            if get(h.crystal_line_chk_1,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D1;
+                            end
+                            
+                        elseif i_cryst_scan == 2
+                            if get(h.crystal_line_chk_2,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D2;
+                            end
+                            
+                        elseif i_cryst_scan == 3
+                            if get(h.crystal_line_chk_3,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D3;
+                            end
+                            
+                        elseif i_cryst_scan == 4
+                            if get(h.crystal_line_chk_4,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D4;
+                            end
+                            
+                        elseif i_cryst_scan == 5
+                            if get(h.crystal_line_chk_5,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D5;
+                            end
+                            
+                        elseif i_cryst_scan == 6
+                            if get(h.crystal_line_chk_6,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D6;
+                            end
+                            
+                        elseif i_cryst_scan == 7
+                            if get(h.crystal_line_chk_7,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D7;
+                            end
+                            
+                        elseif i_cryst_scan == 8
+                            if get(h.crystal_line_chk_8,'Value') == 1
+                                R_S_3D = R_S_3DScan;
+                            else
+                                R_S_3D = R_S_3D8;
+                            end
+                            
+                        end
+                        % Convolute both signals R MONO and R crystal in 2D
+                        
+                        R_S_G = R_S_3D.*Gaussian_K_3D;
+                        
+                        Gaussian_K_3D = R_S_G;
+                        %Gaussian_K_3D = [];
+                        
+                        axes(h.I_Fig_Beam_3D_F2)
+                        surf(x_array,y_array,sum(abs(R_S_G).^2,3),'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                        view([20 20]);
+                    end
+                    
+                    if get(h.Shift_x,'Value') == 1
+                        R_S_G = fftshift(R_S_G,1);
+                    end
+                    if get(h.Shift_y,'Value') == 1
+                        R_S_G = fftshift(R_S_G,2);
+                    end
+                    if get(h.Shift_t2,'Value') == 1
+                        R_S_G = fftshift(R_S_G,3);
+                    end
+                    
+                    Gaussian_R = (ifftn(R_S_G));
+                    
+                    
+                    axes(h.I_Fig_Beam_3D_F1)
+                    if get(h.Time_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1
+                        Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,1);
+                        surf(t_array,x_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                        
+                    elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Time_um_3D_Check,'Value') == 1
+                        Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,2);
+                        surf(t_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                        
+                    elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1
+                        Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,3);
+                        surf(x_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                    end
+                    view([90 -90])
+                    Gaussian_R_plot = [];
+                    pause(1)
+                    
+                    %  Gaussian_K_3D = fftshift(fftn(Gaussian_R));
+                    
+                    % end
+%                    Gaussian_K_3D = [];
+                    
+                    axes(h.I_Fig_Beam_3D_F3)
+                    if get(h.Time_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),2);
+                        plot_array = t_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                        
+                    elseif get(h.Transverse_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),3);
+                        plot_array = x_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                        
+                    elseif get(h.Transversey_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,2),3);
+                        plot_array = y_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                    end
+                    hold on
+                    
+                    Intensity_array(1,i_steps) = sum(sum(sum(abs(Gaussian_R).^2,1),2),3);
+                    axes(h.I_Fig_Beam_3D_F6)
+                    plot(Energy_array(1,i_steps),Intensity_array(1,i_steps),'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','none','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                    
+                    ylabel('Intensity (arb units)')
+                    xlabel('Energy (eV)')
+                    xlim auto
+                    hold on
+                    pause(0.1)
+                    
+                else
+                    R_S_3D_plot(:,:) = sum(abs(R_S_3D1),1).^2;
+                    surf(E_Scan_plot,kx_transvers_array,R_S_3D_plot,'Parent',h.I_Fig_Beam_3D_F4,'edgecolor','none')
+                    
+                    view([20 20]);
+                    R_S_3D_plot = [];
+                    
+                    if get(h.Pause_Dynamical_3D,'Value') == 1
+                        pause(0)
+                        for i_pause =1:1000
+                            if get(h.Pause_Dynamical_3D,'Value') == 1
+                                pause(0.1)
+                            else
+                            end
+                        end
+                    else
+                        pause(1)
+                    end
+                    
+                    
+                    % Convolute both signals R MONO and R crystal in 2D
+                    R_S_G = R_S_3D1.*Gaussian_K_3D;
+                    
+                    
+                    Gaussian_K_3D = [];
+                    
+                    axes(h.I_Fig_Beam_3D_F2)
+                    surf(x_array,y_array,sum(abs(R_S_G).^2,3),'Parent',h.I_Fig_Beam_3D_F2,'edgecolor','none')
+                    view([20 20]);
+                    
+                    
+                    if get(h.Shift_x,'Value') == 1
+                        R_S_G = fftshift(R_S_G,1);
+                    end
+                    if get(h.Shift_y,'Value') == 1
+                        R_S_G = fftshift(R_S_G,2);
+                    end
+                    if get(h.Shift_t2,'Value') == 1
+                        R_S_G = fftshift(R_S_G,3);
+                    end
+                    
+                    Gaussian_R = (ifftn(R_S_G));
+                    
+                    
+                    
+                    axes(h.I_Fig_Beam_3D_F1)
+                    if get(h.Time_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1
+                        Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,1);
+                        surf(t_array,x_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                        
+                    elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Time_um_3D_Check,'Value') == 1
+                        Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,2);
+                        surf(t_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                        
+                    elseif get(h.Transversey_um_3D_Check,'Value') == 1 && get(h.Transverse_um_3D_Check,'Value') == 1
+                        Gaussian_R_plot(:,:) = sum(abs(Gaussian_R).^2,3);
+                        surf(x_array,y_array,Gaussian_R_plot,'Parent',h.I_Fig_Beam_3D_F1,'edgecolor','none')
+                    end
+                    view([90 -90])
+                    Gaussian_R_plot = [];
+                    
+                    axes(h.I_Fig_Beam_3D_F3)
+                    if get(h.Time_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),2);
+                        plot_array = t_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                    elseif get(h.Transverse_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,1),3);
+                        plot_array = x_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                        
+                    elseif get(h.Transversey_um_F4_Check,'Value') == 1
+                        Intensityplot_array(i_steps,:) = sum(sum(abs(Gaussian_R).^2,2),3);
+                        plot_array = y_array;
+                        plot(plot_array',Intensityplot_array(i_steps,:),'Parent',h.I_Fig_Beam_3D_F3)
+                    end
+                    hold on
+                    
+                    Intensity_array(1,i_steps) = sum(sum(sum(abs(Gaussian_R).^2,1),2),3);
+                    axes(h.I_Fig_Beam_3D_F6)
+                    plot(Energy_array(1,i_steps),Intensity_array(1,i_steps),'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','none','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+                    title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+                    title(title_Convolution)
+                    ylabel('Intensity (arb units)')
+                    xlabel('Energy (eV)')
+                    xlim auto
+                    hold on
+                    pause(0.1)
+                end
+
+                
+                save_folder_intermediate = '/das/work/p15/p15366/RN84/SwissFEL Simulations/Calculation_Support';
+                h.save_folder_intermediate = save_folder_intermediate;
+                
+                if get(h.Channel_Save_XY_Check,'value')
+                    Gaussian_R_XY(:,:) = sum(abs(Gaussian_R).^2,3);  
+                    R_S_G_XY(:,:) = sum(abs(R_S_G).^2,3);  
+                    
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    save(filename_Output,'Gaussian_R_XY','R_S_G_XY','G_mono');
+                end
+                
+                if get(h.Channel_Save_XT_Check,'value')
+                    Gaussian_R_XT(:,:) = sum(abs(Gaussian_R).^2,1);  
+                    R_S_G_XT(:,:) = sum(abs(R_S_G).^2,2);
+                    
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    save(filename_Output,'Gaussian_R_XT','R_S_G_XT','G_mono');
+                end
+                
+                if get(h.Channel_Save_YT_Check,'value')
+                    Gaussian_R_YT(:,:) = sum(abs(Gaussian_R).^2,2);                        
+                    R_S_G_YT(:,:) = sum(abs(R_S_G).^2,1);
+                    
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    save(filename_Output,'Gaussian_R_YT','R_S_G_YT','G_mono');
+                end
+                
+                if get(h.Channel_Save_All_Check,'value') 
+                    Channel_rep = eval(get(h.Repetition_channel,'String'));
+                    Name_Filep = sprintf('Gaussian_R_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    save(filename_Output,'Gaussian_R','R_S_G','G_mono');
+                end
+                
+            end
+            Gaussian_R_sum = Gaussian_R.*0;
+            R_S_G_sum = R_S_G.*0;
+            G_mono_sum = G_mono.*0;
+            Gaussian_R = [];
+            R_S_G = [];
+            
+            
+            if get(h.Channel_Save_XY_Check,'value')
+                Gaussian_R_XY_sum = Gaussian_R_XY.*0;
+                R_S_G_XY_sum = R_S_G_XY.*0;
+                G_mono_XY_sum = G_mono.*0;
+                Gaussian_R_XY = [];
+                R_S_G_XY = [];
+                
+            end
+            
+            if get(h.Channel_Save_XT_Check,'value')
+                Gaussian_R_XT_sum = Gaussian_R_XT.*0;
+                R_S_G_XT_sum = R_S_G_XT.*0;
+                G_mono_XT_sum = G_mono.*0;
+                Gaussian_R_XT = [];
+                R_S_G_XT = [];
+                
+            end
+            
+            if get(h.Channel_Save_YT_Check,'value')
+                Gaussian_R_YT_sum = Gaussian_R_YT.*0;
+                R_S_G_YT_sum = R_S_G_YT.*0;
+                G_mono_YT_sum = G_mono.*0;
+                Gaussian_R_YT = [];
+                R_S_G_YT = [];
+            end
+            G_mono = [];
+            Gaussian_R = [];
+            R_S_G = [];
+            G_mono = [];
+            Gaussian_R_XY_ave = [];
+            R_S_G_XY_ave = [];
+            Gaussian_R_XT_ave = [];
+            R_S_G_XT_ave = [];
+            Gaussian_R_YT_ave = [];
+            R_S_G_YT_ave = [];
+            Gaussian_R_ave = [];
+            R_S_G_ave = [];
+            
+            for i_average = 1: eval(get(h.Repetition_ave,'String'))
+                if get(h.Channel_Save_XY_Check,'value')
+                    Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    load(filename_input)
+                    Gaussian_R_XY_sum = Gaussian_R_XY_sum + Gaussian_R_XY;
+                    R_S_G_XY_sum = R_S_G_XY_sum + R_S_G_XY;
+                    G_mono_XY_sum = G_mono_XY_sum +G_mono;
+                    if get(h.Channel_Save_average_Check,'value') == 0
+                        delete(filename_input)
+                    end
+                end
+                
+                if get(h.Channel_Save_XT_Check,'value')
+                    Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    load(filename_input)
+                    Gaussian_R_XT_sum = Gaussian_R_XT_sum + Gaussian_R_XT;
+                    R_S_G_XT_sum = R_S_G_XT_sum + R_S_G_XT;
+                    G_mono_XT_sum = G_mono_XT_sum +G_mono;
+                    if get(h.Channel_Save_average_Check,'value') == 0
+                        delete(filename_input)
+                    end
+                end
+                
+                if get(h.Channel_Save_YT_Check,'value')
+                    Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    load(filename_input)
+                    Gaussian_R_YT_sum = Gaussian_R_YT_sum + Gaussian_R_YT;
+                    R_S_G_YT_sum = R_S_G_YT_sum + R_S_G_YT;
+                    G_mono_YT_sum = G_mono_YT_sum +G_mono;
+                    if get(h.Channel_Save_average_Check,'value') == 0
+                        delete(filename_input)
+                    end
+                end
+                
+                if get(h.Channel_Save_All_Check,'value')
+                    Name_Filep = sprintf('Gaussian_R_Energy_%0.1d_channel_%0.1d_point_%0.1d.mat',i_steps,Channel_rep,i_average);
+                    filename_input = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                    load(filename_input)
+                    
+                    Gaussian_R_sum = Gaussian_R_sum + Gaussian_R;
+                    R_S_G_sum = R_S_G_sum + R_S_G;
+                    G_mono_sum = G_mono_sum +G_mono;
+                    if get(h.Channel_Save_average_Check,'value') == 0
+                        delete(filename_input)
+                    end
+                end
+                
+            end
+            
+            if get(h.Channel_Save_XY_Check,'value')
+                Gaussian_R_XY_ave = Gaussian_R_XY_sum./eval(get(h.Repetition_ave,'String'));
+                R_S_G_XY_ave = R_S_G_XY_sum./eval(get(h.Repetition_ave,'String'));
+                G_mono_ave = G_mono_XY_sum./eval(get(h.Repetition_ave,'String'));
+                
+                Name_Filep = sprintf('Gaussian_R_XY_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                save(filename_Output,'Gaussian_R_XY_ave','R_S_G_XY_ave','G_mono_ave');
+                
+                Gaussian_R_XY=[];
+                G_mono=[];
+                R_S_G_XY=[];
+                Gaussian_R_XY_sum = [];
+                R_S_G_XY_sum=[];
+                G_mono_XY_sum =[];
+                G_mono_ave= [];
+                Gaussian_R_XY_ave = [];
+                R_S_G_XY_ave = [];
+            end
+            if get(h.Channel_Save_XT_Check,'value')
+                Gaussian_R_XT_ave = Gaussian_R_XT_sum./eval(get(h.Repetition_ave,'String'));
+                R_S_G_XT_ave = R_S_G_XT_sum./eval(get(h.Repetition_ave,'String'));
+                G_mono_ave = G_mono_XT_sum./eval(get(h.Repetition_ave,'String'));
+                
+                Name_Filep = sprintf('Gaussian_R_XT_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                save(filename_Output,'Gaussian_R_XT_ave','R_S_G_XT_ave','G_mono_ave');
+                
+                Gaussian_R_XT=[];
+                G_mono=[];
+                R_S_G_XT=[];
+                Gaussian_R_XT_sum = [];
+                R_S_G_XT_sum=[];
+                G_mono_XT_sum =[];
+                G_mono_ave= [];                
+                R_S_G_XT_ave = [];               
+                Gaussian_R_XT_ave = [];
+                
+            end
+            if get(h.Channel_Save_YT_Check,'value')
+                Gaussian_R_YT_ave = Gaussian_R_YT_sum./eval(get(h.Repetition_ave,'String'));
+                R_S_G_YT_ave = R_S_G_YT_sum./eval(get(h.Repetition_ave,'String'));
+                G_mono_ave = G_mono_YT_sum./eval(get(h.Repetition_ave,'String'));
+                
+                Name_Filep = sprintf('Gaussian_R_YT_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                save(filename_Output,'Gaussian_R_YT_ave','R_S_G_YT_ave','G_mono_ave');
+                Gaussian_R_YT=[];
+                G_mono=[];
+                R_S_G_YT=[];
+                Gaussian_R_YT_sum = [];
+                R_S_G_YT_sum=[];
+                G_mono_YT_sum =[];
+                G_mono_ave= [];
+                Gaussian_R_YT_ave = [];
+                R_S_G_YT_ave = [];
+                
+            end
+            if get(h.Channel_Save_All_Check,'value')
+                Gaussian_R_ave = Gaussian_R_sum./eval(get(h.Repetition_ave,'String'));
+                R_S_G_ave = R_S_G_sum./eval(get(h.Repetition_ave,'String'));
+                G_mono_ave = G_mono_sum./eval(get(h.Repetition_ave,'String'));
+                
+                Name_Filep = sprintf('Gaussian_R_Energy_%0.1d_channel_%0.1d_average.mat',i_steps,Channel_rep);
+                filename_Output = sprintf('%s/%s',save_folder_intermediate,Name_Filep);
+                save(filename_Output,'Gaussian_R_ave','R_S_G_ave','G_mono_ave');
+                
+                Gaussian_R=[];
+                G_mono=[];
+                R_S_G=[];
+                Gaussian_R_sum = [];
+                R_S_G_sum=[];
+                G_mono_sum =[];
+                G_mono_ave= [];
+                Gaussian_R_ave = [];
+                R_S_G_ave = [];
+                
+            end
+            
+            
+        end
+            
+        
+        Gaussian_XY = [];
+        
+        
+
+        if get(h.Mono_Scan_Check,'value') == 1
+            
+            axes(h.I_Fig_Beam_3D_F6)
+            plot(Energy_array,Intensity_array,'Parent',h.I_Fig_Beam_3D_F6,'LineStyle','-','Marker','o','MarkerFaceColor','r','MarkerEdgeColor','r');
+            title_Convolution = strcat('Monochromator(',get(h.H_Mono,'String'),',',get(h.K_Mono,'String'),',',get(h.L_Mono,'String'),') Convoluted with (',num2str(h_Miller),',',num2str(k_Miller),',',num2str(l_Miller),')');
+            title(title_Convolution)
+            ylabel('Intensity (arb units)')
+            xlabel('Energy (eV)')
+            hold on
+            xlim([E_Scan(1,1),E_Scan(1,size(E_Scan,2))])
+            
+            
+            axes(h.I_Fig_Beam_3D_F3)
+            hold off
+            surf(plot_array,Energy_array,Intensityplot_array,'Parent',h.I_Fig_Beam_3D_F3,'edgecolor','none')
+            zlabel('Intensity (arb units)')
+            xlabel('Transverse displecement (m)')
+            ylabel('Energy (eV)')
+            axis auto
+            
+            h.x_array = x_array;
+            h.y_array = y_array;
+            h.t_array = t_array;
+            h.Energy_array = Energy_array;
+            %                     h.Gaussian_R_all = Gaussian_R_all;
+            h.plot_array = plot_array;
+            h.Intensityx_array = Intensityplot_array;
+            h.E_Scan_plot = E_Scan_plot;
+            h.kx_transvers_array = kx_transvers_array;
+            h.ky_transvers_array = ky_transvers_array;
+            %                     h.R_S_G_all = R_S_G_all;
+            h.FBD = FBD;
+            h.LaueD = LaueD;
+            h.R_S_all = R_S_3D1;
+            if get(h.Mono_Beam_Check,'Value') == 1
+                h.R_0H_S_Mono_all = R_0H_S_Mono_all;
+            else
+                h.R_0H_S_Mono_all = Gaussian_K_all;
+            end
+        end
+
+        
+        h.x_array = x_array;
+        h.y_array = y_array;
+        h.t_array = t_array;
+        h.Energy_array = Energy_array;
+        h.plot_array = plot_array;
+        h.Intensityx_array = Intensityplot_array;
+        h.E_Scan_plot = E_Scan_plot;
+        h.kx_transvers_array = kx_transvers_array;
+        h.ky_transvers_array = ky_transvers_array;
+        h.FBD = FBD;
+        h.LaueD = LaueD;
+        h.R_S_all = R_S_3D1;
+        if get(h.Mono_Beam_Check,'Value') == 1
+            h.R_0H_S_Mono_all = R_0H_S_Mono_all;
+        else
+            h.R_0H_S_Mono_all = Gaussian_K_all;
+        end
+        
+        set (h.Status_Dynamical_3D,'String','Status: Finnish','BackgroundColor',[0 0 0.9])
+        
+    end
+end
+   

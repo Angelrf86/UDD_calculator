@@ -56,8 +56,8 @@ end
 
 Ang_asy = Ang_asy_Deg*pi/180;
 
-gam_0 = sin(pi/2-Theta_Bragg+Ang_asy);
-gam_H = sin(pi/2+Theta_Bragg-Ang_asy);
+gam_0 = sin(pi/2 - Theta_Bragg + Ang_asy);
+gam_H = sin(pi/2 + Theta_Bragg - Ang_asy);
 
 b = gam_0/gam_H;
 

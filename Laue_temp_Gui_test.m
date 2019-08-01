@@ -113,9 +113,9 @@ k0_vect = [repmat(kx0, 1, N_Step); repmat(ky0, 1, N_Step); kz0];
 
 k0_beam = Matrix_Bragg*k0_vect;
 
-alfa_beam = m_d*k0_beam/2/pi;
+alfa_beam = m_d * k0_beam / (2 * pi);
 
-alfa =(2*alfa_beam + 1/(d_hkl)^2)*4*pi*pi /k0_Bragg^2 ;
+alfa =(2 * alfa_beam + 1 / (d_hkl)^2)* 4 * pi*pi /k0_Bragg^2 ;
 
 %Definition of y
 y =0.5*(b*alfa + Chi_0_Cx*(1-b));

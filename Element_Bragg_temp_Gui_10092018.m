@@ -95,7 +95,7 @@ if size(element,2) == 1
         end
 
       %  num = xlsread('Diamond_f1_f2.xlsx');
-         num = xlsread('Cf1f2.xlsx');
+         num = xlsread('elements/Cf1f2.xlsx');
        
          for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -132,7 +132,7 @@ if size(element,2) == 1
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Wf1f2.xlsx');
+        num = xlsread('elements/Wf1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -291,7 +291,7 @@ elseif size(element,2) == 2
             f_0 =  5.747483396891868;
         end
         %num = xlsread('Silicon_f1_f2.xlsx');
-        num = xlsread('Sif1f2.xlsx');
+        num = xlsread('elements/Sif1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)
@@ -441,7 +441,7 @@ elseif size(element,2) == 2
              f_0 = 19.18393337563041;
         end
         %num = xlsread('Silicon_f1_f2.xlsx');
-        num = xlsread('Gef1f2.xlsx');
+        num = xlsread('elements/Gef1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)
@@ -484,7 +484,7 @@ elseif size(element,2) == 2
         f_0 = f_0 + c;
         
          
-         num = xlsread('Cuf1f2.xlsx');
+         num = xlsread('elements/Cuf1f2.xlsx');
          for i_Energy = 2:size(num,1)
              if Energy_Bragg > num(i_Energy-1,1)
                  if Energy_Bragg <= num(i_Energy,1)
@@ -526,7 +526,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Fef1f2.xlsx');
+        num = xlsread('elements/Fef1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -563,7 +563,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Nif1f2.xlsx');
+        num = xlsread('elements/Nif1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -600,7 +600,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Auf1f2.xlsx');
+        num = xlsread('elements/Auf1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -637,7 +637,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Pbf1f2.xlsx');
+        num = xlsread('elements/Pbf1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -674,7 +674,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Alf1f2.xlsx');
+        num = xlsread('elements/Alf1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -711,7 +711,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Agf1f2.xlsx');
+        num = xlsread('elements/Agf1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -747,7 +747,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Ptf1f2.xlsx');
+        num = xlsread('elements/Ptf1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -784,7 +784,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Crf1f2.xlsx');
+        num = xlsread('elements/Crf1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -820,7 +820,7 @@ elseif size(element,2) == 2
         end
         f_0 = f_0 + c;
         
-        num = xlsread('Cof1f2.xlsx');
+        num = xlsread('elements/Cof1f2.xlsx');
         
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
@@ -987,7 +987,7 @@ elseif size(element,2) == 4
             
         end
         
-        num = xlsread('Inf1f2.xlsx');
+        num = xlsread('elements/Inf1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)
@@ -997,7 +997,7 @@ elseif size(element,2) == 4
                 end
             end
         end
-        num = xlsread('Sbf1f2.xlsx');
+        num = xlsread('elements/Sbf1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)
@@ -1048,7 +1048,7 @@ elseif size(element,2) == 4
             f0_2 = 40.525056678251275;
         end
             
-        num = xlsread('Cdf1f2.xlsx');
+        num = xlsread('elements/Cdf1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)
@@ -1058,7 +1058,7 @@ elseif size(element,2) == 4
                 end
             end
         end
-        num = xlsread('Tef1f2.xlsx');
+        num = xlsread('elements/Tef1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)
@@ -1109,7 +1109,7 @@ elseif size(element,2) == 4
             f0_2 = 24.380221259258064;
         end
             
-        num = xlsread('Gaf1f2.xlsx');
+        num = xlsread('elements/Gaf1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)
@@ -1119,7 +1119,7 @@ elseif size(element,2) == 4
                 end
             end
         end
-        num = xlsread('Asf1f2.xlsx');
+        num = xlsread('elements/Asf1f2.xlsx');
         for i_Energy = 2:size(num,1)
             if Energy_Bragg > num(i_Energy-1,1)
                 if Energy_Bragg <= num(i_Energy,1)

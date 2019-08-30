@@ -7,6 +7,7 @@ vector_Miller = [h_Miller, k_Miller, l_Miller];
 
 %Cell Parameters
 if size(element,2) == 1
+    
     if element == 'C'
         Z = 6;
         
@@ -180,6 +181,9 @@ elseif size(element,2) == 2
         alpha_Par = 90;
         beta_Par = 90;
         gamma_Par = 90;
+        
+        
+        cell_structure = 'dia'; %crystalline structure
 
         if vector_Miller == [5,1,3]
             f_0 = 5.92227;
@@ -318,6 +322,8 @@ elseif size(element,2) == 2
         alpha_Par = 90;
         beta_Par = 90;
         gamma_Par = 90;
+        
+        cell_structure = 'dia'; %crystalline structure
         
          if vector_Miller == [5,1,3]
              f_0 = 15.622178200533803;
@@ -1128,7 +1134,6 @@ elseif size(element,2) == 4
                 end
             end
         end 
-        565.315
     end
     
     F0 = ((Z1 + f1_1 + 1i * f1_2) + exp(1i*0/4*pi)*(Z2 + f2_1 + 1i * f2_2))*(1+(-1)^(h_Miller+k_Miller)+(-1)^(h_Miller+l_Miller)+(-1)^(k_Miller+l_Miller));

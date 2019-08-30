@@ -72,7 +72,7 @@ q = b*Chi_h_Cx*Chi_h_n_Cx*abs(P)^2;
 
 %Range work
 %In case there is assymetry 
-Theta_Bragg_Asy = Theta_Bragg + Ang_asy
+Theta_Bragg_Asy = Theta_Bragg + Ang_asy;
 
 WaveL_Bragg_neg = h_planck*c_light/(Energy_center - Range_E_neg); %m
 WaveL_Bragg_pos = h_planck*c_light/(Energy_center + Range_E_pos); %

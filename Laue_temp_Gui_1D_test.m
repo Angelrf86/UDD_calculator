@@ -1,4 +1,4 @@
-function [Theta_Bragg_Asy,Chi_0_Cx,Chi_h_Cx,R_0H_S,E_Scan_plot,G_0H,t_array,Dwidth] = Laue_temp_Gui_1D_test(a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,F0,FH,F_H,absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,FBD,crystal_orientation)
+function [Theta_Bragg_Asy,Chi_0_Cx,Chi_h_Cx,R_0H_S,E_Scan_plot,G_0H,t_array,k_array,Dwidth] = Laue_temp_Gui_1D_test(a_Par,b_Par,c_Par,Energy_Bragg,Energy_center,h_Miller,k_Miller,l_Miller,DWF,F0,FH,F_H,absor,Range_E_neg,Range_E_pos,Polarization,Ang_asy_Deg,Thickness,N_Step,FBD,crystal_orientation)
 %%% Calculations
 % Constants
 r_e = 2.8179403267*10^(-15);
@@ -106,6 +106,7 @@ Energy = h_planck*c_light./WaveL;
 E_Scan =  (Energy-Energy_Bragg);
 
 k0_Theta = 2*pi./WaveL;
+k_array = k0_Theta;
 
 kz0 = sqrt(k0_Theta.^2-ky0^2-kx0^2);
 
@@ -165,15 +166,15 @@ dt = T / N_Step;
 
 t_array = dt * linspace(1,N_Step,N_Step);
 
-
-d_hkl = d_hkl;
-Theta_Bragg_De  = Theta_Bragg_De ;
-
-w_D = 4 * r_e * d_hkl^2 *abs(FH) *abs(P)/ (pi * V);
+w_D = 4 * r_e * d_hkl^2 *abs(FH) * abs(P)/ (pi * V);
 
 w_s = w_D *tan(Theta_Bragg);
 
 Dl_l = w_s/2*cot(Theta_Bragg);
 
 Dwidth = round(2* P* abs(Chi_h_Cx) * sqrt(abs(b))/sin(2*Theta_Bragg),8);
+
+Delta = abs(WaveL_Bragg * sqrt(gam_0*abs(gam_H))/P/sqrt(Chi_h_Cx*Chi_h_n_Cx));
+
+
 

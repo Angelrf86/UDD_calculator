@@ -144,8 +144,8 @@ R1 = (- y - sqrt(q + y.^2))/(Chi_h_n_Cx*P);
 X_1 = 0.5*(Chi_0_Cx +(-y + sqrt(q + y.^2)));
 X_2 = 0.5*(Chi_0_Cx +(-y - sqrt(q + y.^2)));
 
-expX1 = exp(1i*k0_Bragg/gam_0*X_1*Thickness);
-expX2 = exp(1i*k0_Bragg/gam_0*X_2*Thickness);
+expX1 = exp(1i.*k0_Bragg./gam_0.*X_1.*Thickness);
+expX2 = exp(1i.*k0_Bragg./gam_0.*X_2.*Thickness);
 
 if FBD == 1
     R_0_0_S = (R2.*expX1-R1.*expX2)./(R2-R1);
@@ -156,7 +156,19 @@ else
     R_S_3D =  R_0_H_S;
 end
 
-
+%
 % figure
-% R_S_3D_plot(1,:) = R_S_3D(15,50,:);
-% plot(E_Scan,abs(R_S_3D_plot).^2)
+% R_S_3D_plot(:,:) = R_S_3D(:,:,size(R_S_3D,3)/2);
+% imagesc(abs(R_S_3D_plot).^2)
+% 
+% figure
+% R_S_3D_plot(:,:) = R_S_3D(:,:,1);
+% imagesc(abs(R_S_3D_plot).^2)
+% 
+% figure
+% R_S_3D_plot(:,:) = R_S_3D(:,:,size(R_S_3D,3));
+% imagesc(abs(R_S_3D_plot).^2)
+% 
+% figure
+% R_S_3D_plot(:,:) = sum(R_S_3D,3);
+% imagesc(abs(R_S_3D_plot).^2)

@@ -54,8 +54,8 @@ end
 
 Ang_asy = Ang_asy_Deg*pi/180;
 
-gam_0 = sin(pi/2 + Theta_Bragg + Ang_asy);
-gam_H = sin(-pi/2 + Theta_Bragg - Ang_asy);
+gam_0 = cos(-pi/2 + Theta_Bragg + Ang_asy);
+gam_H = cos(pi/2 + Theta_Bragg - Ang_asy);
 
 b = gam_0/gam_H;
 
@@ -152,8 +152,8 @@ R1 = (- y - sqrt(q + y.^2))/(Chi_h_n_Cx*P);
 X_1 = 0.5*(Chi_0_Cx +(-y + sqrt(q + y.^2)));
 X_2 = 0.5*(Chi_0_Cx +(-y - sqrt(q + y.^2)));
 
-expX1 = exp(1i*k0_Bragg/gam_0*X_1*Thickness);
-expX2 = exp(1i*k0_Bragg/gam_0*X_2*Thickness);
+expX1 = exp(1i.*k0_Bragg./gam_0.*X_1.*Thickness);
+expX2 = exp(1i.*k0_Bragg./gam_0.*X_2.*Thickness);
 
 if FBD == 0
     R_0_H_S = R2.*R1.*(expX2-expX1)./(R2.*expX2-R1.*expX1);
@@ -164,6 +164,7 @@ else
 end
 % 
 % 
+% 
 % figure
-% R_S_3D_plot(1,:) = R_S_3D(15,50,:);
-% plot(E_Scan,abs(R_S_3D_plot).^2)
+% R_S_3D_plot(:,:) = R_S_3D(:,:,size(R_S_3D,3)/2);
+% imagesc(abs(R_S_3D_plot).^2)

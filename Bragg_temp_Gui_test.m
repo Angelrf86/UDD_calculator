@@ -6,6 +6,8 @@ h_planck = 4.13566733*10^(-15);% eV
 %h_plank and c_light
 hc = 1.2398e-06;
 
+m_electron = 9.109e-31; %Kg
+
 % Wave length Bragg
 WaveL_Bragg = hc/Energy_Bragg    ; %m
 
@@ -52,8 +54,9 @@ end
 
 Ang_asy = Ang_asy_Deg*pi/180;
 
-gam_0 = sin(pi/2 + Theta_Bragg + Ang_asy);
-gam_H = sin(-pi/2 + Theta_Bragg - Ang_asy);
+gam_0 = cos(-pi/2 + Theta_Bragg + Ang_asy);
+gam_H = cos(pi/2 + Theta_Bragg - Ang_asy);
+
 
 b = gam_0/gam_H;
 
@@ -165,5 +168,11 @@ dt = T / N_Step;
 t_array = dt * linspace(1,N_Step,N_Step);
 
 Dwidth = round(2* P* abs(Chi_h_Cx) * sqrt(abs(b))/sin(2*Theta_Bragg),8);
+
+Delta = abs(WaveL_Bragg * sqrt(gam_0 * abs(gam_H)) / P/ sqrt(Chi_h_Cx * Chi_h_n_Cx));
+
+
+
+
 %figure
 %plot(E_Scan,abs(R_S).^2)

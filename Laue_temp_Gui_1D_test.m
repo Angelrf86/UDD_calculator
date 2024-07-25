@@ -166,15 +166,15 @@ dt = T / N_Step;
 
 t_array = dt * linspace(1,N_Step,N_Step);
 
-
-d_hkl = d_hkl;
-Theta_Bragg_De  = Theta_Bragg_De ;
-
-w_D = 4 * r_e * d_hkl^2 *abs(FH) *abs(P)/ (pi * V);
+w_D = 4 * r_e * d_hkl^2 *abs(FH) * abs(P)/ (pi * V);
 
 w_s = w_D *tan(Theta_Bragg);
 
 Dl_l = w_s/2*cot(Theta_Bragg);
 
 Dwidth = round(2* P* abs(Chi_h_Cx) * sqrt(abs(b))/sin(2*Theta_Bragg),8);
+
+Delta = abs(WaveL_Bragg * sqrt(gam_0*abs(gam_H))/P/sqrt(Chi_h_Cx*Chi_h_n_Cx));
+
+
 

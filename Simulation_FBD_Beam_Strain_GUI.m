@@ -4259,15 +4259,15 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
                 Thickenes_Layer = eval(get(h.Thickness,'String'))*1e4;
                 %incident surface
                 Strain_Val_a = eval(get(h.Crystal_Distortion_tan_da,'String')); %Strain in the surface
-                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
-                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
+                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
+                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
                 Interfase_Val_a = eval(get(h.width_strain_a,'String'));  %Interdace
                 Interfase_Val_b = eval(get(h.width_strain_b,'String'));  %Interdace
                 Interfase_Val_c = eval(get(h.width_strain_c,'String'));  %Interdace
                 %Rear surface
                 Strain_Val_a2 = eval(get(h.Crystal_Distortion_tan_da2,'String')); %Strain in the surface
-                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
-                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
+                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
+                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
                 Interfase_Val_a2 = eval(get(h.width_strain_a2,'String'));  %Interdace
                 Interfase_Val_b2 = eval(get(h.width_strain_b2,'String'));  %Interdace
                 Interfase_Val_c2 = eval(get(h.width_strain_c2,'String'));  %Interdace
@@ -4336,8 +4336,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
                 %Front surface
                 Thickenes_Layer = eval(get(h.Thickness,'String'))*1e4;
                 Strain_Val_a = eval(get(h.Crystal_Distortion_tan_da,'String')); %Strain in the surface
-                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
-                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface                
+                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
+                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface                
                 Interfase_Val_a = eval(get(h.width_strain_a,'String'));  %Interdace
                 Interfase_Val_b = eval(get(h.width_strain_b,'String'));  %Interdace
                 Interfase_Val_c = eval(get(h.width_strain_c,'String'));  %Interdace
@@ -4422,15 +4422,15 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
                 %Front Surface
                 Thickenes_Layer = eval(get(h.Thickness,'String'))*1e4;
                 Strain_Val_a = eval(get(h.Crystal_Distortion_tan_da,'String')); %Strain in the surface
-                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
-                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
+                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
+                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
                 Interfase_Val_a = eval(get(h.width_strain_a,'String'));  %Interdace
                 Interfase_Val_b = eval(get(h.width_strain_b,'String'));  %Interdace
                 Interfase_Val_c = eval(get(h.width_strain_c,'String'));  %Interdace
                 %Rear surface
                 Strain_Val_a2 = eval(get(h.Crystal_Distortion_tan_da2,'String')); %Strain in the surface
-                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
-                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
+                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
+                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
                 Interfase_Val_a2 = eval(get(h.width_strain_a2,'String'));  %Interdace
                 Interfase_Val_b2 = eval(get(h.width_strain_b2,'String'));  %Interdace
                 Interfase_Val_c2 = eval(get(h.width_strain_c2,'String'));  %Interdace
@@ -4510,8 +4510,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
                
                 Thickenes_Layer = eval(get(h.Thickness,'String'))*1e4;
                 Strain_Val_a = eval(get(h.Crystal_Distortion_tan_da,'String')); %Strain in the surface
-                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
-                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
+                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
+                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
 %                Interfase_Val = eval(get(h.width_strain,'String'));  %Interdace
                 Step_Layer = eval(get(h.Crystal_Step_Layer,'String'));
                 
@@ -4554,8 +4554,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
 
                 %First Gaussian
                 Strain_Val_a = eval(get(h.Crystal_Distortion_tan_da,'String')); %Strain in the surface
-                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
-                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
+                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
+                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
                 Interfase_Val_a = eval(get(h.width_strain_a,'String'));  %Interdace
                 Interfase_Val_b = eval(get(h.width_strain_b,'String'));  %Interdace
                 Interfase_Val_c = eval(get(h.width_strain_c,'String'));  %Interdace                
@@ -4565,8 +4565,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
 
                 %Second Gaussian
                 Strain_Val_a2 = eval(get(h.Crystal_Distortion_tan_da2,'String')); %Strain in the surface
-                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
-                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
+                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
+                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
                 Interfase_Val_a2 = eval(get(h.width_strain_a2,'String'));  %Interdace
                 Interfase_Val_b2 = eval(get(h.width_strain_b2,'String'));  %Interdace
                 Interfase_Val_c2 = eval(get(h.width_strain_c2,'String'));  %Interdace
@@ -4641,8 +4641,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
 
                 %First wave
                 Strain_Val_a = eval(get(h.Crystal_Distortion_tan_da,'String')); %Strain in the surface
-                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
-                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
+                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
+                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
                 Interfase_Val_a = eval(get(h.width_strain_a,'String'));  %Interdace
                 Interfase_Val_b = eval(get(h.width_strain_b,'String'));  %Interdace
                 Interfase_Val_c = eval(get(h.width_strain_c,'String'));  %Interdace                
@@ -4652,8 +4652,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
 
                 %Second Wave
                 Strain_Val_a2 = eval(get(h.Crystal_Distortion_tan_da2,'String')); %Strain in the surface
-                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
-                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
+                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
+                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
                 Interfase_Val_a2 = eval(get(h.width_strain_a2,'String'));  %Interdace
                 Interfase_Val_b2 = eval(get(h.width_strain_b2,'String'));  %Interdace
                 Interfase_Val_c2 = eval(get(h.width_strain_c2,'String'));  %Interdace
@@ -4738,8 +4738,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
 
                 %First wave
                 Strain_Val_a = eval(get(h.Crystal_Distortion_tan_da,'String')); %Strain in the surface
-                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
-                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
+                Strain_Val_b = eval(get(h.Crystal_Distortion_tan_db,'String')); %Strain in the surface
+                Strain_Val_c = eval(get(h.Crystal_Distortion_tan_dc,'String')); %Strain in the surface
                 Interfase_Val_a = eval(get(h.width_strain_a,'String'));  %Interdace
                 Interfase_Val_b = eval(get(h.width_strain_b,'String'));  %Interdace
                 Interfase_Val_c = eval(get(h.width_strain_c,'String'));  %Interdace                
@@ -4749,8 +4749,8 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
 
                 %Second Wave
                 Strain_Val_a2 = eval(get(h.Crystal_Distortion_tan_da2,'String')); %Strain in the surface
-                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
-                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
+                Strain_Val_b2 = eval(get(h.Crystal_Distortion_tan_db2,'String')); %Strain in the surface
+                Strain_Val_c2 = eval(get(h.Crystal_Distortion_tan_dc2,'String')); %Strain in the surface
                 Interfase_Val_a2 = eval(get(h.width_strain_a2,'String'));  %Interdace
                 Interfase_Val_b2 = eval(get(h.width_strain_b2,'String'));  %Interdace
                 Interfase_Val_c2 = eval(get(h.width_strain_c2,'String'));  %Interdace
@@ -4764,14 +4764,14 @@ h.Beam_simulation = uicontrol('Parent',h.lp_fit,...
                 ISD(1,:) = linspace(0,Thickenes_Layer,steps_layers);
      
 
-                %Front Surface #Force 400nm of interaction depth
-                R_coefficient_exp_a = 1/(100000);
-                R_coefficient_exp_b = 1/(100000);
-                R_coefficient_exp_c = 1/(100000);
+                %Front Surface #Force 1 um of interaction depth
+                R_coefficient_exp_a = 1/(10000);
+                R_coefficient_exp_b = 1/(10000);
+                R_coefficient_exp_c = 1/(10000);
                 %Rear surface
-                R_coefficient_exp_a2 = 1/(100000);
-                R_coefficient_exp_b2 = 1/(100000);
-                R_coefficient_exp_c2 = 1/(100000);
+                R_coefficient_exp_a2 = 1/(1000);
+                R_coefficient_exp_b2 = 1/(1000);
+                R_coefficient_exp_c2 = 1/(1000);
                 
                 %surface strain thermal
                 if get(h.Compressed_strain,'value') == 1 %compressed

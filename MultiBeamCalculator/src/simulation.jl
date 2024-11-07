@@ -1,9 +1,10 @@
 # Contains re-useable buffers for the simulation
-struct SimBuffers{ComplexVec, ComplexTensor, FloatVec, FloatTensor}
+struct SimBuffers{ComplexVec, ComplexTensor, FloatVec, FloatTensor, Plan}
     R_00_S0::ComplexTensor
     R_0H_S0::ComplexTensor
     r_s_g::ComplexTensor
     alfa::FloatTensor
+    ifftplan::Plan
 
     Gaussian_kx::ComplexVec
     Gaussian_ky::ComplexVec
@@ -15,12 +16,13 @@ function SimBuffers(shape; ArrayT=CuArray, ComplexT=ComplexF64, FloatT=Float64)
     R_0H_S0 = similar(R_00_S0)
     r_s_g = similar(R_00_S0)
     alfa = ArrayT{FloatT, 3}(undef, shape)
+    ifftplan = CUFFT.plan_ifft(r_s_g)
 
     Gaussian_kx = ArrayT{ComplexT, 1}(undef, shape[1])
     Gaussian_ky = ArrayT{ComplexT, 1}(undef, shape[2])
     k0_Theta = ArrayT{FloatT, 1}(undef, shape[3])
 
-    buffers = SimBuffers(R_00_S0, R_0H_S0, r_s_g, alfa,
+    buffers = SimBuffers(R_00_S0, R_0H_S0, r_s_g, alfa, ifftplan,
                          Gaussian_kx, Gaussian_ky, k0_Theta)
 end
 
@@ -55,9 +57,9 @@ const default_buffers = Ref{SimBuffers}()
         @inbounds old_0H = R_0H_S0[i]
 
         @inbounds R_00_S0[i] = (((R2_i * expX1_i - R1_i * expX2_i) * R_diff_recip) * old_00 +
-            ((expX2_i - expX1_i)               * R_diff_recip) * old_0H)
+                                ((expX2_i - expX1_i)               * R_diff_recip) * old_0H)
         @inbounds R_0H_S0[i] = ((R2_i * R1_i * (expX1_i - expX2_i) * R_diff_recip) * old_00 +
-            ((R2_i * expX2_i - R1_i * expX1_i) * R_diff_recip) * old_0H)
+                                ((R2_i * expX2_i - R1_i * expX1_i) * R_diff_recip) * old_0H)
     end
 end
 
@@ -261,10 +263,10 @@ function laue_strain(
         # Both perpendicular and parallel strain
         if all(Theta .> Theta_Bragg)
             alfa_strain_constant = (sin(Ang_asy)^2 * tan(Theta_Bragg) - sin(Ang_asy) * cos(Ang_asy)) * strain_per[i_layers] +
-                (cos(Ang_asy)^2 * tan(Theta_Bragg) - sin(Ang_asy) * cos(Ang_asy)) * strain_par[i_layers]
+                                   (cos(Ang_asy)^2 * tan(Theta_Bragg) - sin(Ang_asy) * cos(Ang_asy)) * strain_par[i_layers]
         else
             alfa_strain_constant = (sin(Ang_asy)^2 * tan(Theta_Bragg) + sin(Ang_asy) * cos(Ang_asy)) * strain_per[i_layers] +
-                (cos(Ang_asy)^2 * tan(Theta_Bragg) + sin(Ang_asy) * cos(Ang_asy)) * strain_par[i_layers]
+                                   (cos(Ang_asy)^2 * tan(Theta_Bragg) + sin(Ang_asy) * cos(Ang_asy)) * strain_par[i_layers]
         end
 
         d_hkl_factor = 1 / d_hkl^2
@@ -290,21 +292,25 @@ function laue_strain(
                   buffers.R_0H_S0, buffers.Gaussian_kx, buffers.Gaussian_ky,
                   buffers.k0_Theta, k0, sigk,
                   ndrange=size(buffers.r_s_g))
-    r_s_g = CUFFT.fftshift(buffers.r_s_g)
 
-    # gaussian_r = CUFFT.fftshift(CUFFT.ifft(r_s_g), 3)
-    gaussian_r = CUFFT.fftshift(CUFFT.ifft(r_s_g), (2, 3))
+    # Warning: here we reuse some of the buffers as temporary arrays
+    tmp = buffers.R_00_S0
+
+    # fftshift all dimensions, inverse FFT, and then fftshift again over the y
+    # and t dimensions.
+    CUFFT.fftshift!(tmp, buffers.r_s_g)
+    mul!(buffers.r_s_g, buffers.ifftplan, tmp)
+    gaussian_r = CUFFT.fftshift!(tmp, buffers.r_s_g, (2, 3))
+
     gaussian_r_2d = squeeze(sum(gaussian_r, dims=3))
     # circshift() to fully shift the signal. The plain fftshift()
     # still leaves a few elements wrapped around the end of the array.
     gaussian_r_2d = circshift(gaussian_r_2d, (0, 20))
     mode_gaus = abs.(gaussian_r_2d)
     # phase_gaus = Array(angle.(gaussian_r_2d))
+
     y_profile = squeeze(Array(sum(mode_gaus, dims=1)))
     x_profile = squeeze(Array(sum(mode_gaus, dims=2)))
-
-    KA.synchronize(backend)
-
     results = (; # R_0H_S0=Array(buffers.R_0H_S0),
                # R_00_S0=Array(buffers.R_00_S0),
                # k0_Theta=Array(buffers.k0_Theta),

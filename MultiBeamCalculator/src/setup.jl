@@ -1,9 +1,4 @@
-const default_elements_dir = "/gpfs/exfel/exp/MID/202401/p004977/usr/Shared/rodrigfa/Simulations/elements"
-
-function read_element(energy_center, filename="Sif1f2.txt"; elements_dir=default_elements_dir)
-    file_data = readdlm("$elements_dir/$filename", '\t', String)
-    energies = map(x -> parse(Float32, replace(x, "," => ".")), file_data)
-
+function read_element(energy_center, energies=Sif1f2)
     for i in 1:size(energies)[1]
         if energies[max(1, i - 1), 1] < energy_center <= energies[i, 1]
             return energies[i, 2], energies[i, 3]
@@ -55,7 +50,7 @@ function structure_factor_si(hkl, energy_center)
         error("Unsupported Miller indices: $(hkl)")
     end
 
-    f_1, f_2 = read_element(energy_center, "Sif1f2.txt")
+    f_1, f_2 = read_element(energy_center, Sif1f2)
     h, k, l = hkl
 
     coef = (1 + (-1)^(h + k) + (-1)^(h + l) + (-1)^(k + l)) * (1 + (-1im)^(h + k + l))

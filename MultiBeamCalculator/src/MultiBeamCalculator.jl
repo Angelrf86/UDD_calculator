@@ -12,10 +12,13 @@ function squeeze(array)
     dropdims(array; dims)
 end
 
-import DelimitedFiles: readdlm
+
+include("elements.jl")
+
 import FFTW
 include("setup.jl")
 
+import LinearAlgebra: mul!
 import Statistics: mean
 import CUDA: CuArray, CUFFT
 import KernelAbstractions as KA

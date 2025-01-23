@@ -311,11 +311,13 @@ function laue_strain(
 
     y_profile = squeeze(Array(sum(mode_gaus, dims=1)))
     x_profile = squeeze(Array(sum(mode_gaus, dims=2)))
+
+    # Swap the dimensions of mode_gaus for simpler plotting
     results = (; # R_0H_S0=Array(buffers.R_0H_S0),
                # R_00_S0=Array(buffers.R_00_S0),
                # k0_Theta=Array(buffers.k0_Theta),
                mean_reflectance=mean(buffers.R_0H_S0),
-               mode_gaus=Array(mode_gaus)',
+               mode_gaus=permutedims(Array(mode_gaus), (2, 1)),
                # phase_gaus,
                y_profile,
                x_profile)

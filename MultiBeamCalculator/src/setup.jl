@@ -68,7 +68,7 @@ Definition of the strain profile.
 - Step_layer is given in angstrom
 - Step of the strain net in angstrom
 """
-function Bipolar_with_surface_exp(thickness; step_layer=100_000_0,
+function Bipolar_with_surface_exp(thickness; n_layers=3, #step_layer=100_000_0,
         Strain_Val_a = 0.0, Strain_Val_b = 0.000, Strain_Val_c = 0.000,
         Interfase_Val_a = 10_000_0, Interfase_Val_b = 10_000_0, Interfase_Val_c = 10_000_0,
         cdepth_a = 500, cdepth_b = 500, cdepth_c = 500, Compressed_strain1 = false,
@@ -76,6 +76,7 @@ function Bipolar_with_surface_exp(thickness; step_layer=100_000_0,
         Interfase_Val_a2 = 10_000_0, Interfase_Val_b2 = 10_000_0, Interfase_Val_c2 = 10_000_0,
         cdepth_a2 = 500, cdepth_b2 = 500, cdepth_c2 = 500, Compressed_strain2 = false)
     thickness_layer = thickness * 10^4  # Thickness to Angstrom
+    step_layer = thickness_layer / n_layers
 
     #First wave
     #Strain_Val_a = 0.0         # Strain in the surface
@@ -199,7 +200,7 @@ function Bipolar_with_surface_exp(thickness; step_layer=100_000_0,
     return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain=ISD_steps)
 end
 
-function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000)
+function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, yshift=0)
     # Definition of the two Gaussians for x and y of the incomming beam
     I_range_x = 1
     I_range_y = 500
@@ -208,6 +209,7 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000)
 
     x_array = range(-I_range_x/2, I_range_x/2, steps_x) .* 10^-6
     y_array = range(-I_range_y/2, I_range_y/2, steps_y) .* 10^-6
+    y_array = circshift(y_array, yshift)
     sigma_x = fwhm_x / 2.355
     sigma_y = fwhm_y / 2.355
 
@@ -231,4 +233,85 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000)
               Gaussian_x, Gaussian_y,
               kx_array, ky_array,
               Gaussian_kx, Gaussian_ky)
+end
+
+"""
+Function to calculate the strain profile following the Thomsen paper: PRB 34 6 1986
+Following Lings JPCM 18 2006 9231
+
+Variables:
+element = 'Ge';
+Thickness_Crystal_um = 300; %um 300um
+Thickness_Crystal_nostrain_um = 250; %um 200um of no strain
+step_in_depth_um = 0.1;%um 100 nm
+Q_l = 4e-3; % J/cm2 4 mJ/cm2 Energy laser
+abs_depth_l_nm = 200;% 200nm for Ge with 800nm
+laser_wl = 800; %Laser wavelenght in nm
+Factor_tanh =1e9, %It is a factor that it is use for the tanh approximation
+R_l = 33 %reflectivity for Si
+
+Time variables:
+time_step_fs = 8000;  %time is in fs after laser hit
+"""
+function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
+                       step_in_depth_um=0.1, laser_wl=800, Q_l=4e-3, R_l=33,
+                       abs_depth_l_nm=200, Factor_tanh=1e9, time_step_fs=800)
+    # From um to m
+    Thickness_Crystal_um = thickness * 1e-6
+    Thickness_Crystal_strain = Thickness_Crystal_strain_um * 1e-6
+    Thickness_Crystal_nostrain = Thickness_Crystal_um - Thickness_Crystal_strain
+    step_in_depth = step_in_depth_um * 1e-6
+
+    # Depth crystal
+    steps_depth = Thickness_Crystal_strain / step_in_depth
+    n_steps = round(Int, steps_depth) + 1
+    z = collect(range(step_in_depth, Thickness_Crystal_strain, n_steps))
+
+    # Thickness_Crystal_strain_um
+    thickness_strain = step_in_depth * ones(n_steps)
+
+    # Laser parameters conversion
+    hc = 1239.8
+    E_p = hc / laser_wl     #E_p = 1.5497;%for 800nm
+    abs_depth_l = abs_depth_l_nm * 1e-9 #Absoption depth to cm from nm
+
+    # Time to s
+    time_step = time_step_fs * 1e-12
+
+    # Si
+    C₁ = 1.66 #J/K/cm3 Si
+    vₛ = 8433 # m/s Speed sound Si m/s longitudinal
+    #v_s = 5800 # m/s Speed sound Si m/s transversal
+
+    # Lings
+    ϕβ = 4.08e-5 #K-1 Si %relates to the  linear expansion coeficient
+    E_g  = 1.12 #eV Si
+
+    # Thomsen
+    Cₘ = 700 #J/kg/K Si
+    ρ =  2.33 #g/cm3 Si
+    Cᵥ = Cₘ * 1e-3 * ρ #J/K/cm3 Specific heat per unit volume
+    β = 7.5e-6 #K-1  the  linear expansion coeficient Si
+    η =  0.27 #Poisson ratio Si International System
+
+    strain_prefactor = @. Q_l * ϕβ * (E_p - E_g) / (100 * abs_depth_l * C₁ * E_p)
+    # Perpendicular
+    strainTH_per = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + vₛ * time_step)/abs_depth_l) + exp(-abs(z - vₛ * time_step) / abs_depth_l) * tanh((z - vₛ * time_step) * Factor_tanh)))
+    # Parallel
+    strainTH_par = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + vₛ * time_step)/abs_depth_l) + exp(-abs(z - vₛ * time_step) / abs_depth_l)))
+
+    # Add the layer non strain
+    strainTH_per = push!(strainTH_per, 0)
+    strainTH_par = push!(strainTH_par, 0)
+    push!(z, z[end] + Thickness_Crystal_nostrain)
+
+    push!(thickness_strain, Thickness_Crystal_nostrain)
+    thickness_strain .*= 1e6
+
+    ISD_a = strainTH_per
+    ISD_b = strainTH_par
+    ISD_c = strainTH_par
+    x_ISD = z
+
+    return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain)
 end

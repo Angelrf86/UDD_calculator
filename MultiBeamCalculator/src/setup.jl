@@ -207,6 +207,8 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, ys
     x0_array = 0
     y0_array = 0
 
+    um_per_px_y = I_range_y / steps_y
+
     x_array = range(-I_range_x/2, I_range_x/2, steps_x) .* 10^-6
     y_array = range(-I_range_y/2, I_range_y/2, steps_y) .* 10^-6
     y_array = circshift(y_array, yshift)
@@ -230,9 +232,10 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, ys
     Gaussian_ky = FFTW.fftshift(FFTW.fft(Gaussian_y))
 
     return (; x_array, y_array,
-              Gaussian_x, Gaussian_y,
-              kx_array, ky_array,
-              Gaussian_kx, Gaussian_ky)
+            Gaussian_x, Gaussian_y,
+            kx_array, ky_array,
+            Gaussian_kx, Gaussian_ky,
+            um_per_px_y)
 end
 
 """

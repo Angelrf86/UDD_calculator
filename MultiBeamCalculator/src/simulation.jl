@@ -125,6 +125,8 @@ function laue_strain(
     N_Step,
     beam,
     crystal_orientation;
+    # This value should be in radians
+    delta_theta_manual=0,
     T=CuArray,
     max_layers=Inf,
     buffers_ref=default_buffers, progressbar=true)
@@ -205,7 +207,7 @@ function laue_strain(
         #Beam properties
         k0_Bragg = 2 * pi / WaveL_Bragg
 
-        Theta_Bragg = asin(WaveL_Bragg / (2 * d_hkl))
+        Theta_Bragg = asin(WaveL_Bragg / (2 * d_hkl)) + delta_theta_manual
 
         #Definition polarization and Asymmetry
         P = Polarization === :p ? cos(2 * Theta_Bragg) : 1.0

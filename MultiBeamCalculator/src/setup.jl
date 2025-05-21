@@ -8,12 +8,10 @@ function read_element(energy_center, energies=Sif1f2)
     error("No energy found")
 end
 
-function structure_factor_si(hkl, energy_center)
+function structure_factor_si(hkl, energy_center;
+                             a_Par=5.431, b_Par=5.431, c_Par=5.431)
     Z = 14
 
-    a_Par = 5.431
-    b_Par = 5.431
-    c_Par = 5.431
     α_par = 90
     β_par = 90
     γ_par = 90
@@ -208,6 +206,7 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, ys
     y0_array = 0
 
     um_per_px_y = I_range_y / steps_y
+    um_per_px_x = I_range_x / steps_x
 
     x_array = range(-I_range_x/2, I_range_x/2, steps_x) .* 10^-6
     y_array = range(-I_range_y/2, I_range_y/2, steps_y) .* 10^-6
@@ -235,7 +234,7 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, ys
             Gaussian_x, Gaussian_y,
             kx_array, ky_array,
             Gaussian_kx, Gaussian_ky,
-            um_per_px_y)
+            um_per_px_x, um_per_px_y)
 end
 
 """
@@ -254,11 +253,12 @@ Factor_tanh =1e9, %It is a factor that it is use for the tanh approximation
 R_l = 33 %reflectivity for Si
 
 Time variables:
-time_step_fs = 8000;  %time is in fs after laser hit
+time_step_ps = 8000;  %time is in ps after laser hit
 """
 function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
                        step_in_depth_um=0.1, laser_wl=800, Q_l=4e-3, R_l=33,
-                       abs_depth_l_nm=200, Factor_tanh=1e9, time_step_fs=800)
+                       abs_depth_l_nm=200, Factor_tanh=1e9, time_step_ps=800,
+                       v_sl=8433, v_st=5800, factor_lt=1)
     # From um to m
     Thickness_Crystal_um = thickness * 1e-6
     Thickness_Crystal_strain = Thickness_Crystal_strain_um * 1e-6
@@ -279,11 +279,11 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     abs_depth_l = abs_depth_l_nm * 1e-9 #Absoption depth to cm from nm
 
     # Time to s
-    time_step = time_step_fs * 1e-12
+    time_step = time_step_ps * 1e-12
 
     # Si
     C₁ = 1.66 #J/K/cm3 Si
-    vₛ = 8433 # m/s Speed sound Si m/s longitudinal
+    # vₛ = 8433 # m/s Speed sound Si m/s longitudinal
     #v_s = 5800 # m/s Speed sound Si m/s transversal
 
     # Lings
@@ -299,16 +299,16 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
 
     strain_prefactor = @. Q_l * ϕβ * (E_p - E_g) / (100 * abs_depth_l * C₁ * E_p)
     # Perpendicular
-    strainTH_per = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + vₛ * time_step)/abs_depth_l) + exp(-abs(z - vₛ * time_step) / abs_depth_l) * tanh((z - vₛ * time_step) * Factor_tanh)))
+    strainTH_per = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_sl * time_step)/abs_depth_l) + exp(-abs(z - v_sl * time_step) / abs_depth_l) * tanh((z - v_sl * time_step) * Factor_tanh)))
     # Parallel
-    strainTH_par = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + vₛ * time_step)/abs_depth_l) + exp(-abs(z - vₛ * time_step) / abs_depth_l)))
+    strainTH_par = @. factor_lt * strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_st * time_step)/abs_depth_l) + exp(-abs(z - v_st * time_step) / abs_depth_l)))
 
     # Add the layer non strain
     strainTH_per = push!(strainTH_per, 0)
     strainTH_par = push!(strainTH_par, 0)
     push!(z, z[end] + Thickness_Crystal_nostrain)
 
-    push!(thickness_strain, Thickness_Crystal_nostrain)
+    thickness_strain[end] = Thickness_Crystal_nostrain
     thickness_strain .*= 1e6
 
     ISD_a = strainTH_per

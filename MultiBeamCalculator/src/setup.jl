@@ -258,7 +258,7 @@ time_step_ps = 8000;  %time is in ps after laser hit
 function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
                        step_in_depth_um=0.1, laser_wl=800, Q_l=4e-3, R_l=33,
                        abs_depth_l_nm=200, Factor_tanh=1e9, time_step_ps=800,
-                       v_sl=8433, v_st=5800, factor_lt=1)
+                       v_sl=8433, v_st=5800, factor_lt=1,Poisson = false)
     # From um to m
     Thickness_Crystal_um = thickness * 1e-6
     Thickness_Crystal_strain = Thickness_Crystal_strain_um * 1e-6
@@ -301,8 +301,12 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     # Perpendicular
     strainTH_per = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_sl * time_step)/abs_depth_l) + exp(-abs(z - v_sl * time_step) / abs_depth_l) * tanh((z - v_sl * time_step) * Factor_tanh)))
     # Parallel
-    strainTH_par = @. factor_lt * strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_st * time_step)/abs_depth_l) + exp(-abs(z - v_st * time_step) / abs_depth_l)))
-
+    if !Poisson
+        strainTH_par = @. factor_lt * strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_st * time_step)/abs_depth_l) + exp(-abs(z - v_st * time_step) / abs_depth_l)))
+    else
+        strainTH_par = @. -2.14e-3 * strainTH_per
+    end
+    
     # Add the layer non strain
     strainTH_per = push!(strainTH_per, 0)
     strainTH_par = push!(strainTH_par, 0)

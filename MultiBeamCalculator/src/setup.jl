@@ -8,54 +8,111 @@ function read_element(energy_center, energies=Sif1f2)
     error("No energy found")
 end
 
-function structure_factor_si(hkl, energy_center;
+function structure_factor(hkl, energy_center; element = :Si,
                              a_Par=5.431, b_Par=5.431, c_Par=5.431)
-    Z = 14
+    if element == :Si
+        Z = 14
+        
+        a_Par=5.431
+        b_Par=5.431
+        c_Par=5.431
+        
+        α_par = 90
+        β_par = 90
+        γ_par = 90
+        
+        f_0 = if hkl in ((5, 1, 3), (5,3,1), (3,5,1), (3,1,5), (1,5,3), (1,3,5))
+            5.92227
+        elseif hkl in ((3,1,1), (1,3,1), (1,1,3))
+            8.2626997
+        elseif hkl == (1,1,1)
+            10.702846
+        elseif hkl in ((2,2,0), (2,0,2), (0,2,2))
+            8.8399534
+        elseif hkl in ((4,0,0), (0,4,0), (0,0,4))
+            7.5887902
+        elseif hkl in ((3,3,1), (1,3,3), (3,1,3))
+            7.2654482
+        elseif hkl in ((4,4,0), (0,4,4), (4,0,4))
+            6.143148
+        elseif hkl == (3,3,3)
+            6.5355327
+        elseif hkl == (5,5,5)
+            3.8871919
+        elseif hkl in ((1,5,5), (5,1,5), (5,5,1))
+            4.9354269
+        elseif hkl in ((5,5,3), (5,3,5), (3,5,5))
+            4.5371446
+        elseif hkl in ((3,3,5), (3,5,3), (5,3,3))
+            5.3936593
+        elseif hkl in ((8,0,0), (0,8,0), (0,0,8))
+            4.3147635
+        elseif hkl in ((0,4,8), (4,0,8), (8,4,8), (8,4,0), (4,8,0), (0,8,4))
+            3.585777
+        else
+            error("Unsupported Miller indices: $(hkl)")
+        end
+        
+        f_1, f_2 = read_element(energy_center, Sif1f2)
+        h, k, l = hkl
+        
+        coef = (1 + (-1)^(h + k) + (-1)^(h + l) + (-1)^(k + l)) * (1 + (-1im)^(h + k + l))
+        F0 = (Z + f_1 + 1im * f_2) * 8
+        FH = (f_0 + f_1 + 1im * f_2) * abs(coef)
+        F_H = (f_0 + f_1 + 1im * f_2) * abs(coef)
+        
+    elseif element == :Ge
+        
+        Z = 32
+        
+        a_Par = 5.658
+        b_Par = 5.658
+        c_Par = 5.658
 
-    α_par = 90
-    β_par = 90
-    γ_par = 90
+        α_par = 90
+        β_par = 90
+        γ_par = 90
+                
+        f_0 = if hkl in ((5,1,3), (5,3,1), (3,5,1),(3,1,5),(1,5,3),(1,3,5))
+            15.622178200533803                
+        elseif hkl in ((3,1,1),(1,3,1),(1,1,3))
+            22.378056270949067                    
+        elseif hkl in ((1,1,1))
+            27.367058878665116
+        elseif hkl in ((2,2,0),(2,0,2),(0,2,2))
+            23.797789346546946
+        elseif hkl in ((4,0,0), (0,4,0), (0,0,4))
+            20.461697153045826
+        elseif hkl in ((3,3,1), (1,3,3), (3,1,3))
+            19.486433565396258
+        elseif hkl in ((4,4,0), (0,4,4), (4,0,4))
+            16.21692019691965
+        elseif hkl in ((3,3,3))
+            17.324324213026493
+        elseif hkl in ((5,5,5))
+            10.665062488265056
+        elseif hkl in ((1,5,5), (5,1,5), (5,5,1))
+            13.103721306960553
+        elseif hkl in ((5,5,3), (5,3,5), (3,5,5))
+            12.150938489418056
+        elseif hkl in ((3,3,5), (3,5,3), (5,3,3))
+            14.242875380623753
+        elseif hkl in ((8,0,0), (0,8,0), (0,0,8))
+            11.63309041116516
+        elseif hkl in ((4,4,4))
+            13.506653614349618
+        else
+            error("Unsupported Miller indices: $(hkl)")
+        end
 
-    f_0 = if hkl in ((5, 1, 3), (5,3,1), (3,5,1), (3,1,5), (1,5,3), (1,3,5))
-        5.92227
-    elseif hkl in ((3,1,1), (1,3,1), (1,1,3))
-        8.2626997
-    elseif hkl == (1,1,1)
-        10.702846
-    elseif hkl in ((2,2,0), (2,0,2), (0,2,2))
-        8.8399534
-    elseif hkl in ((4,0,0), (0,4,0), (0,0,4))
-        7.5887902
-    elseif hkl in ((3,3,1), (1,3,3), (3,1,3))
-        7.2654482
-    elseif hkl in ((4,4,0), (0,4,4), (4,0,4))
-        6.143148
-    elseif hkl == (3,3,3)
-        6.5355327
-    elseif hkl == (5,5,5)
-        3.8871919
-    elseif hkl in ((1,5,5), (5,1,5), (5,5,1))
-        4.9354269
-    elseif hkl in ((5,5,3), (5,3,5), (3,5,5))
-        4.5371446
-    elseif hkl in ((3,3,5), (3,5,3), (5,3,3))
-        5.3936593
-    elseif hkl in ((8,0,0), (0,8,0), (0,0,8))
-        4.3147635
-    elseif hkl in ((0,4,8), (4,0,8), (8,4,8), (8,4,0), (4,8,0), (0,8,4))
-        3.585777
-    else
-        error("Unsupported Miller indices: $(hkl)")
-    end
-
-    f_1, f_2 = read_element(energy_center, Sif1f2)
-    h, k, l = hkl
-
-    coef = (1 + (-1)^(h + k) + (-1)^(h + l) + (-1)^(k + l)) * (1 + (-1im)^(h + k + l))
-    F0 = (Z + f_1 + 1im * f_2) * 8
-    FH = (f_0 + f_1 + 1im * f_2) * abs(coef)
-    F_H = (f_0 + f_1 + 1im * f_2) * abs(coef)
-
+        f_1, f_2 = read_element(energy_center, Gef1f2)
+        h, k, l = hkl
+        
+        coef = (1 + (-1)^(h + k) + (-1)^(h + l) + (-1)^(k + l)) * (1 + (-1im)^(h + k + l))
+        F0 = (Z + f_1 + 1im * f_2) * 8
+        FH = (f_0 + f_1 + 1im * f_2) * abs(coef)
+        F_H = (f_0 + f_1 + 1im * f_2) * abs(coef)
+end
     return (; Z, F0, FH, F_H, a_Par, b_Par, c_Par, α_par, β_par, γ_par)
 end
 
@@ -198,10 +255,10 @@ function Bipolar_with_surface_exp(thickness; n_layers=3, #step_layer=100_000_0,
     return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain=ISD_steps)
 end
 
-function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, yshift=0)
+function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, I_range_x = 1, I_range_y = 500, yshift=0)
     # Definition of the two Gaussians for x and y of the incomming beam
-    I_range_x = 1
-    I_range_y = 500
+    
+
     x0_array = 0
     y0_array = 0
 
@@ -258,7 +315,8 @@ time_step_ps = 8000;  %time is in ps after laser hit
 function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
                        step_in_depth_um=0.1, laser_wl=800, Q_l=4e-3, R_l=33,
                        abs_depth_l_nm=200, Factor_tanh=1e9, time_step_ps=800,
-                       v_sl=8433, v_st=5800, factor_lt=1,Poisson = false)
+                       v_sl=8433, v_st=5800, factor_lt=1,Anisotropic = false,
+                       orthogonal_strain_zero = false)
     # From um to m
     Thickness_Crystal_um = thickness * 1e-6
     Thickness_Crystal_strain = Thickness_Crystal_strain_um * 1e-6
@@ -286,6 +344,9 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     # vₛ = 8433 # m/s Speed sound Si m/s longitudinal
     #v_s = 5800 # m/s Speed sound Si m/s transversal
 
+    #Anisotrpy 
+    C11 = 16.6e11 #dm/cm2
+    C12 = 6.4e11 #dm/cm2
     # Lings
     ϕβ = 4.08e-5 #K-1 Si %relates to the  linear expansion coeficient
     E_g  = 1.12 #eV Si
@@ -300,12 +361,27 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     strain_prefactor = @. Q_l * ϕβ * (E_p - E_g) / (100 * abs_depth_l * C₁ * E_p)
     # Perpendicular
     strainTH_per = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_sl * time_step)/abs_depth_l) + exp(-abs(z - v_sl * time_step) / abs_depth_l) * tanh((z - v_sl * time_step) * Factor_tanh)))
+    
     # Parallel
-    if !Poisson
+    if !Anisotropic
         strainTH_par = @. factor_lt * strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_st * time_step)/abs_depth_l) + exp(-abs(z - v_st * time_step) / abs_depth_l)))
     else
-        strainTH_par = @. -2.14e-3 * strainTH_per
+        strainTH_par = @. - 2 * C12 / C11 * strainTH_per
     end
+
+    if !orthogonal_strain_zero
+        strainTH_par = @. 1 * strainTH_par
+    else
+        strainTH_par = @. 0 * strainTH_par
+    end
+    
+
+    if time_step <= 0
+        strainTH_per = strainTH_per.*0
+        strainTH_par = strainTH_par .*0
+    end
+
+
     
     # Add the layer non strain
     strainTH_per = push!(strainTH_per, 0)

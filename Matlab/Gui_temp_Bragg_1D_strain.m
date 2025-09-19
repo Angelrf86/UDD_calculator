@@ -144,9 +144,13 @@ for i_layers = 1 : layers
     
     %Strain
      if Theta >Theta_Bragg 
-         alfa = 2*sin(2*Theta_Bragg) * (Theta-Theta_Bragg) + ((sin(Ang_asy).^2.*tan(Theta_Bragg) - sin(Ang_asy)*cos(Ang_asy)) * strain_perp(1,i_layers)) + ((cos(Ang_asy).^2.*tan(Theta_Bragg) - sin(Ang_asy)*cos(Ang_asy)) * strain_parll(1,i_layers));
+         alfa = 2*sin(2*Theta_Bragg) * (Theta-Theta_Bragg) +...
+         ((sin(Ang_asy).^2.*tan(Theta_Bragg) - sin(Ang_asy)*cos(Ang_asy)) * strain_perp(1,i_layers)) + ...
+         ((cos(Ang_asy).^2.*tan(Theta_Bragg) - sin(Ang_asy)*cos(Ang_asy)) * strain_parll(1,i_layers));
      else
-         alfa = 2*sin(2*Theta_Bragg) * (Theta-Theta_Bragg) + ((sin(Ang_asy).^2.*tan(Theta_Bragg) + sin(Ang_asy)*cos(Ang_asy)) * strain_perp(1,i_layers)) + ((cos(Ang_asy).^2.*tan(Theta_Bragg) + sin(Ang_asy)*cos(Ang_asy)) * strain_parll(1,i_layers));
+         alfa = 2*sin(2*Theta_Bragg) * (Theta-Theta_Bragg) +...
+         ((sin(Ang_asy).^2.*tan(Theta_Bragg) + sin(Ang_asy)*cos(Ang_asy)) * strain_perp(1,i_layers)) + ...
+         ((cos(Ang_asy).^2.*tan(Theta_Bragg) + sin(Ang_asy)*cos(Ang_asy)) * strain_parll(1,i_layers));
      end
     
     %Definition of y
@@ -213,6 +217,7 @@ while i_layers > 1
 %         title(i_layers)
         
 end
+
 %Solve the waves in the rear surface 
 R_0H_S0(1,:) = - T(2,1,:) ./T (2,2,:);
 

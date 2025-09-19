@@ -316,7 +316,7 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
                        step_in_depth_um=0.1, laser_wl=800, Q_l=4e-3, R_l=33,
                        abs_depth_l_nm=200, Factor_tanh=1e9, time_step_ps=800,
                        v_sl=8433, v_st=5800, factor_lt=1,Anisotropic = false,
-                       orthogonal_strain_zero = false)
+                       orthogonal_strain_zero = false, bipolar_trans = false, compressive = true)
     # From um to m
     Thickness_Crystal_um = thickness * 1e-6
     Thickness_Crystal_strain = Thickness_Crystal_strain_um * 1e-6
@@ -334,10 +334,10 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     # Laser parameters conversion
     hc = 1239.8
     E_p = hc / laser_wl     #E_p = 1.5497;%for 800nm
-    abs_depth_l = abs_depth_l_nm * 1e-9 #Absoption depth to cm from nm
+    ADL = abs_depth_l_nm * 1e-9 #Absoption depth to cm from nm
 
     # Time to s
-    time_step = time_step_ps * 1e-12
+    t_step = time_step_ps * 1e-12
 
     # Si
     C₁ = 1.66 #J/K/cm3 Si
@@ -358,13 +358,26 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     β = 7.5e-6 #K-1  the  linear expansion coeficient Si
     η =  0.27 #Poisson ratio Si International System
 
-    strain_prefactor = @. Q_l * ϕβ * (E_p - E_g) / (100 * abs_depth_l * C₁ * E_p)
+    strain_f = @. Q_l * ϕβ * (E_p - E_g) / (100 * ADL * C₁ * E_p) #strain pre factor
     # Perpendicular
-    strainTH_per = @. strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_sl * time_step)/abs_depth_l) + exp(-abs(z - v_sl * time_step) / abs_depth_l) * tanh((z - v_sl * time_step) * Factor_tanh)))
+    strainTH_per = @. strain_f * (exp(-z / ADL) - 0.5 * (exp(-(z + v_sl * t_step)/ADL) + exp(-abs(z - v_sl * t_step) / ADL) * tanh((z - v_sl * t_step) * Factor_tanh)))
     
     # Parallel
     if !Anisotropic
-        strainTH_par = @. factor_lt * strain_prefactor * (exp(-z / abs_depth_l) - 0.5 * (exp(-(z + v_st * time_step)/abs_depth_l) + exp(-abs(z - v_st * time_step) / abs_depth_l)))
+        #Expansive 
+        if !bipolar_trans
+            if compressive
+                strainTH_par = @. factor_lt * strain_f * (exp(-z / ADL) - 0.5 * (exp(-(z + v_st * t_step)/ADL) + exp(-abs(z - v_st * t_step) / ADL)))
+            else #expansive
+                strainTH_par = @. factor_lt * strain_f * (exp(-z / ADL) - 0.5 * (exp(-(z + v_st * t_step)/ADL) - exp(-abs(z - v_st * t_step) / ADL)))
+            end
+        else
+            if compressive
+                strainTH_par = @. factor_lt * strain_f * (exp(-z / ADL) - 0.5 * (exp(-(z + v_st * t_step)/ADL) + exp(-abs(z - v_st * t_step) / ADL) * tanh((z - v_st * t_step) * Factor_tanh)))
+            else
+                strainTH_par = @. factor_lt * strain_f * (exp(-z / ADL) - 0.5 * (exp(-(z + v_st * t_step)/ADL) - exp(-abs(z - v_st * t_step) / ADL) * tanh((z - v_st * t_step) * Factor_tanh)))
+            end
+        end
     else
         strainTH_par = @. - 2 * C12 / C11 * strainTH_per
     end
@@ -376,7 +389,7 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     end
     
 
-    if time_step <= 0
+    if t_step <= 0
         strainTH_per = strainTH_per.*0
         strainTH_par = strainTH_par .*0
     end

@@ -83,9 +83,13 @@ Steps_De_Theta = (Range_De_pos-Range_De_neg)/N_Step;
 %crystal orientation define the normal of the crystal to be positive or
 %negative with respect to the incoming beam.
 if crystal_orientation == 1
-    Matrix_Bragg = [1 0 0; 0, cos(Theta_Bragg_Asy), -sin(Theta_Bragg_Asy); 0, sin(Theta_Bragg_Asy), cos(Theta_Bragg_Asy)];
+    Matrix_Bragg = [1 0 0;...
+    0, cos(Theta_Bragg_Asy), -sin(Theta_Bragg_Asy);...
+    0, sin(Theta_Bragg_Asy), cos(Theta_Bragg_Asy)];
 else
-    Matrix_Bragg = [-1 0 0; 0, -cos(Theta_Bragg_Asy), -sin(Theta_Bragg_Asy); 0, sin(Theta_Bragg_Asy), -cos(Theta_Bragg_Asy)];
+    Matrix_Bragg = [-1 0 0;...
+    0, -cos(Theta_Bragg_Asy), -sin(Theta_Bragg_Asy);...
+    0, sin(Theta_Bragg_Asy), -cos(Theta_Bragg_Asy)];
 end
 
 %% Loop

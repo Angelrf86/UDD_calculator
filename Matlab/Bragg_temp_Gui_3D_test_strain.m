@@ -187,9 +187,11 @@ for i_layers = 1 : layers
     %alfa =(2*alfa_beam + 1/(d_hkl)^2)*4*pi*pi /k0_Bragg^2 ;
     %Strain
     if Theta >Theta_Bragg
-        alfa = (2*alfa_beam + 1/(d_hkl)^2)*4*pi*pi /k0_Bragg^2 + ((sin(Ang_asy).^2.*tan(Theta_Bragg) - sin(Ang_asy) * cos(Ang_asy)) * strain_perp(1,i_layers));
+        alfa = (2*alfa_beam + 1/(d_hkl)^2)*4*pi*pi /k0_Bragg^2 +...
+        ((sin(Ang_asy).^2.*tan(Theta_Bragg) - sin(Ang_asy) * cos(Ang_asy)) * strain_perp(1,i_layers));
     else
-        alfa = (2*alfa_beam + 1/(d_hkl)^2)*4*pi*pi /k0_Bragg^2 + ((sin(Ang_asy).^2.*tan(Theta_Bragg) + sin(Ang_asy) * cos(Ang_asy)) * strain_perp(1,i_layers));
+        alfa = (2*alfa_beam + 1/(d_hkl)^2)*4*pi*pi /k0_Bragg^2 +...
+        ((sin(Ang_a7654134POPPPOOOsy).^2.*tan(Theta_Bragg) + sin(Ang_asy) * cos(Ang_asy)) * strain_perp(1,i_layers));
     end
     
     %Definition of y
@@ -258,9 +260,11 @@ if FBD == 0
              end
          end
     end
+    
     %CPU
     %R_0H_S0(:,:,:) = - Matrix_total(2,1,:,:,:) ./  Matrix_total(2,2,:,:,:);    
     %R_S_3D =  (R_0H_S0);
+    
 else
     %GPU
     R_00_S0(:,:,:) =  Matrix_total_gpu(1,1,:) - Matrix_total_gpu(2,1,:) ./  Matrix_total_gpu(2,2,:) .* Matrix_total_gpu (1,2,:);

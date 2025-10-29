@@ -1,5 +1,5 @@
 # Contains re-useable buffers for the simulation
-struct SimBuffers{ComplexVec, ComplexTensor, FloatVec, FloatTensor, Plan}
+struct LaueSimBuffers{ComplexVec, ComplexTensor, FloatVec, FloatTensor, Plan}
     R_00_S0::ComplexTensor
     R_0H_S0::ComplexTensor
     r_s_g::ComplexTensor
@@ -12,7 +12,7 @@ struct SimBuffers{ComplexVec, ComplexTensor, FloatVec, FloatTensor, Plan}
     k0_Theta::FloatVec
 end
 
-function SimBuffers(shape; ArrayT=CuArray, ComplexT=ComplexF64, FloatT=Float64)
+function LaueSimBuffers(shape; ArrayT=CuArray, ComplexT=ComplexF64, FloatT=Float64)
     R_00_S0 = ArrayT{ComplexT, 3}(undef, shape)
     R_0H_S0 = similar(R_00_S0)
     r_s_g = similar(R_00_S0)
@@ -24,11 +24,49 @@ function SimBuffers(shape; ArrayT=CuArray, ComplexT=ComplexF64, FloatT=Float64)
     Gaussian_ky = ArrayT{ComplexT, 1}(undef, shape[2])
     k0_Theta = ArrayT{FloatT, 1}(undef, shape[3])
 
-    buffers = SimBuffers(R_00_S0, R_0H_S0, r_s_g, scratch, alfa, ifftplan,
+    buffers = LaueSimBuffers(R_00_S0, R_0H_S0, r_s_g,
+                         scratch, alfa, ifftplan,
                          Gaussian_kx, Gaussian_ky, k0_Theta)
 end
 
-const default_buffers = Ref{SimBuffers}()
+struct BraggSimBuffers{ComplexVec, ComplexTensor, ComplexBraggTensor, FloatVec, FloatTensor, Plan}
+    R_00_S0::ComplexTensor
+    R_0H_S0::ComplexTensor
+    r_s_g::ComplexTensor
+    scratch::ComplexTensor
+    M::ComplexBraggTensor
+    alfa::FloatTensor
+    ifftplan::Plan
+
+    Gaussian_kx::ComplexVec
+    Gaussian_ky::ComplexVec
+    k0_Theta::FloatVec
+end
+
+function BraggSimBuffers(shape, bragg_matrix_shape; ArrayT=CuArray, ComplexT=ComplexF64, FloatT=Float64)
+    R_00_S0 = ArrayT{ComplexT, 3}(undef, shape)
+    R_0H_S0 = similar(R_00_S0)
+    r_s_g = similar(R_00_S0)
+    scratch = similar(R_00_S0)
+
+    M = similar(R_00_S0, bragg_matrix_shape)
+    fill!(M, zero(ComplexT))
+    M_tmp = similar(M)
+    fill!(M_tmp, one(ComplexT))
+
+    alfa = ArrayT{FloatT, 3}(undef, shape)
+    ifftplan = plan_ifft(r_s_g)
+
+    Gaussian_kx = ArrayT{ComplexT, 1}(undef, shape[1])
+    Gaussian_ky = ArrayT{ComplexT, 1}(undef, shape[2])
+    k0_Theta = ArrayT{FloatT, 1}(undef, shape[3])
+
+    buffers = BraggSimBuffers(R_00_S0, R_0H_S0, r_s_g, scratch, M,
+                              alfa, ifftplan,
+                              Gaussian_kx, Gaussian_ky, k0_Theta)
+end
+
+const default_buffers = Ref{Union{LaueSimBuffers, BraggSimBuffers}}()
 
 @kernel function compute_r!(i_layers, b, @Const(alfa), Chi_0_Cx, q, Thickness,
                             Chi_0_factor, Chi_h_n_factor, k0_Bragg_gam_factor,
@@ -63,6 +101,44 @@ const default_buffers = Ref{SimBuffers}()
         @inbounds R_0H_S0[i] = ((R2_i * R1_i * (expX1_i - expX2_i) * R_diff_recip) * old_00 +
                                 ((R2_i * expX2_i - R1_i * expX1_i) * R_diff_recip) * old_0H)
     end
+end
+
+@kernel function compute_M_bragg!(i_layers, end_layer, b, @Const(alfa), Chi_0_Cx, q, Thickness,
+                                  Chi_0_factor, Chi_h_n_factor, k0_Bragg_gam_factor,
+                                  # These arguments will be modified
+                                  M)
+    i = @index(Global, Cartesian)
+
+    y_i = 0.5 * (b * alfa[i] + Chi_0_factor)
+    q_y_sqrt_i = sqrt(q + y_i^2)
+
+    R2_i = (-y_i - q_y_sqrt_i) * Chi_h_n_factor
+    R1_i = (-y_i + q_y_sqrt_i) * Chi_h_n_factor
+
+    x_1 = 0.5 * (Chi_0_Cx + (-y_i + q_y_sqrt_i))
+    x_2 = 0.5 * (Chi_0_Cx + (-y_i - q_y_sqrt_i))
+    expX1_i = exp(1im * k0_Bragg_gam_factor * x_1 * Thickness)
+    expX2_i = exp(1im * k0_Bragg_gam_factor * x_2 * Thickness)
+
+    # Multiplication is faster than division, so we take the reciprocal of
+    # the difference here and multiply with that instead of doing divisions
+    # by the difference.
+    R_diff_recip = 1 / (R2_i - R1_i)
+    M_11 = (R2_i * expX1_i - R1_i * expX2_i) * R_diff_recip
+    M_12 = (expX2_i - expX1_i)               * R_diff_recip
+    M_21 = R1_i * R2_i * (expX1_i - expX2_i) * R_diff_recip
+    M_22 = (R2_i * expX2_i - R1_i * expX1_i) * R_diff_recip
+
+    M_previous = if i_layers == end_layer
+        # Identity matrix
+        SMatrix{2, 2, eltype(M)}(LA.I)
+    else
+        SMatrix{2, 2}(@view M[:, :, i])
+    end
+    M[1, 1, i] = M_previous[1, 1] * M_11 + M_previous[1, 2] * M_21
+    M[1, 2, i] = M_previous[1, 1] * M_12 + M_previous[1, 2] * M_22
+    M[2, 1, i] = M_previous[2, 1] * M_11 + M_previous[2, 2] * M_21
+    M[2, 2, i] = M_previous[2, 1] * M_12 + M_previous[2, 2] * M_22
 end
 
 @kernel function compute_alfa!(@Const(Matrix_Bragg),
@@ -166,10 +242,11 @@ function laue_strain(
 
     output_shape = (length(beam.kx_array), length(beam.ky_array), N_Step)
 
-    if !isassigned(buffers_ref)
-        buffers_ref[] = SimBuffers(output_shape; ArrayT)
-    elseif size(buffers_ref[].R_00_S0) != output_shape || !(buffers_ref[].R_00_S0 isa ArrayT)
-        buffers_ref[] = SimBuffers(output_shape; ArrayT)
+    if (!isassigned(buffers_ref)
+        || !(buffers_ref[] isa LaueSimBuffers)
+        || size(buffers_ref[].R_00_S0) != output_shape
+        || !(buffers_ref[].R_00_S0 isa ArrayT))
+        buffers_ref[] = LaueSimBuffers(output_shape; ArrayT=T)
     end
 
     buffers = buffers_ref[]
@@ -347,6 +424,253 @@ function laue_strain(
     # and t dimensions.
 
 
+
+    # Swap the dimensions of mode_gaus for simpler plotting
+    results = (; # R_0H_S0=Array(buffers.R_0H_S0),
+               # R_00_S0=Array(buffers.R_00_S0),
+               # k0_Theta=Array(buffers.k0_Theta),
+               mean_reflectance=mean(buffers.R_0H_S0),
+               diffracted_mode_gauss,
+               diffracted_y_profile,
+               diffracted_x_profile,
+               diffracted_phase,
+               forward_mode_gauss,
+               forward_y_profile,
+               forward_x_profile,
+               forward_phase)
+
+    return results
+end
+
+function bragg_strain(
+    Energy_Bragg,
+    hkl,
+    DWF, sf,
+    absor,
+    Range_E_neg, Range_E_pos,
+    Polarization,
+    Ang_asy_Deg_strain, pulse,
+    n_steps_energy,
+    beam,
+    crystal_orientation;
+    plane::Union{Vector{Symbol}, Symbol}=[:forward, :diffracted],
+    # This value should be in radians
+    delta_theta_manual=0,
+    ArrayT=CuArray,
+    max_layers=Inf,
+    buffers_ref=default_buffers, progressbar=true)
+    # Perpendicular to the surface (100)
+    strain_per = pulse.ISD_a
+
+    # Parallel to surface (100)
+    strain_par = pulse.ISD_b + pulse.ISD_c
+
+    a_par_strain = sf.a_Par .+ pulse.ISD_a
+    b_par_strain = sf.b_Par .+ pulse.ISD_b
+    c_par_strain = sf.c_Par .+ pulse.ISD_c
+
+    # Wave Length Bragg
+    WaveL_Bragg = h_planck * c_light / Energy_Bragg #m
+    k0 = 2 * pi / WaveL_Bragg
+    sigk = rho * k0
+
+    layers = length(pulse.thickness_strain) # number of layers
+
+    # Structure factors
+    i_F0 = sf.F0
+    i_FH = sf.FH
+    i_F_H = sf.F_H
+
+    #Asymmetry
+    i_Ang_asy_Deg = Ang_asy_Deg_strain
+
+    n_steps_x = length(beam.kx_array)
+    n_steps_y = length(beam.ky_array)
+
+    output_shape = (n_steps_x, n_steps_y, n_steps_energy)
+    bragg_matrix_shape = (2, 2, n_steps_x, n_steps_y, n_steps_energy)
+    if (!isassigned(buffers_ref)
+        || !(buffers_ref[] isa BraggSimBuffers)
+        || size(buffers_ref[].R_00_S0) != output_shape
+        || !(buffers_ref[].M isa ArrayT))
+        buffers_ref[] = BraggSimBuffers(output_shape, bragg_matrix_shape; ArrayT)
+    end
+
+    buffers = buffers_ref[]
+
+    copy!(buffers.Gaussian_kx, beam.Gaussian_kx)
+    copy!(buffers.Gaussian_ky, beam.Gaussian_ky)
+
+    backend = KA.get_backend(buffers.R_00_S0)
+    alfa_kernel! = compute_alfa!(backend)
+    M_kernel! = compute_M_bragg!(backend)
+    r_s_g_kernel! = precompute_r_s_g!(backend)
+
+    end_layer = Int(min(layers, max_layers))
+    p = Progress(end_layer; enabled=progressbar == true, showspeed=true)
+    if progressbar isa Base.RefValue
+        progressbar[] = p
+    end
+
+    for i_layers in end_layer:-1:1
+        #Crystal parameters
+        Thickness = pulse.thickness_strain[i_layers] * 1e-6
+
+        #Expansion of the unit cell
+        i_a_Par = a_par_strain[i_layers]
+        i_b_Par = b_par_strain[i_layers]
+        i_c_Par = c_par_strain[i_layers]
+
+        V = @. i_a_Par * 1e-10 * i_b_Par * 1e-10 * i_c_Par * 1e-10
+
+        d_hkl= 10^-10 / sqrt((hkl.h / i_a_Par)^2 +
+            (hkl.k / i_b_Par)^2 +
+            (hkl.l / i_c_Par)^2)
+
+        #Trying minimize the effects of exp
+        r_e_over_V = 2.8179403267e15 / (i_a_Par*i_b_Par*i_c_Par)
+
+        #Calculation of the permeability
+        absor_F0 = absor ? sf.F0 : abs(sf.F0)
+        absor_FH = absor ? sf.FH : abs(sf.FH)
+        absor_F_H = absor ? sf.F_H : abs(sf.F_H)
+        Chi_0_Cx   = r_e_over_V * WaveL_Bragg^2 * absor_F0  / pi
+        Chi_h_Cx   = r_e_over_V * WaveL_Bragg^2 * absor_FH  / pi * DWF
+        Chi_h_n_Cx = r_e_over_V * WaveL_Bragg^2 * absor_F_H / pi * DWF
+
+        #Beam properties
+        k0_Bragg = 2 * pi / WaveL_Bragg
+
+        Theta_Bragg = asin(WaveL_Bragg / (2 * d_hkl)) + delta_theta_manual
+
+        #Definition polarization and Asymmetry
+        P = Polarization === :p ? cos(2 * Theta_Bragg) : 1.0
+
+        Ang_asy = Ang_asy_Deg_strain * pi / 180
+
+        # Cosine directers
+        gam_0 = cos(-pi/2 + Theta_Bragg + Ang_asy)
+        gam_H = cos(pi/2 + Theta_Bragg - Ang_asy)
+
+        b = gam_0 / gam_H
+
+        m_d = ArrayT([0, cos(Ang_asy)/d_hkl, sin(Ang_asy)/d_hkl])
+
+        q = b * Chi_h_Cx * Chi_h_n_Cx * abs(P)^2
+
+        #Range work
+        #In case there is assymetry
+        Theta_Bragg_Asy = Theta_Bragg + Ang_asy
+
+        WaveL_Bragg_neg = h_planck*c_light / (Energy_Bragg - Range_E_neg) #m
+        WaveL_Bragg_pos = h_planck*c_light / (Energy_Bragg + Range_E_pos) #
+
+        Theta_Bragg_neg = asin(WaveL_Bragg_neg / (2*d_hkl)) + Ang_asy
+        Theta_Bragg_pos = asin(WaveL_Bragg_pos / (2*d_hkl)) + Ang_asy
+
+        Range_De_neg = Theta_Bragg_neg * 180 / pi #to Deg
+        Range_De_pos = Theta_Bragg_pos * 180 / pi #to deg
+
+        Theta_Initial = Range_De_neg
+        Steps_De_Theta = (Range_De_pos - Range_De_neg) / n_steps_energy
+
+        if crystal_orientation ##+ diffraction
+            Matrix_Bragg = [[1 0                    0]
+                            [0 cos(Theta_Bragg_Asy) -sin(Theta_Bragg_Asy)]
+                            [0 sin(Theta_Bragg_Asy) cos(Theta_Bragg_Asy)]]
+        else  ##- diffraction
+            Matrix_Bragg = [[-1 0                    0]
+                            [0 -cos(Theta_Bragg_Asy) -sin(Theta_Bragg_Asy)]
+                            [0 sin(Theta_Bragg_Asy)  -cos(Theta_Bragg_Asy)]]
+        end
+        Matrix_Bragg = ArrayT(Matrix_Bragg)
+
+        # Vectorized version of the code
+        i_Theta = 1:n_steps_energy
+
+        Theta_De = @. Theta_Initial + (Steps_De_Theta * i_Theta)
+        Theta = @. Theta_De * pi / 180 - Ang_asy #Back to rad
+
+        #Calculation of the Energy for each angle
+        WaveL = ArrayT(@. 2 * d_hkl * sin(Theta))
+
+        @. buffers.k0_Theta = 2 * pi / WaveL
+
+        # Both perpendicular and parallel strain
+        if all(Theta .> Theta_Bragg)
+            alfa_strain_constant = (cos(Ang_asy)^2 * tan(Theta_Bragg) + sin(Ang_asy) * cos(Ang_asy)) * strain_per[i_layers] +
+                                   (sin(Ang_asy)^2 * tan(Theta_Bragg) - sin(Ang_asy) * cos(Ang_asy)) * strain_par[i_layers]
+        else
+            alfa_strain_constant = (cos(Ang_asy)^2 * tan(Theta_Bragg) - sin(Ang_asy) * cos(Ang_asy)) * strain_per[i_layers] +
+                                   (sin(Ang_asy)^2 * tan(Theta_Bragg) + sin(Ang_asy) * cos(Ang_asy)) * strain_par[i_layers]
+        end
+
+        d_hkl_factor = 1 / d_hkl^2
+        k0_Bragg_factor = 4pi^2 / k0_Bragg^2
+        alfa_kernel!(Matrix_Bragg, beam.kx_array, beam.ky_array, buffers.k0_Theta,
+                     m_d, alfa_strain_constant,
+                     d_hkl_factor, k0_Bragg_factor,
+                     buffers.alfa, ndrange=size(buffers.alfa))
+
+        # Precompute some factors
+        Chi_0_factor = Chi_0_Cx * (1 - b)
+        Chi_h_n_factor = 1 / (Chi_h_n_Cx * P)
+        k0_Bragg_gam_factor = k0_Bragg / gam_0
+        M_kernel!(i_layers, end_layer,
+                  b, buffers.alfa, Chi_0_Cx, q, Thickness,
+                  Chi_0_factor, Chi_h_n_factor, k0_Bragg_gam_factor,
+                  buffers.M,
+                  ndrange=size(buffers.alfa))
+        KA.synchronize(backend)
+        next!(p)
+    end
+
+    @. buffers.R_0H_S0 = -buffers.M[2, 1, :, :, :] / buffers.M[2, 2, :, :, :]
+    @. buffers.R_00_S0 =  buffers.M[1, 1, :, :, :] + buffers.M[1, 2, :, :, :] * buffers.R_0H_S0
+    
+    diffracted_x_profile = nothing
+    diffracted_y_profile = nothing
+    diffracted_mode_gauss = nothing
+    diffracted_phase = nothing
+    forward_mode_gauss = nothing
+    forward_x_profile = nothing
+    forward_y_profile = nothing
+    forward_phase = nothing
+    for p in plane
+        greens_function = p == :diffracted ? buffers.R_0H_S0 : buffers.R_00_S0
+        r_s_g_kernel!(buffers.r_s_g,
+                      greens_function, buffers.Gaussian_kx, buffers.Gaussian_ky,
+                      buffers.k0_Theta, k0, sigk,
+                      ndrange=size(buffers.r_s_g))
+        
+        fftshift!(buffers.scratch, buffers.r_s_g)
+        mul!(buffers.r_s_g, buffers.ifftplan, buffers.scratch)
+        gaussian_r = fftshift!(buffers.scratch, buffers.r_s_g, (2, 3))
+     
+        gaussian_r_2d = squeeze(sum(gaussian_r, dims=3))
+        # circshift() to fully shift the signal. The plain fftshift()
+        # still leaves a few elements wrapped around the end of the array.
+        gaussian_r_2d = circshift(gaussian_r_2d, (0, 20))
+        mode_gauss_gpu = abs.(gaussian_r_2d)
+        phase_gauss_gpu = angle.(gaussian_r_2d)
+        y_profile = squeeze(Array(sum(mode_gauss_gpu, dims=1)))
+        x_profile = squeeze(Array(sum(mode_gauss_gpu, dims=2)))
+
+        mode_gauss = permutedims(Array(mode_gauss_gpu), (2, 1))
+        phase_gauss = permutedims(Array(phase_gauss_gpu), (2, 1))
+        
+        if p == :diffracted
+            diffracted_mode_gauss = mode_gauss
+            diffracted_x_profile = x_profile
+            diffracted_y_profile = y_profile
+            diffracted_phase = phase_gauss
+        else
+            forward_mode_gauss = mode_gauss
+            forward_x_profile = x_profile
+            forward_y_profile = y_profile
+            forward_phase = phase_gauss
+        end
+    end
 
     # Swap the dimensions of mode_gaus for simpler plotting
     results = (; # R_0H_S0=Array(buffers.R_0H_S0),

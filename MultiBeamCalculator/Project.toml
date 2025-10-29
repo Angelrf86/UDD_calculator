@@ -5,20 +5,24 @@ authors = ["Angel Rodriguez-Fernandez <rodrigfa@xfel.eu>", "James Wrigley <james
 
 [deps]
 AbstractFFTs = "621f4979-c628-5d54-868e-fcf4e3e8185c"
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+CUDACore = "bd0ed864-bdfe-4181-a5ed-ce625a5fdea2"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 KernelAbstractions = "63c18a36-062a-441e-b654-da1e3ab1ce7c"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+cuFFT = "533571aa-0936-420e-b4be-9c66f5f626ca"
 
 [compat]
 AbstractFFTs = "1.5.0"
-CUDA = "5"
-FFTW = "1"
+CUDACore = "6.2.1"
+FFTW = "1.10.0"
 KernelAbstractions = "0.9"
 LinearAlgebra = "1"
 ProgressMeter = "1"
+StaticArrays = "1.9.19"
 Statistics = "1"
 StatsBase = "0.34.7"
+cuFFT = "6.2.1"

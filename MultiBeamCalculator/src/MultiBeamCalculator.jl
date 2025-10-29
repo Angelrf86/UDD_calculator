@@ -14,15 +14,17 @@ end
 
 include("elements.jl")
 
-# We need to load FFTW to have a backend for doing FFTs on a CPU
+# We need to load FFTW and cuFFT to have CPU/GPU backends for doing FFTs
 using FFTW: FFTW
+using cuFFT: cuFFT
 using AbstractFFTs: fft, plan_ifft, fftshift, fftshift!
 include("setup.jl")
 include("ModelStrainTest.jl")
 
-using LinearAlgebra: mul!
+using LinearAlgebra: LinearAlgebra as LA, mul!
 using Statistics: mean
-using CUDA: CuArray
+using CUDACore: CuArray
+using StaticArrays: SMatrix
 using KernelAbstractions: KernelAbstractions as KA, @kernel, @index
 using ProgressMeter: Progress, next!
 include("simulation.jl")

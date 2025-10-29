@@ -427,7 +427,6 @@ function Bipolar_with_surface_exp(thickness; n_layers=3, #step_layer=100_000_0,
     return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain=ISD_steps)
 end
 
-
 """
 Function to calculate the strain profile following the Thomsen paper: PRB 34 6 1986
 Following Lings JPCM 18 2006 9231

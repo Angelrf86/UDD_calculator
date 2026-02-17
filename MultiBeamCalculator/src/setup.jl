@@ -285,6 +285,52 @@ function structure_factor(hkl, energy_center; element = :Si,
     #end
 end
 
+
+"""
+Definition of the incoming x-ray beam profile
+
+"""
+function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, I_range_x = 1, I_range_y = 500, yshift=0)
+    # Definition of the two Gaussians for x and y of the incomming beam
+
+
+    x0_array = 0
+    y0_array = 0
+
+    um_per_px_y = I_range_y / steps_y
+    um_per_px_x = I_range_x / steps_x
+
+    x_array = range(-I_range_x/2, I_range_x/2, steps_x) .* 10^-6
+    y_array = range(-I_range_y/2, I_range_y/2, steps_y) .* 10^-6
+    y_array = circshift(y_array, yshift)
+    sigma_x = fwhm_x / 2.355
+    sigma_y = fwhm_y / 2.355
+
+    Gaussian_x = @. exp(-((x_array - x0_array)/sigma_x)^2 / 2)
+    Gaussian_y = @. exp(-((y_array - y0_array)/sigma_y)^2 / 2)
+
+    # Calculation of the ky_array and the kx_array vectors
+    dx = x_array[2] - x_array[1]
+    dy = y_array[2] - y_array[1]
+
+    dkx = 2*pi/(steps_x * dx)
+    dky = 2*pi/(steps_y * dy)
+
+    kx_array = dkx * range(-steps_x/2, steps_x/2, steps_x)
+    ky_array = dky * range(-steps_y/2, steps_y/2, steps_y)
+
+    Gaussian_kx = FFTW.fftshift(FFTW.fft(Gaussian_x))
+    Gaussian_ky = FFTW.fftshift(FFTW.fft(Gaussian_y))
+
+    return (; x_array, y_array,
+            Gaussian_x, Gaussian_y,
+            kx_array, ky_array,
+            Gaussian_kx, Gaussian_ky,
+            um_per_px_x, um_per_px_y)
+end
+
+
+
 """
 Definition of the strain profile.
 
@@ -299,36 +345,11 @@ function Bipolar_with_surface_exp(thickness; n_layers=3, #step_layer=100_000_0,
         Strain_Val_a2 = 0.0, Strain_Val_b2 = 0.0, Strain_Val_c2 = 0.0,
         Interfase_Val_a2 = 10_000_0, Interfase_Val_b2 = 10_000_0, Interfase_Val_c2 = 10_000_0,
         cdepth_a2 = 500, cdepth_b2 = 500, cdepth_c2 = 500, Compressed_strain2 = false)
+    
     thickness_layer = thickness * 10^4  # Thickness to Angstrom
     step_layer = thickness_layer / n_layers
 
-    #First wave
-    #Strain_Val_a = 0.0         # Strain in the surface
-    #Strain_Val_b = 0.0         # Strain in the surface
-    #Strain_Val_c = 0.0         # Strain in the surface
-    #Interfase_Val_a = 10_000_0  # Interdace Angstrom
-    #Interfase_Val_b = 10_000_0  # Interdace Angstrom
-    #Interfase_Val_c = 10_000_0  # Interdace Angstrom
-    #cdepth_a = 500             # Center of the strain effect in a
-    #cdepth_b = 500             # Center of the strain effect in b
-    #cdepth_c = 500             # Center of the strain effect in c
-
-    #Compressed_strain1 = false # Compressive True and Expansive False
-
-
-    #Second Wave
-    #Strain_Val_a2 = 0.0         # Strain in the surface
-    #Strain_Val_b2 = 0.0         # Strain in the surface
-    #Strain_Val_c2 = 0.0         # Strain in the surface
-    #Interfase_Val_a2 = 10_000_0 # Interdace Angstrom
-    #Interfase_Val_b2 = 10_000_0 # Interdace Angstrom
-    #Interfase_Val_c2 = 10_000_0 # Interdace Angstrom
-    #cdepth_a2 = 500             # Center of the strain effect in a
-    #cdepth_b2 = 500             # Center of the strain effect in b
-    #cdepth_c2 = 500             # Center of the strain effect in c
-
-    #Compressed_strain2 = false  # Compressive True and Expansive False
-
+ 
     n_steps_layers = round(Int, thickness_layer / step_layer) #Calculation of the number of layers
 
     # generation of the net
@@ -349,29 +370,11 @@ function Bipolar_with_surface_exp(thickness; n_layers=3, #step_layer=100_000_0,
     R_coefficient_exp_b2 = 1/(10*Interfase_Val_b2)
     R_coefficient_exp_c2 = 1/(10*Interfase_Val_c2)
 
-    #surface strain thermal
-#    if get(h.Compressed_strain,'value') == 1: #compressed
-#        ISD_a = - 2 * Strain_Val_a * np.exp(-R_coefficient_exp_a * x_ISD)
-#        ISD_b = - 2 * Strain_Val_b * np.exp(-R_coefficient_exp_b * x_ISD)
-#        ISD_c = - 2 * Strain_Val_c * np.exp(-R_coefficient_exp_c * x_ISD)
 
 #    else: #expansive strain
     ISD_a = @. 2 * Strain_Val_a * exp(-R_coefficient_exp_a * x_ISD)
     ISD_b = @. 2 * Strain_Val_b * exp(-R_coefficient_exp_b * x_ISD)
     ISD_c = @. 2 * Strain_Val_c * exp(-R_coefficient_exp_c * x_ISD)
-
-
-#####For the future is the laser hits in the back of the crystal
-    #surface strain thermal
-#    if get(h.Compressed_strain2,'value') == 1: #compressed
-#        ISD_a = ISD_a - 2*Strain_Val_a2 * np.exp(-R_coefficient_exp_a2 * flip(x_ISD))
-#        ISD_b = ISD_b - 2*Strain_Val_b2 * np.exp(-R_coefficient_exp_b2 * flip(x_ISD))
-#        ISD_c = ISD_c - 2*Strain_Val_c2 * np.exp(-R_coefficient_exp_c2 * flip(x_ISD))
-#    else: #expansive strain
-#        ISD_a = ISD_a + 2*Strain_Val_a2 * np.exp(-R_coefficient_exp_a2 * flip(x_ISD))
-#        ISD_b = ISD_b + 2*Strain_Val_b2 * np.exp(-R_coefficient_exp_b2 * flip(x_ISD))
-#        ISD_c = ISD_c + 2*Strain_Val_c2 * np.exp(-R_coefficient_exp_c2 * flip(x_ISD))
-
 
     #Bipolar waves
     #First wave
@@ -424,44 +427,6 @@ function Bipolar_with_surface_exp(thickness; n_layers=3, #step_layer=100_000_0,
     return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain=ISD_steps)
 end
 
-function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, I_range_x = 1, I_range_y = 500, yshift=0)
-    # Definition of the two Gaussians for x and y of the incomming beam
-
-
-    x0_array = 0
-    y0_array = 0
-
-    um_per_px_y = I_range_y / steps_y
-    um_per_px_x = I_range_x / steps_x
-
-    x_array = range(-I_range_x/2, I_range_x/2, steps_x) .* 10^-6
-    y_array = range(-I_range_y/2, I_range_y/2, steps_y) .* 10^-6
-    y_array = circshift(y_array, yshift)
-    sigma_x = fwhm_x / 2.355
-    sigma_y = fwhm_y / 2.355
-
-    Gaussian_x = @. exp(-((x_array - x0_array)/sigma_x)^2 / 2)
-    Gaussian_y = @. exp(-((y_array - y0_array)/sigma_y)^2 / 2)
-
-    # Calculation of the ky_array and the kx_array vectors
-    dx = x_array[2] - x_array[1]
-    dy = y_array[2] - y_array[1]
-
-    dkx = 2*pi/(steps_x * dx)
-    dky = 2*pi/(steps_y * dy)
-
-    kx_array = dkx * range(-steps_x/2, steps_x/2, steps_x)
-    ky_array = dky * range(-steps_y/2, steps_y/2, steps_y)
-
-    Gaussian_kx = FFTW.fftshift(FFTW.fft(Gaussian_x))
-    Gaussian_ky = FFTW.fftshift(FFTW.fft(Gaussian_y))
-
-    return (; x_array, y_array,
-            Gaussian_x, Gaussian_y,
-            kx_array, ky_array,
-            Gaussian_kx, Gaussian_ky,
-            um_per_px_x, um_per_px_y)
-end
 
 """
 Function to calculate the strain profile following the Thomsen paper: PRB 34 6 1986
@@ -579,4 +544,148 @@ function Thomsen_model(; thickness=300, Thickness_Crystal_strain_um=50,
     x_ISD = z
 
     return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain)
+end
+
+"""
+Definition of the Strain in the crystal
+
+"""
+function Bend_crystal_profile(thickness; n_layers=3, #step_layer=100_000_0,
+        Strain_Val_a = 0.0, Strain_Val_b = 0.000, Strain_Val_c = 0.000,
+        Interfase_Val_a = 10_000_0, Interfase_Val_b = 10_000_0, Interfase_Val_c = 10_000_0,
+        cdepth_a = 500, cdepth_b = 500, cdepth_c = 500, Compressed_strain1 = false,
+        Strain_Val_a2 = 0.0, Strain_Val_b2 = 0.0, Strain_Val_c2 = 0.0,
+        Interfase_Val_a2 = 10_000_0, Interfase_Val_b2 = 10_000_0, Interfase_Val_c2 = 10_000_0,
+        cdepth_a2 = 500, cdepth_b2 = 500, cdepth_c2 = 500, Compressed_strain2 = false)
+
+    
+    thickness_layer = thickness * 10^4  # Thickness to Angstrom
+    step_layer = thickness_layer / n_layers
+
+    #First wave
+    #Strain_Val_a = 0.0         # Strain in the surface
+    #Strain_Val_b = 0.0         # Strain in the surface
+    #Strain_Val_c = 0.0         # Strain in the surface
+    #Interfase_Val_a = 10_000_0  # Interdace Angstrom
+    #Interfase_Val_b = 10_000_0  # Interdace Angstrom
+    #Interfase_Val_c = 10_000_0  # Interdace Angstrom
+    #cdepth_a = 500             # Center of the strain effect in a
+    #cdepth_b = 500             # Center of the strain effect in b
+    #cdepth_c = 500             # Center of the strain effect in c
+
+    #Compressed_strain1 = false # Compressive True and Expansive False
+    
+    #Second Wave
+    #Strain_Val_a2 = 0.0         # Strain in the surface
+    #Strain_Val_b2 = 0.0         # Strain in the surface
+    #Strain_Val_c2 = 0.0         # Strain in the surface
+    #Interfase_Val_a2 = 10_000_0 # Interdace Angstrom
+    #Interfase_Val_b2 = 10_000_0 # Interdace Angstrom
+    #Interfase_Val_c2 = 10_000_0 # Interdace Angstrom
+    #cdepth_a2 = 500             # Center of the strain effect in a
+    #cdepth_b2 = 500             # Center of the strain effect in b
+    #cdepth_c2 = 500             # Center of the strain effect in c
+
+    #Compressed_strain2 = false  # Compressive True and Expansive False
+
+    n_steps_layers = round(Int, thickness_layer / step_layer) #Calculation of the number of layers
+
+    # generation of the net
+    x_ISD = if n_steps_layers == 1
+        [thickness_layer]
+    else
+        range(1, thickness_layer, n_steps_layers)
+    end
+
+
+    #Front Surface
+    R_coefficient_exp_a = 1/(10*Interfase_Val_a)
+    R_coefficient_exp_b = 1/(10*Interfase_Val_b)
+    R_coefficient_exp_c = 1/(10*Interfase_Val_c)
+
+    #Rear surface
+    R_coefficient_exp_a2 = 1/(10*Interfase_Val_a2)
+    R_coefficient_exp_b2 = 1/(10*Interfase_Val_b2)
+    R_coefficient_exp_c2 = 1/(10*Interfase_Val_c2)
+
+    #surface strain thermal
+#    if get(h.Compressed_strain,'value') == 1: #compressed
+#        ISD_a = - 2 * Strain_Val_a * np.exp(-R_coefficient_exp_a * x_ISD)
+#        ISD_b = - 2 * Strain_Val_b * np.exp(-R_coefficient_exp_b * x_ISD)
+#        ISD_c = - 2 * Strain_Val_c * np.exp(-R_coefficient_exp_c * x_ISD)
+
+#    else: #expansive strain
+    ISD_a = @. 2 * Strain_Val_a * exp(-R_coefficient_exp_a * x_ISD)
+    ISD_b = @. 2 * Strain_Val_b * exp(-R_coefficient_exp_b * x_ISD)
+    ISD_c = @. 2 * Strain_Val_c * exp(-R_coefficient_exp_c * x_ISD)
+
+
+#####For the future is the laser hits in the back of the crystal
+    #surface strain thermal
+#    if get(h.Compressed_strain2,'value') == 1: #compressed
+#        ISD_a = ISD_a - 2*Strain_Val_a2 * np.exp(-R_coefficient_exp_a2 * flip(x_ISD))
+#        ISD_b = ISD_b - 2*Strain_Val_b2 * np.exp(-R_coefficient_exp_b2 * flip(x_ISD))
+#        ISD_c = ISD_c - 2*Strain_Val_c2 * np.exp(-R_coefficient_exp_c2 * flip(x_ISD))
+#    else: #expansive strain
+         x_ISD_rev = reverse(x_ISD)
+        ISD_a = @. ISD_a - 2 * Strain_Val_a2 * exp(-R_coefficient_exp_a2 *x_ISD_rev) 
+    #ISD_a + 2*Strain_Val_a2 * np.exp(-R_coefficient_exp_a2 * flip(x_ISD))
+        ISD_b = @. ISD_b - 2 * Strain_Val_b2 * exp(-R_coefficient_exp_b2 * x_ISD_rev)
+    #ISD_b + 2*Strain_Val_b2 * np.exp(-R_coefficient_exp_b2 * flip(x_ISD))
+        ISD_c = @. ISD_c - 2 * Strain_Val_c2 * exp(-R_coefficient_exp_c2 * x_ISD_rev)
+    #ISD_c + 2*Strain_Val_c2 * np.exp(-R_coefficient_exp_c2 * flip(x_ISD))
+
+
+    #Bipolar waves
+    #First wave
+    R_coefficient_a = Interfase_Val_a/2
+    R_coefficient_b = Interfase_Val_b/2
+    R_coefficient_c = Interfase_Val_c/2
+
+    #second wave
+    R_coefficient_a2 = Interfase_Val_a2/2
+    R_coefficient_b2 = Interfase_Val_b2/2
+    R_coefficient_c2 = Interfase_Val_c2/2
+
+    # Bipolar wave:
+#    if Compressed_strain1 #compressed
+#        ISD_a = @. ISD_a - Strain_Val_a * exp(- (x_ISD - cdepth_a + Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
+#        ISD_a = @. ISD_a + Strain_Val_a * exp(- (x_ISD - cdepth_a - Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
+#        ISD_b = @. ISD_b - Strain_Val_b * exp(- (x_ISD - cdepth_b + Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
+#        ISD_b = @. ISD_b + Strain_Val_b * exp(- (x_ISD - cdepth_b - Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
+#        ISD_c = @. ISD_c - Strain_Val_c * exp(- (x_ISD - cdepth_c + Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
+#        ISD_c = @. ISD_c + Strain_Val_c * exp(- (x_ISD - cdepth_c - Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
+#    else #expansive strain
+#        ISD_a = @. ISD_a + Strain_Val_a * exp(- (x_ISD - cdepth_a + Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
+#        ISD_a = @. ISD_a - Strain_Val_a * exp(- (x_ISD - cdepth_a - Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
+#        ISD_b = @. ISD_b + Strain_Val_b * exp(- (x_ISD - cdepth_b + Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
+#        ISD_b = @. ISD_b - Strain_Val_b * exp(- (x_ISD - cdepth_b - Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
+#        ISD_c = @. ISD_c + Strain_Val_c * exp(- (x_ISD - cdepth_c + Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
+#        ISD_c = @. ISD_c - Strain_Val_c * exp(- (x_ISD - cdepth_c - Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
+#    end
+
+    #second wave
+#    if Compressed_strain2 #compressed
+#        ISD_a = @. ISD_a - Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 + Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
+#        ISD_b = @. ISD_b - Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 + Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
+#        ISD_c = @. ISD_c - Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 + Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
+#        ISD_a = @. ISD_a + Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 - Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
+#        ISD_b = @. ISD_b + Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 - Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
+#        ISD_c = @. ISD_c + Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 - Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
+#    else #expansive strain
+#        ISD_a = @. ISD_a + Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 + Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
+#        ISD_b = @. ISD_b + Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 + Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
+#        ISD_c = @. ISD_c + Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 + Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
+#        ISD_a = @. ISD_a - Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 - Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
+#        ISD_b = @. ISD_b - Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 - Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
+#        ISD_c = @. ISD_c - Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 - Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
+#    end
+
+    ISD_steps = step_layer * ones(n_steps_layers)
+    ISD_steps *= 1e-4
+
+    print(x_ISD)
+
+    
+    return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain=ISD_steps)
 end

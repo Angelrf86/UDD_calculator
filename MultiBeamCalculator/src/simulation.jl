@@ -18,7 +18,7 @@ function SimBuffers(shape; ArrayT=CuArray, ComplexT=ComplexF64, FloatT=Float64)
     r_s_g = similar(R_00_S0)
     scratch = similar(R_00_S0)
     alfa = ArrayT{FloatT, 3}(undef, shape)
-    ifftplan = CUFFT.plan_ifft(r_s_g)
+    ifftplan = plan_ifft(r_s_g)
 
     Gaussian_kx = ArrayT{ComplexT, 1}(undef, shape[1])
     Gaussian_ky = ArrayT{ComplexT, 1}(undef, shape[2])
@@ -116,10 +116,8 @@ end
     @inbounds k0_Theta[i] = 2 * pi / WaveL
 end
 
-function greens_postprocess(buffers)
-
-end
-
+# Note: this runs on GPUs by default. Change it to run on CPUs by passing
+# `ArrayT=Array` to the function.
 function laue_strain(
     Energy_Bragg,
     hkl,
@@ -133,7 +131,7 @@ function laue_strain(
     crystal_orientation;
     # This value should be in radians
     delta_theta_manual=0,
-    T=CuArray,
+    ArrayT=CuArray,
     max_layers=Inf,
     plane::Union{Vector{Symbol}, Symbol}=[:forward, :diffracted],
     buffers_ref=default_buffers, progressbar=true)
@@ -163,15 +161,15 @@ function laue_strain(
     i_FH = sf.FH
     i_F_H = sf.F_H
 
-    #Asymmetry
+    # Asymmetry
     i_Ang_asy_Deg = Ang_asy_Deg_strain
 
     output_shape = (length(beam.kx_array), length(beam.ky_array), N_Step)
 
     if !isassigned(buffers_ref)
-        buffers_ref[] = SimBuffers(output_shape; ArrayT=T)
-    elseif size(buffers_ref[].R_00_S0) != output_shape
-        buffers_ref[] = SimBuffers(output_shape; ArrayT=T)
+        buffers_ref[] = SimBuffers(output_shape; ArrayT)
+    elseif size(buffers_ref[].R_00_S0) != output_shape || !(buffers_ref[].R_00_S0 isa ArrayT)
+        buffers_ref[] = SimBuffers(output_shape; ArrayT)
     end
 
     buffers = buffers_ref[]
@@ -231,7 +229,7 @@ function laue_strain(
 
         b = gam_0 / gam_H
 
-        m_d = T([0, cos(Ang_asy)/d_hkl, sin(Ang_asy)/d_hkl])
+        m_d = ArrayT([0, cos(Ang_asy)/d_hkl, sin(Ang_asy)/d_hkl])
 
         q = b * Chi_h_Cx * Chi_h_n_Cx * abs(P)^2
 
@@ -260,7 +258,7 @@ function laue_strain(
                             [0 -cos(Theta_Bragg_Asy) -sin(Theta_Bragg_Asy)]
                             [0 sin(Theta_Bragg_Asy)  -cos(Theta_Bragg_Asy)]]
         end
-        Matrix_Bragg = T(Matrix_Bragg)
+        Matrix_Bragg = ArrayT(Matrix_Bragg)
 
         # Vectorized version of the code
         i_Theta = 1:N_Step
@@ -269,7 +267,7 @@ function laue_strain(
         Theta = @. Theta_De * pi / 180 - Ang_asy #Back to rad
 
         #Calculation of the Energy for each angle
-        WaveL = T(@. 2 * d_hkl * sin(Theta))
+        WaveL = ArrayT(@. 2 * d_hkl * sin(Theta))
 
         @. buffers.k0_Theta = 2 * pi / WaveL
 
@@ -316,9 +314,9 @@ function laue_strain(
               buffers.k0_Theta, k0, sigk,
               ndrange=size(buffers.r_s_g))
         
-        CUFFT.fftshift!(buffers.scratch, buffers.r_s_g)
+        fftshift!(buffers.scratch, buffers.r_s_g)
         mul!(buffers.r_s_g, buffers.ifftplan, buffers.scratch)
-        gaussian_r = CUFFT.fftshift!(buffers.scratch, buffers.r_s_g, (2, 3))
+        gaussian_r = fftshift!(buffers.scratch, buffers.r_s_g, (2, 3))
      
         gaussian_r_2d = squeeze(sum(gaussian_r, dims=3))
         # circshift() to fully shift the signal. The plain fftshift()

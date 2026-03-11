@@ -12,22 +12,21 @@ function squeeze(array)
     dropdims(array; dims)
 end
 
-
-#include("elements.jl")
 include("elements.jl")
 
-import FFTW
+# We need to load FFTW to have a backend for doing FFTs on a CPU
+using FFTW: FFTW
+using AbstractFFTs: fft, plan_ifft, fftshift, fftshift!
 include("setup.jl")
 
-import LinearAlgebra: mul!
-import Statistics: mean
-import CUDA: CuArray, CUFFT
-import KernelAbstractions as KA
-import KernelAbstractions: @kernel, @index
-import ProgressMeter: Progress, next!
+using LinearAlgebra: mul!
+using Statistics: mean
+using CUDA: CuArray
+using KernelAbstractions: KernelAbstractions as KA, @kernel, @index
+using ProgressMeter: Progress, next!
 include("simulation.jl")
 
-import StatsBase: fit, uweights, Histogram, Weights
+using StatsBase: fit, uweights, Histogram, Weights
 include("scans.jl")
 
 end # module MultiBeamCalculator

@@ -319,8 +319,8 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, I_
     kx_array = dkx * range(-steps_x/2, steps_x/2, steps_x)
     ky_array = dky * range(-steps_y/2, steps_y/2, steps_y)
 
-    Gaussian_kx = FFTW.fftshift(FFTW.fft(Gaussian_x))
-    Gaussian_ky = FFTW.fftshift(FFTW.fft(Gaussian_y))
+    Gaussian_kx = fftshift(fft(Gaussian_x))
+    Gaussian_ky = fftshift(fft(Gaussian_y))
 
     return (; x_array, y_array,
             Gaussian_x, Gaussian_y,

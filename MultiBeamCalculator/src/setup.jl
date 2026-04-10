@@ -319,8 +319,8 @@ function compute_beam(fwhm_x=0.5e-6, fwhm_y=0.5e-6; steps_x=40, steps_y=1000, I_
     kx_array = dkx * range(-steps_x/2, steps_x/2, steps_x)
     ky_array = dky * range(-steps_y/2, steps_y/2, steps_y)
 
-    Gaussian_kx = fftshift(fft(Gaussian_x))
-    Gaussian_ky = fftshift(fft(Gaussian_y))
+    Gaussian_kx = FFTW.fftshift(FFTW.fft(Gaussian_x))
+    Gaussian_ky = FFTW.fftshift(FFTW.fft(Gaussian_y))
 
     return (; x_array, y_array,
             Gaussian_x, Gaussian_y,
@@ -562,32 +562,6 @@ function Bend_crystal_profile(thickness; n_layers=3, #step_layer=100_000_0,
     thickness_layer = thickness * 10^4  # Thickness to Angstrom
     step_layer = thickness_layer / n_layers
 
-    #First wave
-    #Strain_Val_a = 0.0         # Strain in the surface
-    #Strain_Val_b = 0.0         # Strain in the surface
-    #Strain_Val_c = 0.0         # Strain in the surface
-    #Interfase_Val_a = 10_000_0  # Interdace Angstrom
-    #Interfase_Val_b = 10_000_0  # Interdace Angstrom
-    #Interfase_Val_c = 10_000_0  # Interdace Angstrom
-    #cdepth_a = 500             # Center of the strain effect in a
-    #cdepth_b = 500             # Center of the strain effect in b
-    #cdepth_c = 500             # Center of the strain effect in c
-
-    #Compressed_strain1 = false # Compressive True and Expansive False
-    
-    #Second Wave
-    #Strain_Val_a2 = 0.0         # Strain in the surface
-    #Strain_Val_b2 = 0.0         # Strain in the surface
-    #Strain_Val_c2 = 0.0         # Strain in the surface
-    #Interfase_Val_a2 = 10_000_0 # Interdace Angstrom
-    #Interfase_Val_b2 = 10_000_0 # Interdace Angstrom
-    #Interfase_Val_c2 = 10_000_0 # Interdace Angstrom
-    #cdepth_a2 = 500             # Center of the strain effect in a
-    #cdepth_b2 = 500             # Center of the strain effect in b
-    #cdepth_c2 = 500             # Center of the strain effect in c
-
-    #Compressed_strain2 = false  # Compressive True and Expansive False
-
     n_steps_layers = round(Int, thickness_layer / step_layer) #Calculation of the number of layers
 
     # generation of the net
@@ -608,13 +582,7 @@ function Bend_crystal_profile(thickness; n_layers=3, #step_layer=100_000_0,
     R_coefficient_exp_b2 = 1/(10*Interfase_Val_b2)
     R_coefficient_exp_c2 = 1/(10*Interfase_Val_c2)
 
-    #surface strain thermal
-#    if get(h.Compressed_strain,'value') == 1: #compressed
-#        ISD_a = - 2 * Strain_Val_a * np.exp(-R_coefficient_exp_a * x_ISD)
-#        ISD_b = - 2 * Strain_Val_b * np.exp(-R_coefficient_exp_b * x_ISD)
-#        ISD_c = - 2 * Strain_Val_c * np.exp(-R_coefficient_exp_c * x_ISD)
-
-#    else: #expansive strain
+#   #expansive strain
     ISD_a = @. 2 * Strain_Val_a * exp(-R_coefficient_exp_a * x_ISD)
     ISD_b = @. 2 * Strain_Val_b * exp(-R_coefficient_exp_b * x_ISD)
     ISD_c = @. 2 * Strain_Val_c * exp(-R_coefficient_exp_c * x_ISD)
@@ -622,19 +590,10 @@ function Bend_crystal_profile(thickness; n_layers=3, #step_layer=100_000_0,
 
 #####For the future is the laser hits in the back of the crystal
     #surface strain thermal
-#    if get(h.Compressed_strain2,'value') == 1: #compressed
-#        ISD_a = ISD_a - 2*Strain_Val_a2 * np.exp(-R_coefficient_exp_a2 * flip(x_ISD))
-#        ISD_b = ISD_b - 2*Strain_Val_b2 * np.exp(-R_coefficient_exp_b2 * flip(x_ISD))
-#        ISD_c = ISD_c - 2*Strain_Val_c2 * np.exp(-R_coefficient_exp_c2 * flip(x_ISD))
-#    else: #expansive strain
-         x_ISD_rev = reverse(x_ISD)
-        ISD_a = @. ISD_a - 2 * Strain_Val_a2 * exp(-R_coefficient_exp_a2 *x_ISD_rev) 
-    #ISD_a + 2*Strain_Val_a2 * np.exp(-R_coefficient_exp_a2 * flip(x_ISD))
-        ISD_b = @. ISD_b - 2 * Strain_Val_b2 * exp(-R_coefficient_exp_b2 * x_ISD_rev)
-    #ISD_b + 2*Strain_Val_b2 * np.exp(-R_coefficient_exp_b2 * flip(x_ISD))
-        ISD_c = @. ISD_c - 2 * Strain_Val_c2 * exp(-R_coefficient_exp_c2 * x_ISD_rev)
-    #ISD_c + 2*Strain_Val_c2 * np.exp(-R_coefficient_exp_c2 * flip(x_ISD))
-
+    x_ISD_rev = reverse(x_ISD)
+    ISD_a = @. ISD_a - 2 * Strain_Val_a2 * exp(-R_coefficient_exp_a2 *x_ISD_rev) 
+    ISD_b = @. ISD_b - 2 * Strain_Val_b2 * exp(-R_coefficient_exp_b2 * x_ISD_rev) 
+    ISD_c = @. ISD_c - 2 * Strain_Val_c2 * exp(-R_coefficient_exp_c2 * x_ISD_rev)
 
     #Bipolar waves
     #First wave
@@ -647,39 +606,6 @@ function Bend_crystal_profile(thickness; n_layers=3, #step_layer=100_000_0,
     R_coefficient_b2 = Interfase_Val_b2/2
     R_coefficient_c2 = Interfase_Val_c2/2
 
-    # Bipolar wave:
-#    if Compressed_strain1 #compressed
-#        ISD_a = @. ISD_a - Strain_Val_a * exp(- (x_ISD - cdepth_a + Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
-#        ISD_a = @. ISD_a + Strain_Val_a * exp(- (x_ISD - cdepth_a - Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
-#        ISD_b = @. ISD_b - Strain_Val_b * exp(- (x_ISD - cdepth_b + Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
-#        ISD_b = @. ISD_b + Strain_Val_b * exp(- (x_ISD - cdepth_b - Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
-#        ISD_c = @. ISD_c - Strain_Val_c * exp(- (x_ISD - cdepth_c + Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
-#        ISD_c = @. ISD_c + Strain_Val_c * exp(- (x_ISD - cdepth_c - Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
-#    else #expansive strain
-#        ISD_a = @. ISD_a + Strain_Val_a * exp(- (x_ISD - cdepth_a + Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
-#        ISD_a = @. ISD_a - Strain_Val_a * exp(- (x_ISD - cdepth_a - Interfase_Val_a/2)^2 / (2 * R_coefficient_a^2))
-#        ISD_b = @. ISD_b + Strain_Val_b * exp(- (x_ISD - cdepth_b + Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
-#        ISD_b = @. ISD_b - Strain_Val_b * exp(- (x_ISD - cdepth_b - Interfase_Val_b/2)^2 / (2 * R_coefficient_b^2))
-#        ISD_c = @. ISD_c + Strain_Val_c * exp(- (x_ISD - cdepth_c + Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
-#        ISD_c = @. ISD_c - Strain_Val_c * exp(- (x_ISD - cdepth_c - Interfase_Val_c/2)^2 / (2 * R_coefficient_c^2))
-#    end
-
-    #second wave
-#    if Compressed_strain2 #compressed
-#        ISD_a = @. ISD_a - Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 + Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
-#        ISD_b = @. ISD_b - Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 + Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
-#        ISD_c = @. ISD_c - Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 + Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
-#        ISD_a = @. ISD_a + Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 - Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
-#        ISD_b = @. ISD_b + Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 - Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
-#        ISD_c = @. ISD_c + Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 - Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
-#    else #expansive strain
-#        ISD_a = @. ISD_a + Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 + Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
-#        ISD_b = @. ISD_b + Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 + Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
-#        ISD_c = @. ISD_c + Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 + Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
-#        ISD_a = @. ISD_a - Strain_Val_a2 * exp(- (x_ISD - cdepth_a2 - Interfase_Val_a2/2)^2 / (2 * R_coefficient_a2^2))
-#        ISD_b = @. ISD_b - Strain_Val_b2 * exp(- (x_ISD - cdepth_b2 - Interfase_Val_b2/2)^2 / (2 * R_coefficient_b2^2))
-#        ISD_c = @. ISD_c - Strain_Val_c2 * exp(- (x_ISD - cdepth_c2 - Interfase_Val_c2/2)^2 / (2 * R_coefficient_c2^2))
-#    end
 
     ISD_steps = step_layer * ones(n_steps_layers)
     ISD_steps *= 1e-4
@@ -689,3 +615,7 @@ function Bend_crystal_profile(thickness; n_layers=3, #step_layer=100_000_0,
     
     return (; x_ISD, ISD_a, ISD_b, ISD_c, thickness_strain=ISD_steps)
 end
+
+
+
+ 

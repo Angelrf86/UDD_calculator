@@ -18,6 +18,7 @@ include("elements.jl")
 using FFTW: FFTW
 using AbstractFFTs: fft, plan_ifft, fftshift, fftshift!
 include("setup.jl")
+include("ModelStrainTest.jl")
 
 using LinearAlgebra: mul!
 using Statistics: mean

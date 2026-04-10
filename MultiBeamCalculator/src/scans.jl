@@ -1,11 +1,19 @@
-function align_profiles(sim_results::Vector)
+function align_profiles(sim_results::Vector, direction::Symbol)
+    if direction ∉ (:forward, :diffracted)
+        throw(ArgumentError("Unrecognized direction: $(direction)"))
+    end
+    
     xs = Float64[]
     ys = Float64[]
     x_axes = Vector{Float64}[]
     ref_i = ceil(Int, length(sim_results) / 2)
 
     for (i, result) in enumerate(sim_results)
-        y_profile = result.y_profile
+        y_profile = if direction == :forward
+            reverse(result.forward_y_profile)
+        else
+            result.diffracted_y_profile
+        end
 
         # Find the approximate middle position by finding
         # the midpoint between the two edges of the signal.
@@ -42,6 +50,10 @@ function align_profiles(sim_results::Vector)
     y_signal_hist = fit(Histogram, xs, Weights(ys), -99:900)
     mean_signal = y_signal_hist.weights ./ y_signal_counts.weights
     filter!(isfinite, mean_signal)
+
+    if direction == :forward
+        reverse!(mean_signal)
+    end
 
     return (; x_axes, mean_signal)
 end

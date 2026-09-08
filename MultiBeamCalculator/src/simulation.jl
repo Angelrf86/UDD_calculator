@@ -246,7 +246,7 @@ function laue_strain(
         || !(buffers_ref[] isa LaueSimBuffers)
         || size(buffers_ref[].R_00_S0) != output_shape
         || !(buffers_ref[].R_00_S0 isa ArrayT))
-        buffers_ref[] = LaueSimBuffers(output_shape; ArrayT=T)
+        buffers_ref[] = LaueSimBuffers(output_shape; ArrayT)
     end
 
     buffers = buffers_ref[]

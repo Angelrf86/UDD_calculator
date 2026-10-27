@@ -21,6 +21,7 @@ using AbstractFFTs: fft, plan_ifft, fftshift, fftshift!
 include("setup.jl")
 include("ModelStrainTest.jl")
 
+using DimensionalData: DimArray, X, Y, Ti
 using LinearAlgebra: LinearAlgebra as LA, mul!
 using Statistics: mean
 using CUDACore: CuArray

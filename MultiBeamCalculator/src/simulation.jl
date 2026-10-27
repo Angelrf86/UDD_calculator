@@ -376,25 +376,38 @@ function laue_strain(
         next!(p)
     end
 
+    ħ = 4.13566733e-15
+    ΔE = (Range_E_pos - (-Range_E_neg)) / N_Step      # energy step of the scan (eV)
+    Δf = ΔE / ħ;                                      # E = h·f  →  frequency step (Hz)
+    T  = 1 / Δf;                                      # total time window covered by the IFFT (s)
+    Δt = T / N_Step;                                  # time step per sample (s)
+    t_array = Δt * (1:N_Step) * 1e15                  # time (fs)
+
+    diffracted_gaussian_r = nothing
     diffracted_x_profile = nothing
     diffracted_y_profile = nothing
     diffracted_mode_gauss = nothing
     diffracted_phase = nothing
+    forward_gaussian_r = nothing
     forward_mode_gauss = nothing
     forward_x_profile = nothing
     forward_y_profile = nothing
     forward_phase = nothing
+
     for p in plane
         greens_function = p == :diffracted ? buffers.R_0H_S0 : buffers.R_00_S0
         r_s_g_kernel!(buffers.r_s_g,
               greens_function, buffers.Gaussian_kx, buffers.Gaussian_ky,
               buffers.k0_Theta, k0, sigk,
               ndrange=size(buffers.r_s_g))
-        
+
         fftshift!(buffers.scratch, buffers.r_s_g)
         mul!(buffers.r_s_g, buffers.ifftplan, buffers.scratch)
-        gaussian_r = fftshift!(buffers.scratch, buffers.r_s_g, (2, 3))
-     
+        gaussian_r = DimArray(fftshift!(buffers.scratch, buffers.r_s_g, (2, 3)),
+                              (X(eachindex(beam.kx_array) * beam.um_per_px_x),
+                               Y(eachindex(beam.ky_array) * beam.um_per_px_y),
+                               Ti(t_array)))
+
         gaussian_r_2d = squeeze(sum(gaussian_r, dims=3))
         # circshift() to fully shift the signal. The plain fftshift()
         # still leaves a few elements wrapped around the end of the array.
@@ -406,13 +419,15 @@ function laue_strain(
 
         mode_gauss = permutedims(Array(mode_gauss_gpu), (2, 1))
         phase_gauss = permutedims(Array(phase_gauss_gpu), (2, 1))
-        
+
         if p == :diffracted
+            diffracted_gaussian_r = copy(gaussian_r)
             diffracted_mode_gauss = mode_gauss
             diffracted_x_profile = x_profile
             diffracted_y_profile = y_profile
             diffracted_phase = phase_gauss
         else
+            forward_gaussian_r = copy(gaussian_r)
             forward_mode_gauss = mode_gauss
             forward_x_profile = x_profile
             forward_y_profile = y_profile
@@ -430,10 +445,12 @@ function laue_strain(
                # R_00_S0=Array(buffers.R_00_S0),
                # k0_Theta=Array(buffers.k0_Theta),
                mean_reflectance=mean(buffers.R_0H_S0),
+               diffracted_gaussian_r,
                diffracted_mode_gauss,
                diffracted_y_profile,
                diffracted_x_profile,
                diffracted_phase,
+               forward_gaussian_r,
                forward_mode_gauss,
                forward_y_profile,
                forward_x_profile,
@@ -627,7 +644,7 @@ function bragg_strain(
 
     @. buffers.R_0H_S0 = -buffers.M[2, 1, :, :, :] / buffers.M[2, 2, :, :, :]
     @. buffers.R_00_S0 =  buffers.M[1, 1, :, :, :] + buffers.M[1, 2, :, :, :] * buffers.R_0H_S0
-    
+
     diffracted_x_profile = nothing
     diffracted_y_profile = nothing
     diffracted_mode_gauss = nothing
@@ -642,11 +659,11 @@ function bragg_strain(
                       greens_function, buffers.Gaussian_kx, buffers.Gaussian_ky,
                       buffers.k0_Theta, k0, sigk,
                       ndrange=size(buffers.r_s_g))
-        
+
         fftshift!(buffers.scratch, buffers.r_s_g)
         mul!(buffers.r_s_g, buffers.ifftplan, buffers.scratch)
         gaussian_r = fftshift!(buffers.scratch, buffers.r_s_g, (2, 3))
-     
+
         gaussian_r_2d = squeeze(sum(gaussian_r, dims=3))
         # circshift() to fully shift the signal. The plain fftshift()
         # still leaves a few elements wrapped around the end of the array.
@@ -658,7 +675,7 @@ function bragg_strain(
 
         mode_gauss = permutedims(Array(mode_gauss_gpu), (2, 1))
         phase_gauss = permutedims(Array(phase_gauss_gpu), (2, 1))
-        
+
         if p == :diffracted
             diffracted_mode_gauss = mode_gauss
             diffracted_x_profile = x_profile
